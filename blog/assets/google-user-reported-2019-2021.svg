@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 420" role="img" aria-labelledby="title desc">
+  <title id="title">Google reviews taken down after user reports, 2019 to 2021</title>
+  <desc id="desc">Three bars show more than 580,000 in 2019, more than 960,000 in 2020, and more than one million in 2021. Google did not publish a directly comparable figure in the later annual updates used for this audit.</desc>
+  <rect width="1000" height="420" fill="#eaf0ed"/>
+  <text x="55" y="58" fill="#17353e" font-family="Georgia,serif" font-size="29">A smaller, different measure: user reported takedowns</text>
+  <text x="55" y="87" fill="#586b6c" font-family="Arial,sans-serif" font-size="14">Google’s published annual figures for reviews reported directly by users</text>
+  <g font-family="Arial,sans-serif" font-size="14" fill="#17353e" font-weight="700"><text x="55" y="157">2019</text><text x="55" y="227">2020</text><text x="55" y="297">2021</text></g>
+  <g fill="#d4dfd9"><rect x="130" y="130" width="750" height="40"/><rect x="130" y="200" width="750" height="40"/><rect x="130" y="270" width="750" height="40"/></g>
+  <g fill="#bf6344"><rect x="130" y="130" width="435" height="40"/><rect x="130" y="200" width="720" height="40"/><rect x="130" y="270" width="750" height="40"/></g>
+  <g font-family="Arial,sans-serif" font-size="16" fill="#17353e" font-weight="700"><text x="580" y="157">580k+</text><text x="865" y="227">960k+</text><text x="890" y="297">1m+</text></g>
+  <line x1="55" y1="338" x2="945" y2="338" stroke="#bccac3"/>
+  <text x="55" y="367" fill="#56666a" font-family="Arial,sans-serif" font-size="12">This is a subset of moderation actions, not a success rate for business reports.</text>
+  <text x="55" y="389" fill="#56666a" font-family="Arial,sans-serif" font-size="12">Source: Google annual updates for 2019, 2020 and 2021. Compiled by ReviewRemoval.</text>
+</svg>

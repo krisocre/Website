@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 290" role="img" aria-labelledby="title desc">
+  <title id="title">Trustpilot detected 90 percent of removed fake reviews automatically in 2024</title>
+  <desc id="desc">A horizontal band shows 90 percent detected by automated systems and the remaining 10 percent identified after user flags or manual investigations, according to Trustpilot.</desc>
+  <rect width="1000" height="290" fill="#eaf0ed"/>
+  <text x="55" y="61" fill="#17353e" font-family="Georgia,serif" font-size="30">How those fake reviews were found</text>
+  <text x="55" y="92" fill="#586b6c" font-family="Arial,sans-serif" font-size="14">Trustpilot’s 2024 account of its 4.5 million detected fake review removals</text>
+  <rect x="55" y="137" width="890" height="56" fill="#d4dfd9"/><rect x="55" y="137" width="801" height="56" fill="#1f6f5b"/>
+  <text x="69" y="173" fill="#fff" font-family="Arial,sans-serif" font-size="19" font-weight="700">90% automated detection</text>
+  <text x="862" y="173" fill="#17353e" font-family="Arial,sans-serif" font-size="17" font-weight="700">10%</text>
+  <text x="55" y="225" fill="#56666a" font-family="Arial,sans-serif" font-size="12">The rest were identified after user flags or manual investigations. This does not measure business report success.</text>
+  <text x="55" y="249" fill="#56666a" font-family="Arial,sans-serif" font-size="12">Source: Trustpilot Trust Report 2025.</text>
+</svg>

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 560" role="img" aria-labelledby="title desc">
+  <title id="title">Trustpilot fake reviews removed in 2024 by star rating</title>
+  <desc id="desc">Horizontal bars using Trustpilot rounded counts: five stars 3.4 million, four stars 306 thousand, three stars 70 thousand, two stars 80 thousand, one star 627 thousand.</desc>
+  <rect width="1000" height="560" fill="#f7f3ec"/>
+  <text x="55" y="62" fill="#17353e" font-family="Georgia,serif" font-size="31">Fake reviews removed by star rating</text>
+  <text x="55" y="92" fill="#586b6c" font-family="Arial,sans-serif" font-size="14">Trustpilot, 2024 · rounded platform reported counts</text>
+  <g font-family="Arial,sans-serif" font-size="15" fill="#17353e" font-weight="700"><text x="55" y="161">5 stars</text><text x="55" y="233">4 stars</text><text x="55" y="305">3 stars</text><text x="55" y="377">2 stars</text><text x="55" y="449">1 star</text></g>
+  <g fill="#e2e9e4"><rect x="160" y="133" width="615" height="40"/><rect x="160" y="205" width="615" height="40"/><rect x="160" y="277" width="615" height="40"/><rect x="160" y="349" width="615" height="40"/><rect x="160" y="421" width="615" height="40"/></g>
+  <rect x="160" y="133" width="615" height="40" fill="#bf6344"/><rect x="160" y="205" width="55" height="40" fill="#55747a"/><rect x="160" y="277" width="13" height="40" fill="#55747a"/><rect x="160" y="349" width="15" height="40" fill="#55747a"/><rect x="160" y="421" width="113" height="40" fill="#55747a"/>
+  <g font-family="Arial,sans-serif" font-size="16" fill="#17353e" font-weight="700"><text x="797" y="160">3.4m</text><text x="797" y="232">306k</text><text x="797" y="304">70k</text><text x="797" y="376">80k</text><text x="797" y="448">627k</text></g>
+  <line x1="55" y1="485" x2="945" y2="485" stroke="#cbd5d0"/>
+  <text x="55" y="514" fill="#56666a" font-family="Arial,sans-serif" font-size="12">The values sum to 4.483m because the source rounds each category; its reported total is 4.5m.</text>
+  <text x="55" y="536" fill="#56666a" font-family="Arial,sans-serif" font-size="12">Source: Trustpilot Trust Report 2025. Visualization and calculations by ReviewRemoval.</text>
+</svg>
