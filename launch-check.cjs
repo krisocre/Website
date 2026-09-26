@@ -6,7 +6,7 @@ const {spawnSync} = require('node:child_process');
 const workspace = __dirname;
 const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'reviewremoval-launch-'));
 const pages = [
-  'index.html','platforms.html','remove-facebook-reviews.html','remove-yelp-reviews.html','remove-trustpilot-reviews.html','remove-tripadvisor-reviews.html','remove-glassdoor-reviews.html',
+  'index.html','platforms.html','about.html','remove-facebook-reviews.html','remove-yelp-reviews.html','remove-trustpilot-reviews.html','remove-tripadvisor-reviews.html','remove-booking-com-reviews.html','remove-glassdoor-reviews.html','remove-indeed-reviews.html',
   'blog/index.html','blog/google-review-moderation-2019-2025.html','blog/trustpilot-fake-reviews-by-star-rating.html','blog/review-removal-questions-answered.html','blog/review-report-evidence-checklist.html'
 ];
 
@@ -27,13 +27,16 @@ try {
   if (schema['@type'] !== 'BlogPosting' || schema.citation.length < 7 || !schema.image.endsWith('.png')) throw new Error('Article schema is incomplete');
   const home = fs.readFileSync(path.join(tempRoot, 'index.html'), 'utf8');
   const homeSchema = JSON.parse(home.match(/<script type="application\/ld\+json">([^<]+)<\/script>/)?.[1]);
-  if (homeSchema['@graph']?.[0]?.['@type'] !== 'Organization' || homeSchema['@graph']?.[1]?.['@type'] !== 'Service' || homeSchema['@graph']?.[1]?.areaServed?.name !== 'Canada') throw new Error('Home service schema is incomplete');
+  if (homeSchema['@graph']?.[0]?.['@type'] !== 'Organization' || !homeSchema['@graph']?.[0]?.logo?.endsWith('reviewremoval-logo.svg') || homeSchema['@graph']?.[1]?.['@type'] !== 'WebSite' || homeSchema['@graph']?.[2]?.['@type'] !== 'Service' || homeSchema['@graph']?.[2]?.areaServed?.name !== 'Canada') throw new Error('Home service schema is incomplete');
   const facebook = fs.readFileSync(path.join(tempRoot, 'remove-facebook-reviews.html'), 'utf8');
   const facebookSchema = JSON.parse(facebook.match(/<script type="application\/ld\+json">([^<]+)<\/script>/)?.[1]);
-  if (facebookSchema['@type'] !== 'Service' || facebookSchema.name !== 'Facebook review removal service') throw new Error('Platform service schema is incomplete');
+  if (facebookSchema['@graph']?.[0]?.['@type'] !== 'Service' || facebookSchema['@graph']?.[0]?.name !== 'Facebook review removal service' || facebookSchema['@graph']?.[1]?.['@type'] !== 'BreadcrumbList') throw new Error('Platform service schema is incomplete');
+  const booking = fs.readFileSync(path.join(tempRoot, 'remove-booking-com-reviews.html'), 'utf8');
+  const bookingSchema = JSON.parse(booking.match(/<script type="application\/ld\+json">([^<]+)<\/script>/)?.[1]);
+  if (bookingSchema['@graph']?.[0]?.name !== 'Booking.com review removal service' || bookingSchema['@graph']?.[1]?.itemListElement?.[1]?.name !== 'Booking.com') throw new Error('Booking.com schema is incomplete');
   const sitemap = fs.readFileSync(path.join(tempRoot, 'sitemap.xml'), 'utf8');
   if ((sitemap.match(/<loc>/g) || []).length !== pages.length) throw new Error('Sitemap does not list every page');
-  console.log('PASS: production URL script is repeatable, with 12 sitemap URLs and article/service schema');
+  console.log(`PASS: production URL script is repeatable, with ${pages.length} sitemap URLs and article/service schema`);
 } finally {
   const resolved = fs.realpathSync(tempRoot);
   const safeParent = path.resolve(os.tmpdir()) + path.sep;

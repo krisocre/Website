@@ -1,6 +1,6 @@
 # ReviewRemoval quote form
 
-The homepage and the Facebook, Yelp, Trustpilot, Tripadvisor, and Glassdoor service pages post URL-encoded form data to the supplied Google Apps Script deployment. They send `selected_plan`, `full_name`, `business_name`, `email_address`, `business_url`, `review_count`, `review_links`, `reason`, `contact_method`, and `contact_detail`. The `selected_plan` value identifies the platform, quantity, and price.
+The homepage and the Facebook, Yelp, Trustpilot, Tripadvisor, Booking.com, Glassdoor, and Indeed service pages post URL-encoded form data to the supplied Google Apps Script deployment. They send `selected_plan`, `full_name`, `business_name`, `email_address`, `business_url`, `review_count`, `review_links`, `reason`, `contact_method`, and `contact_detail`. The `selected_plan` value identifies the platform, quantity, and price.
 
 The live integration test on 2026-09-21 reached the deployment and received `Failed to send email: no recipient`. In the supplied handler, `sheet.appendRow(...)` runs before `MailApp.sendEmail(...)`, so the clearly labelled TEST row should be in the spreadsheet, but the owner notification was not sent.
 

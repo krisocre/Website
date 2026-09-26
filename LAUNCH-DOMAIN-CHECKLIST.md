@@ -1,43 +1,32 @@
-# Add the production domain when ReviewRemoval goes live
+# ReviewRemoval production SEO and launch checklist
 
-The site has no live domain yet, so its HTML intentionally has no canonical URL, `og:url`, XML sitemap, or sitemap line in `robots.txt`. Relative internal links already work.
+The preferred public origin is **https://reviewremoval.ca**. The site contains 15 indexable pages: the homepage, platform directory, About page, seven platform service pages, blog index, and four articles. `CNAME` identifies the apex domain for GitHub Pages. `404.html` provides a useful error page and is excluded from the sitemap.
 
-## Exact files needing production URLs
+## Rebuild order
 
-The launch script updates the `<head>` of all 12 public pages:
-
-- `index.html`
-- `platforms.html`
-- `remove-facebook-reviews.html`
-- `remove-yelp-reviews.html`
-- `remove-trustpilot-reviews.html`
-- `remove-tripadvisor-reviews.html`
-- `remove-glassdoor-reviews.html`
-- `blog/index.html`
-- `blog/google-review-moderation-2019-2025.html`
-- `blog/trustpilot-fake-reviews-by-star-rating.html`
-- `blog/review-removal-questions-answered.html`
-- `blog/review-report-evidence-checklist.html`
-
-After the live HTTPS domain is final, run the build scripts and then the launch script, substituting the real origin:
+Run these commands after changing generated platform or blog content, then publish the resulting files:
 
 ```powershell
 node build-platform-pages.cjs
 node build-blog.cjs
 node build-blog-images.cjs
-node set-live-domain.cjs https://www.example.com
+python build-social-image.py
+node set-live-domain.cjs https://reviewremoval.ca
+node site-check.cjs
+node launch-check.cjs
+node seo-audit.cjs
 ```
 
-`set-live-domain.cjs` adds a canonical URL, `og:url`, title/description sharing metadata, and Twitter card metadata to every page. It adds Organization and Service structured data to the homepage, Service data to the five platform pages, article structured data to the four blog posts, and chart images as sharing images for the two research posts. It creates `sitemap.xml` with all 12 absolute URLs and `robots.txt` with the sitemap address. It can be rerun when the domain or generated pages change; run it **after** the build scripts because rebuilding pages replaces generated HTML.
+The domain script is repeatable. It adds unique canonical and social URLs, a social image, Organization/WebSite/Service and article structured data where appropriate, and writes `sitemap.xml` and `robots.txt`. Generated HTML loses this metadata when rebuilt, so always run the domain script afterward. Keep the apex domain as the canonical host.
 
-## Launch checks outside this workspace
+## Tasks requiring site-owner access or verified details
 
-1. Confirm that the site serves the same preferred domain and HTTPS URL used in the launch script, with redirects from other hostnames and HTTP.
-2. Open the live sitemap and a few article URLs in a browser. Check that pages, charts, and CSV downloads return successfully.
-3. Verify the domain in Google Search Console and submit `https://YOUR-DOMAIN/sitemap.xml`. Request indexing for the homepage, blog hub, and two research pages after publication.
-4. Keep the research pages current. If platform reports change, update the article, source table and charts together, then update the visible publication/revision date only when the content actually changes.
-5. Redeploy the corrected `google-apps-script.gs` before relying on owner email notifications from quote forms; see `FORM-SETUP.md`.
-6. Create and verify a Google Business Profile only if ReviewRemoval has a location customers can visit or meets customers in person. An online-only service is not eligible. If eligible, use the real name, contact details and service area, and keep them consistent wherever the business is listed. Do not create profiles for places without a genuine business presence.
-7. Earn relevant Canadian links and mentions by sharing the cited research and useful guides with real industry publications or local business groups. Review search queries and indexing reports in Search Console, then improve pages based on the terms and questions people actually use.
+1. Publish the updated files to the live site. Verify HTTPS and the preferred-domain redirect, then check the live homepage, two new service pages, charts, sitemap, and 404 response.
+2. Verify `reviewremoval.ca` in Google Search Console and submit `https://reviewremoval.ca/sitemap.xml`. Check indexing and search queries after Google crawls the pages. A sitemap helps discovery; it does not force indexing or ranking.
+3. Redeploy the corrected `google-apps-script.gs` and set its `NOTIFICATION_EMAIL` property before relying on owner email notifications from the quote forms. See `FORM-SETUP.md`. The supplied deployment previously accepted the sheet row but reported an email-recipient error.
+4. Supply a real public business contact address or email and the verified legal business name. Add them to the About page and Organization data when confirmed. Publish a privacy notice explaining the quote data sent to Google Apps Script and stored in Google Sheets, who can access it, its actual retention period, and how clients can request access or deletion; link it beside each form.
+5. Maintain the two research articles when source reports change. Update text, source tables, charts, and visible revision dates together after a material edit. Do not change dates merely to appear fresh.
+6. If ReviewRemoval serves customers in person and meets Google Business Profile eligibility rules, create a profile with the real business details. An online-only service should not claim a physical local presence.
+7. Share the cited research and practical guides with relevant Canadian publications and business groups. Monitor earned links, citations, search queries, and indexing reports, then improve pages based on actual reader questions.
 
-Publishing and Search Console submission make the pages discoverable; they do not guarantee rankings or citations.
+Search ranking depends on many factors outside this site. These changes improve technical access and page relevance but cannot guarantee a top position.

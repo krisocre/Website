@@ -1,5 +1,5 @@
-/* Run once a production domain exists, after building the platform and blog pages.
-   Example: node set-live-domain.cjs https://www.example.com */
+/* Run after building the platform and blog pages.
+   Production: node set-live-domain.cjs https://reviewremoval.ca */
 const fs = require('node:fs');
 const path = require('node:path');
 
@@ -14,8 +14,8 @@ if (parsed.protocol !== 'https:' || parsed.pathname !== '/' || parsed.search || 
 const origin = parsed.origin;
 const root = __dirname;
 const pages = [
-  'index.html', 'platforms.html',
-  'remove-facebook-reviews.html', 'remove-yelp-reviews.html', 'remove-trustpilot-reviews.html', 'remove-tripadvisor-reviews.html', 'remove-glassdoor-reviews.html',
+  'index.html', 'platforms.html', 'about.html',
+  'remove-facebook-reviews.html', 'remove-yelp-reviews.html', 'remove-trustpilot-reviews.html', 'remove-tripadvisor-reviews.html', 'remove-booking-com-reviews.html', 'remove-glassdoor-reviews.html', 'remove-indeed-reviews.html',
   'blog/index.html', 'blog/google-review-moderation-2019-2025.html', 'blog/trustpilot-fake-reviews-by-star-rating.html',
   'blog/review-removal-questions-answered.html', 'blog/review-report-evidence-checklist.html'
 ];
@@ -26,6 +26,11 @@ const shareImages = {
   'blog/trustpilot-fake-reviews-by-star-rating.html': 'blog/assets/trustpilot-fake-reviews-by-star.png'
 };
 const decodeEntities = value => value.replaceAll('&amp;', '&').replaceAll('&quot;', '"').replaceAll('&#39;', "'").replaceAll('&lt;', '<').replaceAll('&gt;', '>');
+const organization = {
+  '@type': 'Organization', '@id': `${origin}/#organization`, name: 'ReviewRemoval', url: origin,
+  logo: `${origin}/assets/reviewremoval-logo.svg`,
+  description: 'Independent review reporting service for businesses in Canada.'
+};
 
 for (const relative of pages) {
   const file = path.join(root, relative);
@@ -36,24 +41,31 @@ for (const relative of pages) {
   if (!title || !description || !html.includes('</head>')) { console.error(`Missing metadata in ${relative}`); process.exit(1); }
   const canonical = `${origin}/${relative === 'index.html' ? '' : relative}`;
   const isArticle = relative.startsWith('blog/') && relative !== 'blog/index.html';
-  const shareImage = shareImages[relative] ? `${origin}/${shareImages[relative]}` : null;
+  const shareImage = `${origin}/${shareImages[relative] || 'assets/reviewremoval-social.png'}`;
   let schemaTag = '';
   if (relative === 'index.html' || relative.startsWith('remove-')) {
-    const platform = relative === 'index.html' ? 'Google' : relative.match(/^remove-(.+)-reviews\.html$/)?.[1];
+    const platform = relative === 'index.html' ? 'Google' : decodeEntities(html.match(/<body data-platform="([^"]+)"/)?.[1] || '');
+    if (!platform) { console.error(`Missing platform name in ${relative}`); process.exit(1); }
     const service = {
       '@type': 'Service', '@id': `${canonical}#service`, url: canonical,
-      name: `${platform[0].toUpperCase()}${platform.slice(1)} review removal service`,
-      serviceType: `${platform[0].toUpperCase()}${platform.slice(1)} review removal assistance`,
+      name: `${platform} review removal service`,
+      serviceType: `${platform} review removal assistance`,
       description: decodeEntities(description),
       areaServed: { '@type': 'Country', name: 'Canada' },
       provider: { '@id': `${origin}/#organization`, '@type': 'Organization', name: 'ReviewRemoval', url: origin }
     };
     const schema = relative === 'index.html'
       ? { '@context': 'https://schema.org', '@graph': [
-          { '@type': 'Organization', '@id': `${origin}/#organization`, name: 'ReviewRemoval', url: origin },
+          organization,
+          { '@type': 'WebSite', '@id': `${origin}/#website`, url: `${origin}/`, name: 'ReviewRemoval', publisher: { '@id': `${origin}/#organization` }, inLanguage: 'en-CA' },
           service
         ] }
-      : { '@context': 'https://schema.org', ...service };
+      : { '@context': 'https://schema.org', '@graph': [service, {
+          '@type': 'BreadcrumbList', itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'All platforms', item: `${origin}/platforms.html` },
+            { '@type': 'ListItem', position: 2, name: platform, item: canonical }
+          ]
+        }] };
     schemaTag = `\n  <script type="application/ld+json">${JSON.stringify(schema).replaceAll('<', '\\u003c')}</script>`;
   }
   if (isArticle) {
@@ -64,14 +76,15 @@ for (const relative of pages) {
       '@context': 'https://schema.org', '@type': 'BlogPosting', '@id': `${canonical}#article`,
       mainEntityOfPage: canonical, headline: decodeEntities(title.replace(/ \| ReviewRemoval$/, '')),
       description: decodeEntities(description), datePublished: published, dateModified: published,
-      author: { '@type': 'Organization', name: 'ReviewRemoval', url: origin },
+      author: { '@type': 'Organization', name: 'ReviewRemoval', url: `${origin}/about.html` },
       publisher: { '@type': 'Organization', name: 'ReviewRemoval', url: origin },
       isAccessibleForFree: true, citation: citations
     };
-    if (shareImage) schema.image = shareImage;
+    schema.image = shareImage;
     schemaTag = `\n  <script type="application/ld+json">${JSON.stringify(schema).replaceAll('<', '\\u003c')}</script>`;
   }
-  const tags = `\n  <!-- production URL metadata start -->\n  <link rel="canonical" href="${escapeAttr(canonical)}">\n  <meta property="og:type" content="${isArticle ? 'article' : 'website'}">\n  <meta property="og:url" content="${escapeAttr(canonical)}">\n  <meta property="og:title" content="${title}">\n  <meta property="og:description" content="${description}">${shareImage ? `\n  <meta property="og:image" content="${escapeAttr(shareImage)}">` : ''}\n  <meta name="twitter:card" content="${shareImage ? 'summary_large_image' : 'summary'}">${schemaTag}\n  <!-- production URL metadata end -->`;
+  const imageAlt = shareImages[relative] ? 'Chart illustrating the data discussed in this article' : 'ReviewRemoval: review concerns, handled for you';
+  const tags = `\n  <!-- production URL metadata start -->\n  <link rel="canonical" href="${escapeAttr(canonical)}">\n  <meta name="robots" content="index, follow, max-image-preview:large">\n  <meta property="og:type" content="${isArticle ? 'article' : 'website'}">\n  <meta property="og:site_name" content="ReviewRemoval">\n  <meta property="og:locale" content="en_CA">\n  <meta property="og:url" content="${escapeAttr(canonical)}">\n  <meta property="og:title" content="${title}">\n  <meta property="og:description" content="${description}">\n  <meta property="og:image" content="${escapeAttr(shareImage)}">\n  <meta property="og:image:width" content="1200">\n  <meta property="og:image:height" content="${shareImages[relative] ? '672' : '630'}">\n  <meta property="og:image:alt" content="${escapeAttr(imageAlt)}">\n  <meta name="twitter:card" content="summary_large_image">\n  <meta name="twitter:title" content="${title}">\n  <meta name="twitter:description" content="${description}">\n  <meta name="twitter:image" content="${escapeAttr(shareImage)}">${schemaTag}\n  <!-- production URL metadata end -->`;
   html = html.replace('</head>', `${tags}\n</head>`);
   fs.writeFileSync(file, html, 'utf8');
 }

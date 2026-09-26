@@ -4,7 +4,7 @@ const puppeteer = require('C:/Users/alkhi/node_modules/puppeteer');
 
 const root = __dirname;
 const pages = [
-  'index.html', 'platforms.html', 'remove-facebook-reviews.html', 'remove-yelp-reviews.html', 'remove-trustpilot-reviews.html', 'remove-tripadvisor-reviews.html', 'remove-glassdoor-reviews.html',
+  'index.html', 'platforms.html', 'about.html', 'remove-facebook-reviews.html', 'remove-yelp-reviews.html', 'remove-trustpilot-reviews.html', 'remove-tripadvisor-reviews.html', 'remove-booking-com-reviews.html', 'remove-glassdoor-reviews.html', 'remove-indeed-reviews.html',
   'blog/index.html', 'blog/google-review-moderation-2019-2025.html', 'blog/trustpilot-fake-reviews-by-star-rating.html', 'blog/review-removal-questions-answered.html', 'blog/review-report-evidence-checklist.html'
 ];
 const errors = [];
@@ -56,13 +56,26 @@ for (const name of ['google-moderation-2019-2025.png', 'trustpilot-fake-reviews-
       if (name === 'index.html') {
         const sectionIds = await page.$$eval('main > section', els => els.slice(0,3).map(el => el.id || el.className));
         if (sectionIds[1] !== 'pricing' || sectionIds[2] !== 'quote') errors.push(`${name}: section order ${sectionIds}`);
+        const marquee = await page.evaluate(() => ({
+          names: [...document.querySelectorAll('.marquee-group:first-child [role="listitem"]')].map(el => el.textContent.trim()),
+          animation: getComputedStyle(document.querySelector('.marquee-track')).animationName
+        }));
+        if (marquee.names.length !== 8 || new Set(marquee.names).size !== 8 || marquee.animation !== 'platform-scroll') errors.push(`${name}: eight-platform banner is incomplete`);
+        await page.emulateMediaFeatures([{name: 'prefers-reduced-motion', value: 'reduce'}]);
+        const reducedAnimation = await page.$eval('.marquee-track', el => getComputedStyle(el).animationName);
+        if (reducedAnimation !== 'none') errors.push(`${name}: banner ignores reduced motion`);
+        await page.emulateMediaFeatures([{name: 'prefers-reduced-motion', value: 'no-preference'}]);
       }
       for (const width of [1440, 390, 320]) {
         await page.setViewport({width, height: 900, deviceScaleFactor: 1});
         const layout = await page.evaluate(() => ({scroll: document.documentElement.scrollWidth, viewport: innerWidth, heading: document.querySelector('h1')?.getBoundingClientRect().width}));
         if (layout.scroll > layout.viewport + 1) errors.push(`${name} @${width}: horizontal overflow ${layout.scroll}`);
         if (name === 'index.html' && width === 1440) await page.screenshot({path: path.join(root, 'previews', 'home-desktop.png'), fullPage: true});
+        if (name === 'index.html' && width === 1440) await page.screenshot({path: path.join(root, 'previews', 'home-desktop-top.png')});
         if (name === 'index.html' && width === 390) await page.screenshot({path: path.join(root, 'previews', 'home-mobile.png'), fullPage: true});
+        if (name === 'index.html' && width === 390) await page.screenshot({path: path.join(root, 'previews', 'home-mobile-top.png')});
+        if (name === 'about.html' && width === 1440) await page.screenshot({path: path.join(root, 'previews', 'about-desktop.png'), fullPage: true});
+        if (name === 'about.html' && width === 390) await page.screenshot({path: path.join(root, 'previews', 'about-mobile-top.png')});
         if (name === 'platforms.html' && width === 1440) await page.screenshot({path: path.join(root, 'previews', 'platforms-desktop.png'), fullPage: true});
         if (name === 'remove-facebook-reviews.html' && width === 1440) await page.screenshot({path: path.join(root, 'previews', 'facebook-desktop.png'), fullPage: true});
         if (name === 'remove-trustpilot-reviews.html' && width === 390) await page.screenshot({path: path.join(root, 'previews', 'trustpilot-mobile.png'), fullPage: true});
@@ -71,7 +84,7 @@ for (const name of ['google-moderation-2019-2025.png', 'trustpilot-fake-reviews-
         if (name === 'blog/trustpilot-fake-reviews-by-star-rating.html' && width === 390) await page.screenshot({path: path.join(root, 'previews', 'trustpilot-study-mobile.png'), fullPage: true});
       }
       if (name.startsWith('remove-')) {
-        const platform = name.match(/^remove-(.+)-reviews/)[1];
+        const platform = await page.$eval('body', el => el.dataset.platform.toLowerCase());
         const sectionIds = await page.$$eval('main > section', els => els.slice(0,3).map(el => el.id || el.className));
         if (sectionIds[1] !== 'pricing' || sectionIds[2] !== 'quote') errors.push(`${name}: section order ${sectionIds}`);
         await page.evaluate(() => { document.querySelector('#priceQuantity').value = '3'; document.querySelector('#priceQuantity').dispatchEvent(new Event('input', {bubbles:true})); });
