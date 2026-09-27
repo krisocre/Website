@@ -100,6 +100,8 @@
 .coverage-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:95px;align-items:start}
 .coverage-intro h2{max-width:540px;margin-bottom:20px}
 .coverage-intro>p:not(.eyebrow){max-width:520px;color:var(--muted);font-size:17px;line-height:1.72}
+.coverage-intro .coverage-more{margin:16px 0 0;font-size:13px}
+.coverage-more a{color:var(--accent-dark);font-weight:700;text-decoration:underline;text-underline-offset:3px}
 .coverage-list{border-top:2px solid var(--ink)}
 .coverage-list>div{display:grid;grid-template-columns:1fr 1.55fr;column-gap:24px;border-bottom:1px solid #d3ddd7;padding:22px 0}
 .coverage-list span{grid-row:1/3;color:var(--accent-dark);font-size:10px;font-weight:700;letter-spacing:.12em}

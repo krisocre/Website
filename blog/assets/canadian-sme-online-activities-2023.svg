@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="672" viewBox="0 0 1200 672" role="img" aria-labelledby="title desc">
+  <title id="title">Canadian SME online activities in 2023</title>
+  <desc id="desc">Paired bars compare tourism SMEs and all-industry SMEs for Google Reviews, social media accounts, digital marketing services and company websites using ISED Table 13.</desc>
+  <rect width="1200" height="672" fill="#f7f3ec"/>
+  <rect x="0" y="0" width="13" height="672" fill="#bf6344"/>
+  <text x="58" y="69" fill="#ad563a" font-family="Segoe UI,Arial,sans-serif" font-size="15" font-weight="700" letter-spacing="3">CANADA / 2023 SME SURVEY</text>
+  <text x="58" y="130" fill="#17353e" font-family="Georgia,serif" font-size="45">Where Canadian SMEs were active online</text>
+  <line x1="58" y1="151" x2="1140" y2="151" stroke="#ccd6cf" stroke-width="2"/>
+  <rect x="755" y="53" width="16" height="16" fill="#bf6344"/><text x="780" y="67" fill="#17353e" font-family="Segoe UI,Arial,sans-serif" font-size="17">Tourism SMEs</text>
+  <rect x="950" y="53" width="16" height="16" fill="#17353e"/><text x="975" y="67" fill="#17353e" font-family="Segoe UI,Arial,sans-serif" font-size="17">All industries</text>
+  <g stroke="#d5ded8" stroke-width="1">
+    <line x1="350" y1="180" x2="350" y2="571"/>
+    <line x1="518" y1="180" x2="518" y2="571"/>
+    <line x1="685" y1="180" x2="685" y2="571"/>
+    <line x1="853" y1="180" x2="853" y2="571"/>
+    <line x1="1020" y1="180" x2="1020" y2="571"/>
+  </g>
+  <g fill="#64746f" font-family="Segoe UI,Arial,sans-serif" font-size="14">
+    <text x="345" y="588">0</text><text x="509" y="588">20</text><text x="676" y="588">40</text><text x="844" y="588">60</text><text x="1011" y="588">80%</text>
+  </g>
+  <g fill="#17353e" font-family="Georgia,serif" font-size="23">
+    <text x="58" y="224">Google Reviews</text>
+    <text x="58" y="326">Social media accounts</text>
+    <text x="58" y="428">Digital marketing</text>
+    <text x="58" y="530">Company website</text>
+  </g>
+  <g fill="#bf6344">
+    <rect x="350" y="195" width="534" height="18"/><rect x="350" y="297" width="640" height="18"/><rect x="350" y="399" width="271" height="18"/><rect x="350" y="501" width="647" height="18"/>
+  </g>
+  <g fill="#17353e">
+    <rect x="350" y="220" width="394" height="18"/><rect x="350" y="322" width="562" height="18"/><rect x="350" y="424" width="240" height="18"/><rect x="350" y="526" width="667" height="18"/>
+  </g>
+  <g fill="#17353e" font-family="Segoe UI,Arial,sans-serif" font-size="16" font-weight="700">
+    <text x="895" y="210">63.8%</text><text x="755" y="235">47.0%</text>
+    <text x="1001" y="312">76.4%</text><text x="923" y="337">67.1%</text>
+    <text x="632" y="414">32.4%</text><text x="601" y="439">28.6%</text>
+    <text x="1008" y="516">77.3%</text><text x="1028" y="541">79.7%</text>
+  </g>
+  <line x1="58" y1="611" x2="1140" y2="611" stroke="#ccd6cf" stroke-width="2"/>
+  <text x="58" y="643" fill="#64746f" font-family="Segoe UI,Arial,sans-serif" font-size="15">Source: ISED, SME Profile 2023, Table 13 · Chart: ReviewRemoval</text>
+</svg>

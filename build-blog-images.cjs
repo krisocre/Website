@@ -3,7 +3,7 @@ const path = require('node:path');
 const puppeteer = require('C:/Users/alkhi/node_modules/puppeteer');
 
 const assets = path.join(__dirname, 'blog', 'assets');
-const charts = ['google-moderation-2019-2025', 'trustpilot-fake-reviews-by-star'];
+const charts = ['google-moderation-2019-2025', 'trustpilot-fake-reviews-by-star', 'canadian-sme-online-activities-2023'];
 
 (async () => {
   const browser = await puppeteer.launch({headless: true, executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe', args: ['--no-sandbox']});
@@ -18,5 +18,5 @@ const charts = ['google-moderation-2019-2025', 'trustpilot-fake-reviews-by-star'
       await page.close();
     }
   } finally { await browser.close(); }
-  console.log('Built two 1200×672 article images from the original SVG charts');
+  console.log(`Built ${charts.length} 1200×672 article images from the original SVG charts`);
 })();

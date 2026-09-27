@@ -58,7 +58,7 @@ function doPost(e) {
       'Phone: ' + phone + '\n' +
       'Preferred Contact Method: ' + contactMethod + '\n' +
       'Contact Detail: ' + contactInfo + '\n' +
-      'Google Business Profile URL: ' + businessUrl + '\n' +
+      'Business profile or review URL: ' + businessUrl + '\n' +
       'Reviews to Remove: ' + reviewCount + '\n' +
       'Review Links: ' + reviewLinks + '\n' +
       'Reason: ' + reason + '\n';

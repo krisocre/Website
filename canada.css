@@ -1,0 +1,70 @@
+.canada-page{background:#fff}
+.canada-page .primary-nav [aria-current="page"]{color:var(--accent-dark)}
+.canada-hero{background:var(--navy);color:#fff}
+.canada-hero-grid{display:grid;grid-template-columns:1.25fr .7fr;gap:100px;align-items:center;padding:91px 0 96px}
+.canada-hero h1{max-width:790px;margin:0 0 25px;font-size:clamp(54px,5.1vw,77px)}
+.canada-hero h1 em{color:#e5a387;font-weight:400}
+.canada-lead{max-width:680px;margin:0 0 30px;color:#d6e3de;font-size:18px;line-height:1.7}
+.canada-secondary{color:#fff;font-size:13px;font-weight:700;text-decoration:underline;text-underline-offset:5px}
+.canada-hero-note{border-left:2px solid #d99173;padding:12px 0 10px 27px}
+.canada-hero-note>span{color:#e8ac92;font-size:10px;font-weight:700;letter-spacing:.15em}
+.canada-hero-note p{margin:21px 0 18px;font:400 31px/1.27 Georgia,serif}
+.canada-hero-note small{display:block;max-width:310px;color:#bfd0ca;font-size:12px;line-height:1.7}
+.canada-summary{background:#f7f3ec}
+.canada-summary-grid{display:grid;grid-template-columns:.95fr 1.05fr;gap:110px}
+.canada-summary h2{max-width:510px}
+.canada-summary-grid>div+div p{color:var(--muted);font-size:16px;line-height:1.8}
+.canada-summary .text-link{margin-top:10px}
+.canada-regions{background:#fff}
+.canada-section-head{display:flex;justify-content:space-between;align-items:end;gap:60px;margin-bottom:33px}
+.canada-section-head h2{max-width:650px;margin:0}
+.canada-section-head>p{max-width:390px;margin:0;color:var(--muted);font-size:15px;line-height:1.7}
+.region-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:2px solid var(--ink)}
+.region-grid article{min-width:0;border-bottom:1px solid #d5ded9;border-right:1px solid #d5ded9;padding:27px 25px 31px 0}
+.region-grid article:nth-child(3n+2),.region-grid article:nth-child(3n+3){padding-left:25px}
+.region-grid article:nth-child(3n){border-right:0}
+.region-grid article>span{color:var(--accent-dark);font-size:10px;font-weight:700;letter-spacing:.13em}
+.region-grid h3{margin:15px 0 12px;font-size:29px}
+.region-grid p{min-height:118px;margin:0 0 17px;color:var(--muted);font-size:13px;line-height:1.72}
+.region-grid a{color:var(--accent-dark);font-size:12px;font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.region-note{margin:24px 0 0;color:#73817b;font-size:12px;line-height:1.6}
+.canada-price{background:var(--navy);color:#fff}
+.canada-price-grid{display:grid;grid-template-columns:1fr .9fr;gap:100px;align-items:center}
+.canada-price h2{max-width:510px}
+.canada-price-grid>div:first-child>p:not(.eyebrow){max-width:520px;color:#ccdad4;font-size:16px;line-height:1.75}
+.canada-price .button{margin-top:13px}
+.canada-price-card{background:#f7f3ec;color:var(--ink);padding:24px 30px}
+.canada-price-card>div{display:grid;grid-template-columns:.7fr 1fr 1.2fr;gap:10px;align-items:center;border-bottom:1px solid #d5ded9;padding:13px 0}
+.canada-price-card .canada-price-head{border-top:2px solid var(--ink);color:#6d7b76;font-size:10px;font-weight:700;letter-spacing:.07em}
+.canada-price-card strong{font:700 27px Georgia,serif}
+.canada-price-card p{margin:15px 0 0;color:#677873;font-size:11px;line-height:1.6}
+.canada-platforms{background:#eaf0ed}
+.canada-platform-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:2px solid var(--ink)}
+.canada-platform-grid a{display:flex;flex-direction:column;gap:11px;min-width:0;border-bottom:1px solid #cbd7cf;border-right:1px solid #cbd7cf;padding:22px 20px 24px 0;font:400 25px Georgia,serif}
+.canada-platform-grid a:nth-child(4n+2),.canada-platform-grid a:nth-child(4n+3),.canada-platform-grid a:nth-child(4n+4){padding-left:20px}
+.canada-platform-grid a:nth-child(4n){border-right:0}
+.canada-platform-grid a:hover{color:var(--accent-dark)}
+.canada-platform-grid a span{color:#6b7975;font:400 11px 'Segoe UI',Arial,sans-serif}
+.canada-evidence{background:#fff}
+.canada-evidence-grid{display:grid;grid-template-columns:1fr .95fr;gap:105px}
+.canada-evidence h2{max-width:600px}
+.canada-evidence-grid>div:first-child>p:not(.eyebrow){max-width:590px;color:var(--muted);font-size:16px;line-height:1.75}
+.canada-evidence-list{border-top:2px solid var(--ink)}
+.canada-evidence-list>div{display:grid;grid-template-columns:36px 1fr;gap:14px;border-bottom:1px solid #d5ded9;padding:21px 0}
+.canada-evidence-list span{color:var(--accent-dark);font-size:11px;font-weight:700}
+.canada-evidence-list p{margin:0;color:var(--muted);font-size:14px;line-height:1.65}
+.canada-integrity{background:#eaf0ed}
+.canada-integrity-grid{display:grid;grid-template-columns:1fr .95fr;gap:105px;align-items:start}
+.canada-integrity h2{max-width:620px}
+.canada-integrity-grid>div:first-child>p:not(.eyebrow){max-width:620px;color:var(--muted);font-size:16px;line-height:1.75}
+.canada-integrity-grid .integrity-source{margin-top:26px;font-size:12px!important;line-height:1.7!important}
+.integrity-source a{text-decoration:underline;text-underline-offset:3px}
+.canada-integrity-panel{border-top:2px solid var(--ink)}
+.canada-integrity-panel>div{display:grid;grid-template-columns:36px 1fr;gap:14px;border-bottom:1px solid #cbd7cf;padding:21px 0}
+.canada-integrity-panel span{color:var(--accent-dark);font-size:11px;font-weight:700}
+.canada-integrity-panel p{margin:0;color:var(--muted);font-size:14px;line-height:1.65}
+.canada-page .questions-section{background:#f7f3ec}
+.canada-page .faq-list a{text-decoration:underline;text-underline-offset:3px}
+@media(max-width:1050px){.canada-hero-grid,.canada-price-grid,.canada-summary-grid,.canada-evidence-grid,.canada-integrity-grid{gap:55px}.canada-hero h1{font-size:58px}.region-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.region-grid article{border-right:1px solid #d5ded9;padding-left:0!important}.region-grid article:nth-child(even){border-right:0;padding-left:22px!important}.region-grid p{min-height:0}.canada-platform-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.canada-platform-grid a:nth-child(odd){padding-left:0;border-right:1px solid #cbd7cf}.canada-platform-grid a:nth-child(even){padding-left:20px;border-right:0}}
+@media(max-width:680px){.canada-hero-grid,.canada-price-grid,.canada-summary-grid,.canada-evidence-grid,.canada-integrity-grid{grid-template-columns:1fr;gap:34px}.canada-hero-grid{padding:56px 0 64px}.canada-hero h1{font-size:clamp(44px,8.6vw,58px)}.canada-lead{font-size:16px}.canada-hero-note{max-width:500px}.canada-hero-note p{font-size:25px}.canada-section-head{display:block}.canada-section-head>p{margin-top:18px}.region-grid{grid-template-columns:1fr}.region-grid article,.region-grid article:nth-child(even){border-right:0;padding:24px 0!important}.region-grid h3{font-size:27px}.canada-price-card{padding:17px}.canada-price-card strong{font-size:23px}.canada-platform-grid a{font-size:21px}}
+@media(max-width:380px){.canada-platform-grid{grid-template-columns:1fr}.canada-platform-grid a,.canada-platform-grid a:nth-child(even),.canada-platform-grid a:nth-child(odd){border-right:0;padding:19px 0}}

@@ -14,16 +14,22 @@ if (parsed.protocol !== 'https:' || parsed.pathname !== '/' || parsed.search || 
 const origin = parsed.origin;
 const root = __dirname;
 const pages = [
-  'index.html', 'platforms.html', 'about.html',
+  'index.html', 'platforms.html', 'review-removal-canada.html', 'about.html',
   'remove-facebook-reviews.html', 'remove-yelp-reviews.html', 'remove-trustpilot-reviews.html', 'remove-tripadvisor-reviews.html', 'remove-booking-com-reviews.html', 'remove-glassdoor-reviews.html', 'remove-indeed-reviews.html',
   'blog/index.html', 'blog/google-review-moderation-2019-2025.html', 'blog/trustpilot-fake-reviews-by-star-rating.html',
-  'blog/review-removal-questions-answered.html', 'blog/review-report-evidence-checklist.html'
+  'blog/canadian-tourism-google-reviews-2023.html', 'blog/review-removal-questions-answered.html', 'blog/review-report-evidence-checklist.html'
 ];
 const escapeAttr = value => value.replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;');
 const marker = /\n  <!-- production URL metadata start -->[\s\S]*?<!-- production URL metadata end -->/;
 const shareImages = {
   'blog/google-review-moderation-2019-2025.html': 'blog/assets/google-moderation-2019-2025.png',
-  'blog/trustpilot-fake-reviews-by-star-rating.html': 'blog/assets/trustpilot-fake-reviews-by-star.png'
+  'blog/trustpilot-fake-reviews-by-star-rating.html': 'blog/assets/trustpilot-fake-reviews-by-star.png',
+  'blog/canadian-tourism-google-reviews-2023.html': 'blog/assets/canadian-sme-online-activities-2023.png'
+};
+const shareImageAlts = {
+  'blog/google-review-moderation-2019-2025.html': 'Chart of published Google Maps review moderation figures from 2019 to 2025',
+  'blog/trustpilot-fake-reviews-by-star-rating.html': 'Chart of Trustpilot fake review removals by star rating in 2024',
+  'blog/canadian-tourism-google-reviews-2023.html': 'Chart comparing online activities of Canadian tourism and all-industry SMEs in 2023'
 };
 const decodeEntities = value => value.replaceAll('&amp;', '&').replaceAll('&quot;', '"').replaceAll('&#39;', "'").replaceAll('&lt;', '<').replaceAll('&gt;', '>');
 const organization = {
@@ -35,7 +41,7 @@ const organization = {
 for (const relative of pages) {
   const file = path.join(root, relative);
   if (!fs.existsSync(file)) { console.error(`Missing ${relative}. Run the build scripts first.`); process.exit(1); }
-  let html = fs.readFileSync(file, 'utf8').replace(marker, '');
+  let html = fs.readFileSync(file, 'utf8').replace(/\r+\n/g, '\n').replace(/\r/g, '\n').replace(marker, '').replace(/\n(?:[ \t]*\n)*(?=<\/head>)/, '\n');
   const title = html.match(/<title>([^<]+)<\/title>/)?.[1];
   const description = html.match(/<meta name="description" content="([^"]*)">/)?.[1];
   if (!title || !description || !html.includes('</head>')) { console.error(`Missing metadata in ${relative}`); process.exit(1); }
@@ -43,13 +49,14 @@ for (const relative of pages) {
   const isArticle = relative.startsWith('blog/') && relative !== 'blog/index.html';
   const shareImage = `${origin}/${shareImages[relative] || 'assets/reviewremoval-social.png'}`;
   let schemaTag = '';
-  if (relative === 'index.html' || relative.startsWith('remove-')) {
-    const platform = relative === 'index.html' ? 'Google' : decodeEntities(html.match(/<body data-platform="([^"]+)"/)?.[1] || '');
+  if (relative === 'index.html' || relative === 'review-removal-canada.html' || relative.startsWith('remove-')) {
+    const isCanada = relative === 'review-removal-canada.html';
+    const platform = relative === 'index.html' ? 'Google' : isCanada ? 'Canadian business' : decodeEntities(html.match(/<body data-platform="([^"]+)"/)?.[1] || '');
     if (!platform) { console.error(`Missing platform name in ${relative}`); process.exit(1); }
     const service = {
       '@type': 'Service', '@id': `${canonical}#service`, url: canonical,
-      name: `${platform} review removal service`,
-      serviceType: `${platform} review removal assistance`,
+      name: isCanada ? 'Review removal service across Canada' : `${platform} review removal service`,
+      serviceType: isCanada ? 'Multi-platform review removal assistance' : `${platform} review removal assistance`,
       description: decodeEntities(description),
       areaServed: { '@type': 'Country', name: 'Canada' },
       provider: { '@id': `${origin}/#organization`, '@type': 'Organization', name: 'ReviewRemoval', url: origin }
@@ -60,6 +67,12 @@ for (const relative of pages) {
           { '@type': 'WebSite', '@id': `${origin}/#website`, url: `${origin}/`, name: 'ReviewRemoval', publisher: { '@id': `${origin}/#organization` }, inLanguage: 'en-CA' },
           service
         ] }
+      : isCanada ? { '@context': 'https://schema.org', '@graph': [service, {
+          '@type': 'BreadcrumbList', itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'Home', item: `${origin}/` },
+            { '@type': 'ListItem', position: 2, name: 'Review removal across Canada', item: canonical }
+          ]
+        }] }
       : { '@context': 'https://schema.org', '@graph': [service, {
           '@type': 'BreadcrumbList', itemListElement: [
             { '@type': 'ListItem', position: 1, name: 'All platforms', item: `${origin}/platforms.html` },
@@ -75,15 +88,24 @@ for (const relative of pages) {
     const schema = {
       '@context': 'https://schema.org', '@type': 'BlogPosting', '@id': `${canonical}#article`,
       mainEntityOfPage: canonical, headline: decodeEntities(title.replace(/ \| ReviewRemoval$/, '')),
-      description: decodeEntities(description), datePublished: published, dateModified: published,
+      description: decodeEntities(description), datePublished: published,
+      dateModified: html.match(/<time data-updated datetime="([0-9-]+)"/)?.[1] || published,
       author: { '@type': 'Organization', name: 'ReviewRemoval', url: `${origin}/about.html` },
       publisher: { '@type': 'Organization', name: 'ReviewRemoval', url: origin },
       isAccessibleForFree: true, citation: citations
     };
     schema.image = shareImage;
     schemaTag = `\n  <script type="application/ld+json">${JSON.stringify(schema).replaceAll('<', '\\u003c')}</script>`;
+    const breadcrumbs = {
+      '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: `${origin}/` },
+        { '@type': 'ListItem', position: 2, name: 'Research and guides', item: `${origin}/blog/index.html` },
+        { '@type': 'ListItem', position: 3, name: decodeEntities(title.replace(/ \| ReviewRemoval$/, '')), item: canonical }
+      ]
+    };
+    schemaTag += `\n  <script type="application/ld+json">${JSON.stringify(breadcrumbs).replaceAll('<', '\\u003c')}</script>`;
   }
-  const imageAlt = shareImages[relative] ? 'Chart illustrating the data discussed in this article' : 'ReviewRemoval: review concerns, handled for you';
+  const imageAlt = shareImageAlts[relative] || 'ReviewRemoval: review concerns, handled for you';
   const tags = `\n  <!-- production URL metadata start -->\n  <link rel="canonical" href="${escapeAttr(canonical)}">\n  <meta name="robots" content="index, follow, max-image-preview:large">\n  <meta property="og:type" content="${isArticle ? 'article' : 'website'}">\n  <meta property="og:site_name" content="ReviewRemoval">\n  <meta property="og:locale" content="en_CA">\n  <meta property="og:url" content="${escapeAttr(canonical)}">\n  <meta property="og:title" content="${title}">\n  <meta property="og:description" content="${description}">\n  <meta property="og:image" content="${escapeAttr(shareImage)}">\n  <meta property="og:image:width" content="1200">\n  <meta property="og:image:height" content="${shareImages[relative] ? '672' : '630'}">\n  <meta property="og:image:alt" content="${escapeAttr(imageAlt)}">\n  <meta name="twitter:card" content="summary_large_image">\n  <meta name="twitter:title" content="${title}">\n  <meta name="twitter:description" content="${description}">\n  <meta name="twitter:image" content="${escapeAttr(shareImage)}">${schemaTag}\n  <!-- production URL metadata end -->`;
   html = html.replace('</head>', `${tags}\n</head>`);
   fs.writeFileSync(file, html, 'utf8');

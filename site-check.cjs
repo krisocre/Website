@@ -4,8 +4,8 @@ const puppeteer = require('C:/Users/alkhi/node_modules/puppeteer');
 
 const root = __dirname;
 const pages = [
-  'index.html', 'platforms.html', 'about.html', 'remove-facebook-reviews.html', 'remove-yelp-reviews.html', 'remove-trustpilot-reviews.html', 'remove-tripadvisor-reviews.html', 'remove-booking-com-reviews.html', 'remove-glassdoor-reviews.html', 'remove-indeed-reviews.html',
-  'blog/index.html', 'blog/google-review-moderation-2019-2025.html', 'blog/trustpilot-fake-reviews-by-star-rating.html', 'blog/review-removal-questions-answered.html', 'blog/review-report-evidence-checklist.html'
+  'index.html', 'platforms.html', 'review-removal-canada.html', 'about.html', 'remove-facebook-reviews.html', 'remove-yelp-reviews.html', 'remove-trustpilot-reviews.html', 'remove-tripadvisor-reviews.html', 'remove-booking-com-reviews.html', 'remove-glassdoor-reviews.html', 'remove-indeed-reviews.html',
+  'blog/index.html', 'blog/google-review-moderation-2019-2025.html', 'blog/trustpilot-fake-reviews-by-star-rating.html', 'blog/canadian-tourism-google-reviews-2023.html', 'blog/review-removal-questions-answered.html', 'blog/review-report-evidence-checklist.html'
 ];
 const errors = [];
 const titles = new Set();
@@ -20,9 +20,11 @@ const homeHtml = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 if (!homeHtml.includes('Google Review Removal Canada') || !homeHtml.includes('id="service-area"') || !homeHtml.includes('id="policy-title"')) errors.push('Homepage search landing content is incomplete');
 const googleRows = fs.readFileSync(path.join(root, 'blog/data/google-review-moderation-2019-2025.csv'), 'utf8').trim().split(/\r?\n/).slice(1);
 const trustRows = fs.readFileSync(path.join(root, 'blog/data/trustpilot-fake-reviews-by-star-2024.csv'), 'utf8').trim().split(/\r?\n/).slice(1);
+const canadaRows = fs.readFileSync(path.join(root, 'blog/data/canadian-sme-online-activities-2023.csv'), 'utf8').trim().split(/\r?\n/).slice(1);
 if (googleRows.length !== 7 || googleRows.map(row => Number(row.split(',')[1])).join(',') !== '75,55,95,115,170,240,292') errors.push('Google source table mismatch');
 if (trustRows.length !== 5 || trustRows.reduce((sum, row) => sum + Number(row.split(',')[1]), 0) !== 4483000) errors.push('Trustpilot source table mismatch');
-for (const name of ['google-moderation-2019-2025.png', 'trustpilot-fake-reviews-by-star.png']) {
+if (canadaRows.length !== 7 || !canadaRows.find(row => row.startsWith('Google Reviews,63.8,47.0,16.8,https://www.ised-isde.canada.ca/'))) errors.push('Canadian source table mismatch');
+for (const name of ['google-moderation-2019-2025.png', 'trustpilot-fake-reviews-by-star.png', 'canadian-sme-online-activities-2023.png']) {
   const image = fs.readFileSync(path.join(root, 'blog/assets', name));
   if (image.readUInt32BE(16) !== 1200 || image.readUInt32BE(20) !== 672) errors.push(`${name}: incorrect sharing image size`);
 }
@@ -77,11 +79,14 @@ for (const name of ['google-moderation-2019-2025.png', 'trustpilot-fake-reviews-
         if (name === 'about.html' && width === 1440) await page.screenshot({path: path.join(root, 'previews', 'about-desktop.png'), fullPage: true});
         if (name === 'about.html' && width === 390) await page.screenshot({path: path.join(root, 'previews', 'about-mobile-top.png')});
         if (name === 'platforms.html' && width === 1440) await page.screenshot({path: path.join(root, 'previews', 'platforms-desktop.png'), fullPage: true});
+        if (name === 'review-removal-canada.html' && width === 1440) await page.screenshot({path: path.join(root, 'previews', 'canada-desktop.png'), fullPage: true});
+        if (name === 'review-removal-canada.html' && width === 390) await page.screenshot({path: path.join(root, 'previews', 'canada-mobile.png'), fullPage: true});
         if (name === 'remove-facebook-reviews.html' && width === 1440) await page.screenshot({path: path.join(root, 'previews', 'facebook-desktop.png'), fullPage: true});
         if (name === 'remove-trustpilot-reviews.html' && width === 390) await page.screenshot({path: path.join(root, 'previews', 'trustpilot-mobile.png'), fullPage: true});
         if (name === 'blog/index.html' && width === 1440) await page.screenshot({path: path.join(root, 'previews', 'blog-desktop.png'), fullPage: true});
         if (name === 'blog/google-review-moderation-2019-2025.html' && width === 1440) await page.screenshot({path: path.join(root, 'previews', 'google-study-desktop.png'), fullPage: true});
         if (name === 'blog/trustpilot-fake-reviews-by-star-rating.html' && width === 390) await page.screenshot({path: path.join(root, 'previews', 'trustpilot-study-mobile.png'), fullPage: true});
+        if (name === 'blog/canadian-tourism-google-reviews-2023.html' && width === 1440) await page.screenshot({path: path.join(root, 'previews', 'canada-study-desktop.png'), fullPage: true});
       }
       if (name.startsWith('remove-')) {
         const platform = await page.$eval('body', el => el.dataset.platform.toLowerCase());

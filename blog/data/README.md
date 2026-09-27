@@ -1,6 +1,6 @@
 # ReviewRemoval research tables
 
-These CSV files support the two research articles published September 21, 2026. They transcribe rounded figures from the linked platform publications. ReviewRemoval compiled the Google annual series and calculated the Trustpilot shares and ratios in the articles. We did not collect review-level records or independently verify platform internal counts.
+These CSV files support three research articles: two platform-data studies published September 21, 2026, and a Canadian SME analysis published September 26, 2026. ReviewRemoval transcribed the cited figures and calculated the differences described in the articles. We did not collect review-level records or independently verify the original survey or platform counts.
 
 ## `google-review-moderation-2019-2025.csv`
 
@@ -21,4 +21,14 @@ The chart plots `reported_millions`. It does not calculate growth rates because 
 
 The five entries sum to 4,483,000. Trustpilot's separate rounded headline total is 4.5 million. The article's approximate shares divide each row by 4,483,000; the approximate five-star/one-star ratio is 3,400,000 ÷ 627,000 ≈ 5.4. These are calculations from reported figures, not new platform statistics.
 
-Please credit ReviewRemoval for the compilation/visualization and cite the original Google or Trustpilot page for each underlying figure.
+## `canadian-sme-online-activities-2023.csv`
+
+- `online_activity`: ISED Table 13 activity label.
+- `tourism_sme_percent`: Published value for Canadian tourism SMEs.
+- `all_industries_sme_percent`: Published value for SMEs across all industries.
+- `tourism_minus_all_percentage_points`: Our subtraction of the two published percentages, in percentage points.
+- `source_url`: The ISED report containing Table 13, based on Statistics Canada's 2023 Survey on Financing and Growth of Small and Medium Enterprises.
+
+The Google Reviews row is 63.8% versus 47.0%, a difference of 16.8 percentage points. These figures describe reported online activity, not review volume, fake-review incidence or removal outcomes. The all-industry group includes tourism SMEs. The survey excludes some business types, including non-employers; read the [report definitions](https://www.ised-isde.canada.ca/site/ised/en/canadian-tourism-sector/sme-profile-2023-tourism-industries-canada) before reusing the values.
+
+Please credit ReviewRemoval for the compilations and visualizations, and cite the linked Google, Trustpilot or ISED source for each underlying figure.

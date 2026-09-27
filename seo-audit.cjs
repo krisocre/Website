@@ -9,7 +9,7 @@ const errors = [];
 const titles = new Set();
 const descriptions = new Set();
 
-if (pages.length !== 15 || new Set(pages).size !== pages.length) errors.push('Sitemap must contain 15 unique pages');
+if (pages.length !== 17 || new Set(pages).size !== pages.length) errors.push('Sitemap must contain 17 unique pages');
 if (fs.readFileSync(path.join(root, 'CNAME'), 'utf8').trim() !== 'reviewremoval.ca') errors.push('CNAME does not match the canonical host');
 if (!fs.readFileSync(path.join(root, 'robots.txt'), 'utf8').includes(`Sitemap: ${origin}/sitemap.xml`)) errors.push('robots.txt has the wrong sitemap URL');
 if (!fs.readFileSync(path.join(root, '404.html'), 'utf8').includes('name="robots" content="noindex')) errors.push('404 page must be noindex');
@@ -26,7 +26,7 @@ for (const url of pages) {
   const ogUrl = html.match(/<meta property="og:url" content="([^"]+)"/)?.[1];
   const ogImage = html.match(/<meta property="og:image" content="([^"]+)"/)?.[1];
   const twitterImage = html.match(/<meta name="twitter:image" content="([^"]+)"/)?.[1];
-  const schemaTag = html.match(/<script type="application\/ld\+json">([^<]+)<\/script>/)?.[1];
+  const schemaTags = [...html.matchAll(/<script type="application\/ld\+json">([^<]+)<\/script>/g)].map(match => match[1]);
 
   if (!title || titles.has(title)) errors.push(`${relative}: missing or duplicate title`);
   if (!desc || descriptions.has(desc) || desc.length < 80 || desc.length > 185) errors.push(`${relative}: missing, duplicate, or poorly sized description (${desc?.length || 0})`);
@@ -36,8 +36,13 @@ for (const url of pages) {
   if (!ogImage?.startsWith(`${origin}/`) || ogImage !== twitterImage || !fs.existsSync(path.join(root, ogImage?.slice(origin.length + 1) || ''))) errors.push(`${relative}: missing social image`);
   if (!html.includes('name="twitter:card" content="summary_large_image"')) errors.push(`${relative}: missing large social card`);
   if (html.includes('name="keywords"')) errors.push(`${relative}: obsolete keyword meta tag`);
-  if (schemaTag) {
-    try { JSON.parse(schemaTag); } catch { errors.push(`${relative}: invalid JSON-LD`); }
+  const schemas = [];
+  for (const tag of schemaTags) {
+    try { schemas.push(JSON.parse(tag)); } catch { errors.push(`${relative}: invalid JSON-LD`); }
+  }
+  if (relative.startsWith('blog/') && relative !== 'blog/index.html' &&
+      (!schemas.some(schema => schema['@type'] === 'BlogPosting') || !schemas.some(schema => schema['@type'] === 'BreadcrumbList'))) {
+    errors.push(`${relative}: missing article or breadcrumb schema`);
   }
   titles.add(title);
   descriptions.add(desc);
