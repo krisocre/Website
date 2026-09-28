@@ -1,0 +1,5 @@
+start_year,end_year,start_state,end_state,count,start_state_total,conditional_percent_calculated,source_table,source_url
+2012,2020,Recommended,Recommended,56048,58297,96.1422,II,https://plaintextresponse.com/static/papers/conpro22-amos.pdf
+2012,2020,Recommended,Not Recommended,2249,58297,3.8578,II,https://plaintextresponse.com/static/papers/conpro22-amos.pdf
+2012,2020,Not Recommended,Recommended,3566,8625,41.3449,II,https://plaintextresponse.com/static/papers/conpro22-amos.pdf
+2012,2020,Not Recommended,Not Recommended,5059,8625,58.6551,II,https://plaintextresponse.com/static/papers/conpro22-amos.pdf

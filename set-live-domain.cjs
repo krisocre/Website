@@ -17,16 +17,20 @@ const pages = [
   'index.html', 'platforms.html', 'review-removal-canada.html', 'about.html',
   'remove-facebook-reviews.html', 'remove-yelp-reviews.html', 'remove-trustpilot-reviews.html', 'remove-tripadvisor-reviews.html', 'remove-booking-com-reviews.html', 'remove-glassdoor-reviews.html', 'remove-indeed-reviews.html',
   'blog/index.html', 'blog/google-review-moderation-2019-2025.html', 'blog/trustpilot-fake-reviews-by-star-rating.html',
-  'blog/canadian-tourism-google-reviews-2023.html', 'blog/review-removal-questions-answered.html', 'blog/review-report-evidence-checklist.html'
+  'blog/canadian-tourism-google-reviews-2023.html', 'blog/review-removal-questions-answered.html', 'blog/review-report-evidence-checklist.html', 'blog/yelp-reviews-disappear-reappear-data.html', 'blog/tripadvisor-fake-review-statistics-removal-rates.html'
 ];
 const escapeAttr = value => value.replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;');
 const marker = /\n  <!-- production URL metadata start -->[\s\S]*?<!-- production URL metadata end -->/;
 const shareImages = {
+  'blog/yelp-reviews-disappear-reappear-data.html': 'blog/assets/yelp-review-transitions.png',
+  'blog/tripadvisor-fake-review-statistics-removal-rates.html': 'blog/assets/tripadvisor-fraud-series.png',
   'blog/google-review-moderation-2019-2025.html': 'blog/assets/google-moderation-2019-2025.png',
   'blog/trustpilot-fake-reviews-by-star-rating.html': 'blog/assets/trustpilot-fake-reviews-by-star.png',
   'blog/canadian-tourism-google-reviews-2023.html': 'blog/assets/canadian-sme-online-activities-2023.png'
 };
 const shareImageAlts = {
+  'blog/yelp-reviews-disappear-reappear-data.html': 'Historical Yelp review recommendation transitions in a matched sample of 66,922 reviews',
+  'blog/tripadvisor-fake-review-statistics-removal-rates.html': 'Tripadvisor detected fraud figures for four activity years, with a calculated 2024 ratio',
   'blog/google-review-moderation-2019-2025.html': 'Chart of published Google Maps review moderation figures from 2019 to 2025',
   'blog/trustpilot-fake-reviews-by-star-rating.html': 'Chart of Trustpilot fake review removals by star rating in 2024',
   'blog/canadian-tourism-google-reviews-2023.html': 'Chart comparing online activities of Canadian tourism and all-industry SMEs in 2023'

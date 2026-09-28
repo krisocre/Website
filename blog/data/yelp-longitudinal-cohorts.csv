@@ -1,0 +1,5 @@
+cohort,window_months,review_observations,unique_reviews,businesses,crawls,reclassified_percent_reported,source_table,source_url
+EYG,96,263308,196383,201,2,8.69,I,https://plaintextresponse.com/static/papers/conpro22-amos.pdf
+CHI,11,10485007,1395870,5773,8,0.87,I,https://plaintextresponse.com/static/papers/conpro22-amos.pdf
+UDS,4,1409059,358184,2829,4,0.54,I,https://plaintextresponse.com/static/papers/conpro22-amos.pdf
+UIS,4,1145995,292107,2843,4,0.61,I,https://plaintextresponse.com/static/papers/conpro22-amos.pdf

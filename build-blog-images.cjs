@@ -3,7 +3,7 @@ const path = require('node:path');
 const puppeteer = require('C:/Users/alkhi/node_modules/puppeteer');
 
 const assets = path.join(__dirname, 'blog', 'assets');
-const charts = ['google-moderation-2019-2025', 'trustpilot-fake-reviews-by-star', 'canadian-sme-online-activities-2023'];
+const charts = ['google-moderation-2019-2025', 'trustpilot-fake-reviews-by-star', 'canadian-sme-online-activities-2023', 'yelp-review-transitions', 'tripadvisor-fraud-series', 'tripadvisor-screening-2024'];
 
 (async () => {
   const browser = await puppeteer.launch({headless: true, executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe', args: ['--no-sandbox']});

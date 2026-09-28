@@ -9,7 +9,7 @@ const errors = [];
 const titles = new Set();
 const descriptions = new Set();
 
-if (pages.length !== 17 || new Set(pages).size !== pages.length) errors.push('Sitemap must contain 17 unique pages');
+if (pages.length !== 19 || new Set(pages).size !== pages.length) errors.push('Sitemap must contain 19 unique pages');
 if (fs.readFileSync(path.join(root, 'CNAME'), 'utf8').trim() !== 'reviewremoval.ca') errors.push('CNAME does not match the canonical host');
 if (!fs.readFileSync(path.join(root, 'robots.txt'), 'utf8').includes(`Sitemap: ${origin}/sitemap.xml`)) errors.push('robots.txt has the wrong sitemap URL');
 if (!fs.readFileSync(path.join(root, '404.html'), 'utf8').includes('name="robots" content="noindex')) errors.push('404 page must be noindex');

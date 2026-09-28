@@ -1,0 +1,5 @@
+activity_year,publication_year,review_submissions_millions,submission_qualifier,detected_fraud_percent,percent_basis,fraud_count_millions_used_for_calculation,detected_fraud_prepublication_percent,source_url
+2018,2019,66,more than,2.1,reported percentage,,73,https://www.tripadvisor.com/TripAdvisorInsights/wp-content/uploads/2019/09/2147_PR_Content_Transparency_Report_6SEP19_US.pdf
+2020,2021,26,more than,3.6,reported percentage,,67.1,https://tripadvisor.mediaroom.com/2021-10-27-Tripadvisor-Content-Moderation-Transparency-Report-Reveals-New-Data-In-Fight-Against-Fake-Reviews
+2022,2023,30.2,more than,4.4,reported percentage,,72,https://tripadvisor.mediaroom.com/2023-04-11-Tripadvisor-report-reveals-strong-growth-in-review-submissions-and-improvement-in-fraud-detection-rates
+2024,2025,31.1,rounded,8.681672,calculation from rounded counts,2.7,,https://tripadvisor.mediaroom.com/2025-03-18-Tripadvisors-2025-Transparency-Report-reveals-strong-review-submissions-and-improved-fraud-detection

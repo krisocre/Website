@@ -5,7 +5,7 @@ const puppeteer = require('C:/Users/alkhi/node_modules/puppeteer');
 const root = __dirname;
 const pages = [
   'index.html', 'platforms.html', 'review-removal-canada.html', 'about.html', 'remove-facebook-reviews.html', 'remove-yelp-reviews.html', 'remove-trustpilot-reviews.html', 'remove-tripadvisor-reviews.html', 'remove-booking-com-reviews.html', 'remove-glassdoor-reviews.html', 'remove-indeed-reviews.html',
-  'blog/index.html', 'blog/google-review-moderation-2019-2025.html', 'blog/trustpilot-fake-reviews-by-star-rating.html', 'blog/canadian-tourism-google-reviews-2023.html', 'blog/review-removal-questions-answered.html', 'blog/review-report-evidence-checklist.html'
+  'blog/index.html', 'blog/google-review-moderation-2019-2025.html', 'blog/trustpilot-fake-reviews-by-star-rating.html', 'blog/canadian-tourism-google-reviews-2023.html', 'blog/review-removal-questions-answered.html', 'blog/review-report-evidence-checklist.html', 'blog/yelp-reviews-disappear-reappear-data.html', 'blog/tripadvisor-fake-review-statistics-removal-rates.html'
 ];
 const errors = [];
 const titles = new Set();
@@ -24,7 +24,7 @@ const canadaRows = fs.readFileSync(path.join(root, 'blog/data/canadian-sme-onlin
 if (googleRows.length !== 7 || googleRows.map(row => Number(row.split(',')[1])).join(',') !== '75,55,95,115,170,240,292') errors.push('Google source table mismatch');
 if (trustRows.length !== 5 || trustRows.reduce((sum, row) => sum + Number(row.split(',')[1]), 0) !== 4483000) errors.push('Trustpilot source table mismatch');
 if (canadaRows.length !== 7 || !canadaRows.find(row => row.startsWith('Google Reviews,63.8,47.0,16.8,https://www.ised-isde.canada.ca/'))) errors.push('Canadian source table mismatch');
-for (const name of ['google-moderation-2019-2025.png', 'trustpilot-fake-reviews-by-star.png', 'canadian-sme-online-activities-2023.png']) {
+for (const name of ['google-moderation-2019-2025.png', 'trustpilot-fake-reviews-by-star.png', 'canadian-sme-online-activities-2023.png', 'yelp-review-transitions.png', 'tripadvisor-fraud-series.png', 'tripadvisor-screening-2024.png']) {
   const image = fs.readFileSync(path.join(root, 'blog/assets', name));
   if (image.readUInt32BE(16) !== 1200 || image.readUInt32BE(20) !== 672) errors.push(`${name}: incorrect sharing image size`);
 }
@@ -86,6 +86,10 @@ for (const name of ['google-moderation-2019-2025.png', 'trustpilot-fake-reviews-
         if (name === 'blog/index.html' && width === 1440) await page.screenshot({path: path.join(root, 'previews', 'blog-desktop.png'), fullPage: true});
         if (name === 'blog/google-review-moderation-2019-2025.html' && width === 1440) await page.screenshot({path: path.join(root, 'previews', 'google-study-desktop.png'), fullPage: true});
         if (name === 'blog/trustpilot-fake-reviews-by-star-rating.html' && width === 390) await page.screenshot({path: path.join(root, 'previews', 'trustpilot-study-mobile.png'), fullPage: true});
+        if (name === 'blog/yelp-reviews-disappear-reappear-data.html' && width === 1440) await page.screenshot({path:path.join(root,'previews','yelp-research-desktop.png'),fullPage:true});
+        if (name === 'blog/yelp-reviews-disappear-reappear-data.html' && width === 390) await page.screenshot({path:path.join(root,'previews','yelp-research-mobile.png'),fullPage:true});
+        if (name === 'blog/tripadvisor-fake-review-statistics-removal-rates.html' && width === 1440) await page.screenshot({path:path.join(root,'previews','tripadvisor-research-desktop.png'),fullPage:true});
+        if (name === 'blog/tripadvisor-fake-review-statistics-removal-rates.html' && width === 390) await page.screenshot({path:path.join(root,'previews','tripadvisor-research-mobile.png'),fullPage:true});
         if (name === 'blog/canadian-tourism-google-reviews-2023.html' && width === 1440) await page.screenshot({path: path.join(root, 'previews', 'canada-study-desktop.png'), fullPage: true});
       }
       if (name.startsWith('remove-')) {
