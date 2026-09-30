@@ -21,6 +21,17 @@ const pages = [
 ];
 const escapeAttr = value => value.replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;');
 const marker = /\n  <!-- production URL metadata start -->[\s\S]*?<!-- production URL metadata end -->/;
+const googleTagMarker = /\n  <!-- Google tag \(gtag\.js\) -->[\s\S]*?<!-- \/Google tag \(gtag\.js\) -->/;
+const googleTag = `
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=AW-18449308865"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'AW-18449308865');
+  </script>
+  <!-- /Google tag (gtag.js) -->`;
 const shareImages = {
   'blog/yelp-reviews-disappear-reappear-data.html': 'blog/assets/yelp-review-transitions.png',
   'blog/tripadvisor-fake-review-statistics-removal-rates.html': 'blog/assets/tripadvisor-fraud-series.png',
@@ -45,7 +56,7 @@ const organization = {
 for (const relative of pages) {
   const file = path.join(root, relative);
   if (!fs.existsSync(file)) { console.error(`Missing ${relative}. Run the build scripts first.`); process.exit(1); }
-  let html = fs.readFileSync(file, 'utf8').replace(/\r+\n/g, '\n').replace(/\r/g, '\n').replace(marker, '').replace(/\n(?:[ \t]*\n)*(?=<\/head>)/, '\n');
+  let html = fs.readFileSync(file, 'utf8').replace(/\r+\n/g, '\n').replace(/\r/g, '\n').replace(marker, '').replace(googleTagMarker, '').replace(/\n(?:[ \t]*\n)*(?=<\/head>)/, '\n');
   const title = html.match(/<title>([^<]+)<\/title>/)?.[1];
   const description = html.match(/<meta name="description" content="([^"]*)">/)?.[1];
   if (!title || !description || !html.includes('</head>')) { console.error(`Missing metadata in ${relative}`); process.exit(1); }
@@ -111,7 +122,7 @@ for (const relative of pages) {
   }
   const imageAlt = shareImageAlts[relative] || 'ReviewRemoval: review concerns, handled for you';
   const tags = `\n  <!-- production URL metadata start -->\n  <link rel="canonical" href="${escapeAttr(canonical)}">\n  <meta name="robots" content="index, follow, max-image-preview:large">\n  <meta property="og:type" content="${isArticle ? 'article' : 'website'}">\n  <meta property="og:site_name" content="ReviewRemoval">\n  <meta property="og:locale" content="en_CA">\n  <meta property="og:url" content="${escapeAttr(canonical)}">\n  <meta property="og:title" content="${title}">\n  <meta property="og:description" content="${description}">\n  <meta property="og:image" content="${escapeAttr(shareImage)}">\n  <meta property="og:image:width" content="1200">\n  <meta property="og:image:height" content="${shareImages[relative] ? '672' : '630'}">\n  <meta property="og:image:alt" content="${escapeAttr(imageAlt)}">\n  <meta name="twitter:card" content="summary_large_image">\n  <meta name="twitter:title" content="${title}">\n  <meta name="twitter:description" content="${description}">\n  <meta name="twitter:image" content="${escapeAttr(shareImage)}">${schemaTag}\n  <!-- production URL metadata end -->`;
-  html = html.replace('</head>', `${tags}\n</head>`);
+  html = html.replace('</head>', `${tags}${googleTag}\n</head>`);
   fs.writeFileSync(file, html, 'utf8');
 }
 

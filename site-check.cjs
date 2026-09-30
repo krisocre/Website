@@ -34,6 +34,11 @@ for (const name of ['google-moderation-2019-2025.png', 'trustpilot-fake-reviews-
   try {
     for (const name of pages) {
       const page = await browser.newPage();
+      await page.setRequestInterception(true);
+      page.on('request', request => {
+        if (request.url().startsWith('https://www.googletagmanager.com/gtag/js?')) request.abort();
+        else request.continue();
+      });
       page.on('pageerror', err => errors.push(`${name}: ${err.message}`));
       await page.goto(`file:///${path.join(root, name).replaceAll('\\','/')}`, {waitUntil: 'load'});
       await page.evaluate(async () => {

@@ -8,11 +8,21 @@ const pages = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => match[1
 const errors = [];
 const titles = new Set();
 const descriptions = new Set();
+const googleTagUrl = 'https://www.googletagmanager.com/gtag/js?id=AW-18449308865';
+const googleTagConfig = "gtag('config', 'AW-18449308865');";
+function checkGoogleTag(html, name) {
+  const head = html.split('</head>')[0];
+  if ((head.split(googleTagUrl).length - 1) !== 1 || (head.split(googleTagConfig).length - 1) !== 1) {
+    errors.push(`${name}: Google tag must appear once in the head`);
+  }
+}
 
 if (pages.length !== 19 || new Set(pages).size !== pages.length) errors.push('Sitemap must contain 19 unique pages');
 if (fs.readFileSync(path.join(root, 'CNAME'), 'utf8').trim() !== 'reviewremoval.ca') errors.push('CNAME does not match the canonical host');
 if (!fs.readFileSync(path.join(root, 'robots.txt'), 'utf8').includes(`Sitemap: ${origin}/sitemap.xml`)) errors.push('robots.txt has the wrong sitemap URL');
-if (!fs.readFileSync(path.join(root, '404.html'), 'utf8').includes('name="robots" content="noindex')) errors.push('404 page must be noindex');
+const notFoundHtml = fs.readFileSync(path.join(root, '404.html'), 'utf8');
+if (!notFoundHtml.includes('name="robots" content="noindex')) errors.push('404 page must be noindex');
+checkGoogleTag(notFoundHtml, '404.html');
 
 for (const url of pages) {
   if (!url.startsWith(`${origin}/`)) { errors.push(`Wrong sitemap host: ${url}`); continue; }
@@ -20,6 +30,7 @@ for (const url of pages) {
   const file = path.join(root, relative);
   if (!fs.existsSync(file)) { errors.push(`Missing sitemap target: ${relative}`); continue; }
   const html = fs.readFileSync(file, 'utf8');
+  checkGoogleTag(html, relative);
   const title = html.match(/<title>([^<]+)<\/title>/)?.[1];
   const desc = html.match(/<meta name="description" content="([^"]+)"/)?.[1];
   const canonical = html.match(/<link rel="canonical" href="([^"]+)"/)?.[1];

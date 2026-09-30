@@ -20,6 +20,13 @@ try {
     const result = spawnSync(process.execPath, [path.join(tempRoot, 'set-live-domain.cjs'), 'https://example.com'], {encoding: 'utf8'});
     if (result.status !== 0) throw new Error(result.stderr || result.stdout);
   }
+  for (const relative of pages) {
+    const html = fs.readFileSync(path.join(tempRoot, relative), 'utf8');
+    if ((html.match(/googletagmanager\.com\/gtag\/js\?id=AW-18449308865/g) || []).length !== 1 ||
+        (html.match(/gtag\('config', 'AW-18449308865'\)/g) || []).length !== 1) {
+      throw new Error(`${relative}: Google tag was omitted or duplicated`);
+    }
+  }
   const html = fs.readFileSync(path.join(tempRoot, 'blog/google-review-moderation-2019-2025.html'), 'utf8');
   if ((html.match(/rel="canonical"/g) || []).length !== 1) throw new Error('Canonical tag was duplicated');
   const json = html.match(/<script type="application\/ld\+json">([^<]+)<\/script>/)?.[1];

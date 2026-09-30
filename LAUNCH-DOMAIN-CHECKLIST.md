@@ -18,7 +18,9 @@ node launch-check.cjs
 node seo-audit.cjs
 ```
 
-The domain script is repeatable. It adds unique canonical and social URLs, a social image, Organization/WebSite/Service and article structured data where appropriate, and writes `sitemap.xml` and `robots.txt`. Generated HTML loses this metadata when rebuilt, so always run the domain script afterward. Keep the apex domain as the canonical host.
+The domain script is repeatable. It adds unique canonical and social URLs, a social image, Organization/WebSite/Service and article structured data where appropriate, installs Google tag `AW-18449308865` once in the head of all 19 indexable pages, and writes `sitemap.xml` and `robots.txt`. The same tag is installed directly in `404.html`. Generated HTML loses the domain metadata and tag when rebuilt, so always run the domain script afterward. Keep the apex domain as the canonical host.
+
+The supplied Google tag loads the Google Ads base tag. It does not define a quote-submission conversion event; that requires the specific conversion event snippet or conversion label from Google Ads. Do not send form contents to the tag.
 
 ## Tasks requiring site-owner access or verified details
 
