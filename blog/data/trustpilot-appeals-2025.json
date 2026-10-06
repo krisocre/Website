@@ -1,0 +1,107 @@
+{
+  "title": "Trustpilot appeals: what 890 reversals actually measure",
+  "version": "1.0",
+  "published": "2026-10-06",
+  "source_report_published": "2026-02-28",
+  "reporting_start": "2025-02-17",
+  "reporting_end": "2025-12-31",
+  "geographic_scope": "EU businesses reviewed by EU users; EU businesses reviewed by non-EU users; non-EU businesses reviewed by EU users. This is the scope stated on the report cover page.",
+  "source_url": "https://assets.ctfassets.net/wonkqgvit51x/43veQxX63SCvDEmqXyHqQi/bf51839da2bdb697209a16ceabb18434/Trustpilot_DSA_Transparency_Report.zip",
+  "source_landing_page": "https://corporate.trustpilot.com/legal",
+  "source_filename": "Trustpilot DSA Transparency Report - 17.2.25-31.12.25 - 7_appeals_and_recidivism.csv",
+  "source_sha256": "1a9d3907d4766530a40257c10c322f352da6a54158cabd3f3d76a78eb8e8ff65",
+  "accessed": "2026-10-06",
+  "license": "https://creativecommons.org/licenses/by/4.0/",
+  "separately_reported": {
+    "decisions_omitted": 473,
+    "newly_imposed_restrictions": 816
+  },
+  "notes": [
+    "Decisions omitted is retained separately: the published complaint total already equals upheld plus partially reversed plus reversed. The supplied CSV does not explain how the omitted metric overlaps that total.",
+    "Median-time values are not analysed because the supplied file does not specify their unit.",
+    "Reporting dates follow the identification CSV and cover page; one qualitative passage instead says 18 February.",
+    "The unallocated residual is our subtraction, not an official reason category."
+  ],
+  "rows": [
+    {
+      "category": "all_complaints",
+      "label": "All internal complaints",
+      "complaints": 3458,
+      "upheld": 2568,
+      "partially_reversed": 0,
+      "reversed": 890,
+      "row_origin": "reported",
+      "source_indicator": "Number of complaints submitted to the internal-complaints mechanism"
+    },
+    {
+      "category": "content_restriction",
+      "label": "Content removal / access / visibility restriction",
+      "complaints": 416,
+      "upheld": 356,
+      "partially_reversed": 0,
+      "reversed": 60,
+      "row_origin": "reported",
+      "source_indicator": "Complaint regarding a decision to remove or disable access to or restrict visibility of information"
+    },
+    {
+      "category": "service_restriction",
+      "label": "Service suspension / termination",
+      "complaints": 44,
+      "upheld": 38,
+      "partially_reversed": 0,
+      "reversed": 6,
+      "row_origin": "reported",
+      "source_indicator": "Complaint regarding a decision to suspend or terminate the provision of the service"
+    },
+    {
+      "category": "account_restriction",
+      "label": "Account suspension / termination",
+      "complaints": 2,
+      "upheld": 2,
+      "partially_reversed": 0,
+      "reversed": 0,
+      "row_origin": "reported",
+      "source_indicator": "Complaint regarding a decision to suspend or terminate an account"
+    },
+    {
+      "category": "monetisation_restriction",
+      "label": "Monetisation restriction",
+      "complaints": 0,
+      "upheld": 0,
+      "partially_reversed": 0,
+      "reversed": 0,
+      "row_origin": "reported",
+      "source_indicator": "Complaint regarding a decision to restrict the ability to monetise information"
+    },
+    {
+      "category": "notice_no_action",
+      "label": "No action on an Article 16 notice",
+      "complaints": 2950,
+      "upheld": 2134,
+      "partially_reversed": 0,
+      "reversed": 816,
+      "row_origin": "reported",
+      "source_indicator": "Complaint regarding a decision not to take action on a notice submitted in accordance with Article 16"
+    },
+    {
+      "category": "trusted_flagger_no_action",
+      "label": "No action on a trusted-flagger notice",
+      "complaints": 0,
+      "upheld": 0,
+      "partially_reversed": 0,
+      "reversed": 0,
+      "row_origin": "reported",
+      "source_indicator": "Complaint regarding a decision not to take action on a notice submitted by a Trusted Flagger in accordance with Article 16"
+    },
+    {
+      "category": "unallocated_residual",
+      "label": "Unallocated to supplied reason rows",
+      "complaints": 46,
+      "upheld": 38,
+      "partially_reversed": 0,
+      "reversed": 8,
+      "row_origin": "derived",
+      "source_indicator": "Overall total minus six supplied reason categories; not a source category"
+    }
+  ]
+}

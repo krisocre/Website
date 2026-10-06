@@ -54,3 +54,11 @@ The source URLs in each row identify the underlying company publication. These c
 `review-status-tracking-template.csv` is a blank operational template, not a dataset. No customer or reviewer records are included.
 
 Run `node build-research-assets.cjs` from the repository root to regenerate the six new CSVs and three SVG charts from `blog/research-data.cjs`. The article explanations, precision and qualifiers should be updated together with any source-value change. Credit the named researchers or Tripadvisor for the source data, and ReviewRemoval for the new calculations and visualizations.
+
+## Trustpilot internal complaints, February 17–December 31, 2025
+
+`trustpilot-appeals-2025.json` preserves the report scope, original indicator labels, extracted count columns, separate omitted/restriction metrics, source filename and SHA-256 of the downloaded appeals CSV. `trustpilot-appeals-2025.csv` adds per-row reversal shares and a clearly marked derived residual. The overall row is a summary, not additive with its reason rows. Source ZIP was linked from Trustpilot's legal page on 2026-10-06 and published 2026-02-28.
+
+Run `node audit-trustpilot-appeals.cjs` to reconcile all counts. Run `python plot-trustpilot-appeals.py` with Matplotlib installed to reproduce the figure. Eight rows include the overall total, six reported reason categories and one derived residual. Empty percentages have zero denominators. The 473 omitted decisions are deliberately outside the outcome partition.
+
+Original compilation, calculations and figures: CC BY 4.0 with attribution to ReviewRemoval and the article URL. Source material retains its own rights. This is an EU-related reporting subset, not a Canadian removal success rate. See the article for period, scope, denominator and comparability limitations.

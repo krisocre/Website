@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "Please cite this article when reusing its compilation or calculations."
+type: dataset
+title: "Trustpilot appeals: what 890 reversals actually measure"
+version: 1.0
+date-released: 2026-10-06
+url: https://reviewremoval.ca/blog/trustpilot-appeal-outcomes-2025.html
+license: CC-BY-4.0
+authors:
+  - name: ReviewRemoval

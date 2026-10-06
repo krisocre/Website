@@ -17,7 +17,7 @@ function checkGoogleTag(html, name) {
   }
 }
 
-if (pages.length !== 19 || new Set(pages).size !== pages.length) errors.push('Sitemap must contain 19 unique pages');
+if (pages.length !== 20 || new Set(pages).size !== pages.length) errors.push('Sitemap must contain 20 unique pages');
 if (fs.readFileSync(path.join(root, 'CNAME'), 'utf8').trim() !== 'reviewremoval.ca') errors.push('CNAME does not match the canonical host');
 if (!fs.readFileSync(path.join(root, 'robots.txt'), 'utf8').includes(`Sitemap: ${origin}/sitemap.xml`)) errors.push('robots.txt has the wrong sitemap URL');
 const notFoundHtml = fs.readFileSync(path.join(root, '404.html'), 'utf8');
