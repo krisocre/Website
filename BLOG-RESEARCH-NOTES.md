@@ -37,3 +37,13 @@ Source values live in `blog/research-data.cjs`; article copy lives in `blog/rese
 ## Verification scope
 
 Checks cover local links, images, tables, page widths, article metadata, structured data, sitemap coverage and quote forms. The new matrix arithmetic and normalized examples were independently recalculated. Publication, Google crawling and ranking remain separate steps.
+
+## October 8, 2026: rounded-score uncertainty analysis
+
+The new article adds a specific angle beyond a generic star-rating calculator: integer-feasible ranges after review removal, rather than treating the rounded display as an exact starting average. Search results inspected included several existing recovery calculators; this is not a claim that no other uncertainty calculator exists, nor a keyword-volume study. The contribution is our open 1,625-input grid, feasibility exclusions, three downloadable figures, reproducible source code and an independent histogram audit.
+
+Primary guidance checked: Google score definition (4801187), reporting process (4596773), Maps policy (7400114), review requests (3474122), local ranking (7091), and the Competition Bureau's October 14, 2015 Bell announcement. The Bell example is historical app-review context, not a Google Maps case or a current legal-penalty schedule.
+
+Google's cited scoring page confirms an average but does not document the tie-rounding rule. All display boundaries use an explicit nearest-tenth, half-up assumption. New-review update guidance is not presented as a removal deadline. Simulated inputs are not described as empirical Canadian data; grid frequencies are not probabilities. Citation language, Dataset schema and visible methods preserve these limits. Original data/code/figures are licensed CC BY 4.0.
+
+Reproduction: `node blog/data/build-rating-study.cjs`, `node blog/data/audit-rating-study.cjs`, `python blog/data/plot-rating-study.py`, `node build-blog.cjs`, then `node set-live-domain.cjs https://reviewremoval.ca`. The article is linked from the homepage, blog archive and related article cards. The sitemap records article and blog-index modification dates from their existing schema instead of stamping every page with today's date.

@@ -5,7 +5,7 @@ const puppeteer = require('C:/Users/alkhi/node_modules/puppeteer');
 const root = __dirname;
 const pages = [
   'index.html', 'platforms.html', 'review-removal-canada.html', 'about.html', 'remove-facebook-reviews.html', 'remove-yelp-reviews.html', 'remove-trustpilot-reviews.html', 'remove-tripadvisor-reviews.html', 'remove-booking-com-reviews.html', 'remove-glassdoor-reviews.html', 'remove-indeed-reviews.html',
-  'blog/index.html', 'blog/google-review-moderation-2019-2025.html', 'blog/trustpilot-fake-reviews-by-star-rating.html', 'blog/canadian-tourism-google-reviews-2023.html', 'blog/review-removal-questions-answered.html', 'blog/review-report-evidence-checklist.html', 'blog/yelp-reviews-disappear-reappear-data.html', 'blog/tripadvisor-fake-review-statistics-removal-rates.html', 'blog/trustpilot-appeal-outcomes-2025.html'
+  'blog/index.html', 'blog/google-review-moderation-2019-2025.html', 'blog/trustpilot-fake-reviews-by-star-rating.html', 'blog/canadian-tourism-google-reviews-2023.html', 'blog/review-removal-questions-answered.html', 'blog/review-report-evidence-checklist.html', 'blog/yelp-reviews-disappear-reappear-data.html', 'blog/tripadvisor-fake-review-statistics-removal-rates.html', 'blog/trustpilot-appeal-outcomes-2025.html', 'blog/google-review-removal-rating-impact-study.html'
 ];
 const errors = [];
 const titles = new Set();
@@ -24,7 +24,7 @@ const canadaRows = fs.readFileSync(path.join(root, 'blog/data/canadian-sme-onlin
 if (googleRows.length !== 7 || googleRows.map(row => Number(row.split(',')[1])).join(',') !== '75,55,95,115,170,240,292') errors.push('Google source table mismatch');
 if (trustRows.length !== 5 || trustRows.reduce((sum, row) => sum + Number(row.split(',')[1]), 0) !== 4483000) errors.push('Trustpilot source table mismatch');
 if (canadaRows.length !== 7 || !canadaRows.find(row => row.startsWith('Google Reviews,63.8,47.0,16.8,https://www.ised-isde.canada.ca/'))) errors.push('Canadian source table mismatch');
-for (const name of ['google-moderation-2019-2025.png', 'trustpilot-fake-reviews-by-star.png', 'canadian-sme-online-activities-2023.png', 'yelp-review-transitions.png', 'tripadvisor-fraud-series.png', 'tripadvisor-screening-2024.png']) {
+for (const name of ['google-moderation-2019-2025.png', 'trustpilot-fake-reviews-by-star.png', 'canadian-sme-online-activities-2023.png', 'yelp-review-transitions.png', 'tripadvisor-fraud-series.png', 'tripadvisor-screening-2024.png','rating-removal-uncertainty.png','rating-removal-threshold-map.png','rating-recovery-range.png']) {
   const image = fs.readFileSync(path.join(root, 'blog/assets', name));
   if (image.readUInt32BE(16) !== 1200 || image.readUInt32BE(20) !== 672) errors.push(`${name}: incorrect sharing image size`);
 }
@@ -60,6 +60,33 @@ for (const name of ['google-moderation-2019-2025.png', 'trustpilot-fake-reviews-
       }
       const pageBasics = await page.evaluate(() => ({h1: document.querySelectorAll('h1').length, description: !!document.querySelector('meta[name="description"]'), badImages: [...document.images].filter(img => !img.complete || img.naturalWidth === 0).map(img => img.getAttribute('src'))}));
       if (pageBasics.h1 !== 1 || !pageBasics.description || pageBasics.badImages.length) errors.push(`${name}: page basics ${JSON.stringify(pageBasics)}`);
+      if (name === 'blog/google-review-removal-rating-impact-study.html') {
+        const cases = [
+          {count:100,rating:4.4,removed:1,stars:1,expected:'4.4–4.5'},
+          {count:20,rating:4.4,removed:1,stars:1,expected:'4.5–4.6'},
+          {count:10,rating:4.9,removed:1,stars:1,expected:'cannot coexist'},
+          {count:20,rating:4.4,removed:1,stars:4,expected:'after removal: 4.4.'},
+          {count:100,rating:4.4,removed:100,stars:1,expected:'fewer removals'}
+        ];
+        for (const test of cases) {
+          await page.evaluate(test => {
+            document.querySelector('#rating-count').value=test.count;
+            document.querySelector('#rating-display').value=test.rating;
+            document.querySelector('#rating-removed').value=test.removed;
+            document.querySelector('#rating-stars').value=test.stars;
+            document.querySelector('[data-rating-calculator]').requestSubmit();
+          }, test);
+          const result=await page.$eval('[data-rating-result]',el=>el.textContent);
+          if(!result.includes(test.expected)) errors.push(`${name}: calculator result ${result}`);
+        }
+        await page.evaluate(() => {
+          document.querySelector('#rating-count').value=100;
+          document.querySelector('#rating-display').value=4.4;
+          document.querySelector('#rating-removed').value=1;
+          document.querySelector('#rating-stars').value=1;
+          document.querySelector('[data-rating-calculator]').requestSubmit();
+        });
+      }
       if (name === 'index.html') {
         const sectionIds = await page.$$eval('main > section', els => els.slice(0,3).map(el => el.id || el.className));
         if (sectionIds[1] !== 'pricing' || sectionIds[2] !== 'quote') errors.push(`${name}: section order ${sectionIds}`);
@@ -77,6 +104,8 @@ for (const name of ['google-moderation-2019-2025.png', 'trustpilot-fake-reviews-
         await page.setViewport({width, height: 900, deviceScaleFactor: 1});
         const layout = await page.evaluate(() => ({scroll: document.documentElement.scrollWidth, viewport: innerWidth, heading: document.querySelector('h1')?.getBoundingClientRect().width}));
         if (layout.scroll > layout.viewport + 1) errors.push(`${name} @${width}: horizontal overflow ${layout.scroll}`);
+        if (name === 'blog/google-review-removal-rating-impact-study.html' && width === 1440) await page.screenshot({path:path.join(root,'previews','rating-study-desktop.png'),fullPage:true});
+        if (name === 'blog/google-review-removal-rating-impact-study.html' && width === 390) await page.screenshot({path:path.join(root,'previews','rating-study-mobile.png'),fullPage:true});
         if (name === 'index.html' && width === 1440) await page.screenshot({path: path.join(root, 'previews', 'home-desktop.png'), fullPage: true});
         if (name === 'index.html' && width === 1440) await page.screenshot({path: path.join(root, 'previews', 'home-desktop-top.png')});
         if (name === 'index.html' && width === 390) await page.screenshot({path: path.join(root, 'previews', 'home-mobile.png'), fullPage: true});

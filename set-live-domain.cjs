@@ -17,7 +17,7 @@ const pages = [
   'index.html', 'platforms.html', 'review-removal-canada.html', 'about.html',
   'remove-facebook-reviews.html', 'remove-yelp-reviews.html', 'remove-trustpilot-reviews.html', 'remove-tripadvisor-reviews.html', 'remove-booking-com-reviews.html', 'remove-glassdoor-reviews.html', 'remove-indeed-reviews.html',
   'blog/index.html', 'blog/google-review-moderation-2019-2025.html', 'blog/trustpilot-fake-reviews-by-star-rating.html',
-  'blog/canadian-tourism-google-reviews-2023.html', 'blog/review-removal-questions-answered.html', 'blog/review-report-evidence-checklist.html', 'blog/yelp-reviews-disappear-reappear-data.html', 'blog/tripadvisor-fake-review-statistics-removal-rates.html', 'blog/trustpilot-appeal-outcomes-2025.html'
+  'blog/canadian-tourism-google-reviews-2023.html', 'blog/review-removal-questions-answered.html', 'blog/review-report-evidence-checklist.html', 'blog/yelp-reviews-disappear-reappear-data.html', 'blog/tripadvisor-fake-review-statistics-removal-rates.html', 'blog/trustpilot-appeal-outcomes-2025.html', 'blog/google-review-removal-rating-impact-study.html'
 ];
 const escapeAttr = value => value.replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;');
 const marker = /\n  <!-- production URL metadata start -->[\s\S]*?<!-- production URL metadata end -->/;
@@ -33,6 +33,7 @@ const googleTag = `
   </script>
   <!-- /Google tag (gtag.js) -->`;
 const shareImages = {
+  'blog/google-review-removal-rating-impact-study.html': 'blog/assets/rating-removal-uncertainty.png',
   'blog/trustpilot-appeal-outcomes-2025.html': 'blog/assets/trustpilot-appeals-2025.png',
   'blog/yelp-reviews-disappear-reappear-data.html': 'blog/assets/yelp-review-transitions.png',
   'blog/tripadvisor-fake-review-statistics-removal-rates.html': 'blog/assets/tripadvisor-fraud-series.png',
@@ -41,6 +42,7 @@ const shareImages = {
   'blog/canadian-tourism-google-reviews-2023.html': 'blog/assets/canadian-sme-online-activities-2023.png'
 };
 const shareImageAlts = {
+  'blog/google-review-removal-rating-impact-study.html': 'Original mathematical ranges for star ratings after removing one one-star Google review',
   'blog/trustpilot-appeal-outcomes-2025.html': 'Trustpilot 2025 reversal counts separated by the decision being challenged',
   'blog/yelp-reviews-disappear-reappear-data.html': 'Historical Yelp review recommendation transitions in a matched sample of 66,922 reviews',
   'blog/tripadvisor-fake-review-statistics-removal-rates.html': 'Tripadvisor detected fraud figures for four activity years, with a calculated 2024 ratio',
@@ -128,7 +130,14 @@ for (const relative of pages) {
   fs.writeFileSync(file, html, 'utf8');
 }
 
-const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${pages.map(relative => `  <url><loc>${escapeAttr(`${origin}/${relative === 'index.html' ? '' : relative}`)}</loc></url>`).join('\n')}\n</urlset>\n`;
+const sitemapEntries = pages.map(relative => {
+  const html = fs.readFileSync(path.join(root, relative), 'utf8');
+  const schemas = [...html.matchAll(/<script type="application\/ld\+json">([^<]+)<\/script>/g)].map(match => JSON.parse(match[1]));
+  const modified = schemas.find(schema => ['BlogPosting','CollectionPage'].includes(schema['@type']))?.dateModified;
+  const lastmod = /^\d{4}-\d{2}-\d{2}$/.test(modified || '') ? `<lastmod>${modified}</lastmod>` : '';
+  return `  <url><loc>${escapeAttr(`${origin}/${relative === 'index.html' ? '' : relative}`)}</loc>${lastmod}</url>`;
+});
+const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapEntries.join('\n')}\n</urlset>\n`;
 fs.writeFileSync(path.join(root, 'sitemap.xml'), sitemap, 'utf8');
 fs.writeFileSync(path.join(root, 'robots.txt'), `User-agent: *\nAllow: /\nSitemap: ${origin}/sitemap.xml\n`, 'utf8');
 console.log(`Set canonical and social URLs on ${pages.length} pages; wrote sitemap.xml and robots.txt for ${origin}`);
