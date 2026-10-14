@@ -7,11 +7,13 @@ const workspace = __dirname;
 const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'reviewremoval-launch-'));
 const pages = [
   'index.html','platforms.html','review-removal-canada.html','about.html','remove-facebook-reviews.html','remove-yelp-reviews.html','remove-trustpilot-reviews.html','remove-tripadvisor-reviews.html','remove-booking-com-reviews.html','remove-glassdoor-reviews.html','remove-indeed-reviews.html',
-  'blog/index.html','blog/google-review-moderation-2019-2025.html','blog/trustpilot-fake-reviews-by-star-rating.html','blog/canadian-tourism-google-reviews-2023.html','blog/review-removal-questions-answered.html','blog/review-report-evidence-checklist.html', 'blog/yelp-reviews-disappear-reappear-data.html', 'blog/tripadvisor-fake-review-statistics-removal-rates.html', 'blog/trustpilot-appeal-outcomes-2025.html', 'blog/google-review-removal-rating-impact-study.html'
+  'blog/index.html','blog/google-review-moderation-2019-2025.html','blog/trustpilot-fake-reviews-by-star-rating.html','blog/canadian-tourism-google-reviews-2023.html','blog/review-removal-questions-answered.html','blog/review-report-evidence-checklist.html', 'blog/yelp-reviews-disappear-reappear-data.html', 'blog/tripadvisor-fake-review-statistics-removal-rates.html', 'blog/trustpilot-appeal-outcomes-2025.html', 'blog/google-review-removal-rating-impact-study.html',
+  ...require('./google-guides.cjs').map(guide => guide.file)
 ];
 
 try {
   fs.copyFileSync(path.join(workspace, 'set-live-domain.cjs'), path.join(tempRoot, 'set-live-domain.cjs'));
+  fs.copyFileSync(path.join(workspace, 'google-guides.cjs'), path.join(tempRoot, 'google-guides.cjs'));
   for (const relative of pages) {
     fs.mkdirSync(path.dirname(path.join(tempRoot, relative)), {recursive: true});
     fs.copyFileSync(path.join(workspace, relative), path.join(tempRoot, relative));
@@ -52,7 +54,7 @@ try {
   const sitemap = fs.readFileSync(path.join(tempRoot, 'sitemap.xml'), 'utf8');
   if ((sitemap.match(/<loc>/g) || []).length !== pages.length) throw new Error('Sitemap does not list every page');
   if(!sitemap.includes('<loc>https://example.com/blog/google-review-removal-rating-impact-study.html</loc><lastmod>2026-10-08</lastmod>')) throw new Error('Rating study sitemap date or URL is incorrect');
-  if(!sitemap.includes('<loc>https://example.com/blog/index.html</loc><lastmod>2026-10-08</lastmod>')) throw new Error('Blog index sitemap date is incorrect');
+  if(!sitemap.includes('<loc>https://example.com/blog/index.html</loc><lastmod>2026-10-13</lastmod>')) throw new Error('Blog index sitemap date is incorrect');
   console.log(`PASS: production URL script is repeatable, with ${pages.length} sitemap URLs and article/service schema`);
 } finally {
   const resolved = fs.realpathSync(tempRoot);

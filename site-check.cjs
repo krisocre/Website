@@ -5,7 +5,8 @@ const puppeteer = require('C:/Users/alkhi/node_modules/puppeteer');
 const root = __dirname;
 const pages = [
   'index.html', 'platforms.html', 'review-removal-canada.html', 'about.html', 'remove-facebook-reviews.html', 'remove-yelp-reviews.html', 'remove-trustpilot-reviews.html', 'remove-tripadvisor-reviews.html', 'remove-booking-com-reviews.html', 'remove-glassdoor-reviews.html', 'remove-indeed-reviews.html',
-  'blog/index.html', 'blog/google-review-moderation-2019-2025.html', 'blog/trustpilot-fake-reviews-by-star-rating.html', 'blog/canadian-tourism-google-reviews-2023.html', 'blog/review-removal-questions-answered.html', 'blog/review-report-evidence-checklist.html', 'blog/yelp-reviews-disappear-reappear-data.html', 'blog/tripadvisor-fake-review-statistics-removal-rates.html', 'blog/trustpilot-appeal-outcomes-2025.html', 'blog/google-review-removal-rating-impact-study.html'
+  'blog/index.html', 'blog/google-review-moderation-2019-2025.html', 'blog/trustpilot-fake-reviews-by-star-rating.html', 'blog/canadian-tourism-google-reviews-2023.html', 'blog/review-removal-questions-answered.html', 'blog/review-report-evidence-checklist.html', 'blog/yelp-reviews-disappear-reappear-data.html', 'blog/tripadvisor-fake-review-statistics-removal-rates.html', 'blog/trustpilot-appeal-outcomes-2025.html', 'blog/google-review-removal-rating-impact-study.html',
+  ...require('./google-guides.cjs').map(guide => guide.file)
 ];
 const errors = [];
 const titles = new Set();
@@ -126,7 +127,7 @@ for (const name of ['google-moderation-2019-2025.png', 'trustpilot-fake-reviews-
         if (name === 'blog/tripadvisor-fake-review-statistics-removal-rates.html' && width === 390) await page.screenshot({path:path.join(root,'previews','tripadvisor-research-mobile.png'),fullPage:true});
         if (name === 'blog/canadian-tourism-google-reviews-2023.html' && width === 1440) await page.screenshot({path: path.join(root, 'previews', 'canada-study-desktop.png'), fullPage: true});
       }
-      if (name.startsWith('remove-')) {
+      if (name.startsWith('remove-') && !require('./google-guides.cjs').some(guide => guide.file === name)) {
         const platform = await page.$eval('body', el => el.dataset.platform.toLowerCase());
         const sectionIds = await page.$$eval('main > section', els => els.slice(0,3).map(el => el.id || el.className));
         if (sectionIds[1] !== 'pricing' || sectionIds[2] !== 'quote') errors.push(`${name}: section order ${sectionIds}`);

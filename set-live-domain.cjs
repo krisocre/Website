@@ -17,7 +17,8 @@ const pages = [
   'index.html', 'platforms.html', 'review-removal-canada.html', 'about.html',
   'remove-facebook-reviews.html', 'remove-yelp-reviews.html', 'remove-trustpilot-reviews.html', 'remove-tripadvisor-reviews.html', 'remove-booking-com-reviews.html', 'remove-glassdoor-reviews.html', 'remove-indeed-reviews.html',
   'blog/index.html', 'blog/google-review-moderation-2019-2025.html', 'blog/trustpilot-fake-reviews-by-star-rating.html',
-  'blog/canadian-tourism-google-reviews-2023.html', 'blog/review-removal-questions-answered.html', 'blog/review-report-evidence-checklist.html', 'blog/yelp-reviews-disappear-reappear-data.html', 'blog/tripadvisor-fake-review-statistics-removal-rates.html', 'blog/trustpilot-appeal-outcomes-2025.html', 'blog/google-review-removal-rating-impact-study.html'
+  'blog/canadian-tourism-google-reviews-2023.html', 'blog/review-removal-questions-answered.html', 'blog/review-report-evidence-checklist.html', 'blog/yelp-reviews-disappear-reappear-data.html', 'blog/tripadvisor-fake-review-statistics-removal-rates.html', 'blog/trustpilot-appeal-outcomes-2025.html', 'blog/google-review-removal-rating-impact-study.html',
+  ...require('./google-guides.cjs').map(guide => guide.file)
 ];
 const escapeAttr = value => value.replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;');
 const marker = /\n  <!-- production URL metadata start -->[\s\S]*?<!-- production URL metadata end -->/;
@@ -65,10 +66,11 @@ for (const relative of pages) {
   const description = html.match(/<meta name="description" content="([^"]*)">/)?.[1];
   if (!title || !description || !html.includes('</head>')) { console.error(`Missing metadata in ${relative}`); process.exit(1); }
   const canonical = `${origin}/${relative === 'index.html' ? '' : relative}`;
-  const isArticle = relative.startsWith('blog/') && relative !== 'blog/index.html';
+  const isGuide = require('./google-guides.cjs').some(guide => guide.file === relative);
+  const isArticle = (relative.startsWith('blog/') && relative !== 'blog/index.html') || isGuide;
   const shareImage = `${origin}/${shareImages[relative] || 'assets/reviewremoval-social.png'}`;
   let schemaTag = '';
-  if (relative === 'index.html' || relative === 'review-removal-canada.html' || relative.startsWith('remove-')) {
+  if (relative === 'index.html' || relative === 'review-removal-canada.html' || (relative.startsWith('remove-') && !isGuide)) {
     const isCanada = relative === 'review-removal-canada.html';
     const platform = relative === 'index.html' ? 'Google' : isCanada ? 'Canadian business' : decodeEntities(html.match(/<body data-platform="([^"]+)"/)?.[1] || '');
     if (!platform) { console.error(`Missing platform name in ${relative}`); process.exit(1); }
@@ -80,11 +82,19 @@ for (const relative of pages) {
       areaServed: { '@type': 'Country', name: 'Canada' },
       provider: { '@id': `${origin}/#organization`, '@type': 'Organization', name: 'ReviewRemoval', url: origin }
     };
+    if (relative === 'index.html') {
+      service.name = 'Google review removal service in Canada';
+      service.offers = { '@type': 'Offer', price: '50', priceCurrency: 'CAD', eligibleRegion: 'CA',
+        description: 'CAD $50 upfront per review, plus CAD $125 for each review successfully removed. Applicable taxes and written terms confirmed before payment.', url: `${origin}/#pricing` };
+    }
     const schema = relative === 'index.html'
       ? { '@context': 'https://schema.org', '@graph': [
           organization,
           { '@type': 'WebSite', '@id': `${origin}/#website`, url: `${origin}/`, name: 'ReviewRemoval', publisher: { '@id': `${origin}/#organization` }, inLanguage: 'en-CA' },
-          service
+          service,
+          { '@type': 'WebPage', '@id': `${origin}/#webpage`, url: `${origin}/`, name: decodeEntities(title),
+            description: decodeEntities(description), inLanguage: 'en-CA', dateModified: '2026-10-13',
+            isPartOf: { '@id': `${origin}/#website` }, mainEntity: { '@id': `${origin}/#service` } }
         ] }
       : isCanada ? { '@context': 'https://schema.org', '@graph': [service, {
           '@type': 'BreadcrumbList', itemListElement: [
@@ -105,13 +115,13 @@ for (const relative of pages) {
     if (!published) { console.error(`Missing article publication date in ${relative}`); process.exit(1); }
     const citations = [...new Set([...html.matchAll(/<a href="(https:\/\/[^\"]+)"/g)].map(match => decodeEntities(match[1])))];
     const schema = {
-      '@context': 'https://schema.org', '@type': 'BlogPosting', '@id': `${canonical}#article`,
+      '@context': 'https://schema.org', '@type': relative.startsWith('blog/') ? 'BlogPosting' : 'Article', '@id': `${canonical}#article`,
       mainEntityOfPage: canonical, headline: decodeEntities(title.replace(/ \| ReviewRemoval$/, '')),
       description: decodeEntities(description), datePublished: published,
       dateModified: html.match(/<time data-updated datetime="([0-9-]+)"/)?.[1] || published,
       author: { '@type': 'Organization', name: 'ReviewRemoval', url: `${origin}/about.html` },
       publisher: { '@type': 'Organization', name: 'ReviewRemoval', url: origin },
-      isAccessibleForFree: true, citation: citations
+      isAccessibleForFree: true, inLanguage: 'en-CA', citation: citations
     };
     schema.image = shareImage;
     schemaTag = `\n  <script type="application/ld+json">${JSON.stringify(schema).replaceAll('<', '\\u003c')}</script>`;
@@ -123,6 +133,14 @@ for (const relative of pages) {
       ]
     };
     schemaTag += `\n  <script type="application/ld+json">${JSON.stringify(breadcrumbs).replaceAll('<', '\\u003c')}</script>`;
+    if (relative === 'google-review-removal-checker.html') {
+      schemaTag += `\n  <script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebApplication',
+        name: 'Google review removal evidence checker', url: canonical, applicationCategory: 'BusinessApplication', operatingSystem: 'Any',
+        isAccessibleForFree: true, browserRequirements: 'JavaScript for tailored worksheets; static checklists available without JavaScript',
+        offers: { '@type': 'Offer', price: '0', priceCurrency: 'CAD' },
+        description: 'Seven concerns and four reporting stages create preparation worksheets. No removal probability or eligibility score.',
+        publisher: { '@id': `${origin}/#organization` } }).replaceAll('<', '\\u003c')}</script>`;
+    }
   }
   const imageAlt = shareImageAlts[relative] || 'ReviewRemoval: review concerns, handled for you';
   const tags = `\n  <!-- production URL metadata start -->\n  <link rel="canonical" href="${escapeAttr(canonical)}">\n  <meta name="robots" content="index, follow, max-image-preview:large">\n  <meta property="og:type" content="${isArticle ? 'article' : 'website'}">\n  <meta property="og:site_name" content="ReviewRemoval">\n  <meta property="og:locale" content="en_CA">\n  <meta property="og:url" content="${escapeAttr(canonical)}">\n  <meta property="og:title" content="${title}">\n  <meta property="og:description" content="${description}">\n  <meta property="og:image" content="${escapeAttr(shareImage)}">\n  <meta property="og:image:width" content="1200">\n  <meta property="og:image:height" content="${relative === 'blog/trustpilot-appeal-outcomes-2025.html' ? '720' : shareImages[relative] ? '672' : '630'}">\n  <meta property="og:image:alt" content="${escapeAttr(imageAlt)}">\n  <meta name="twitter:card" content="summary_large_image">\n  <meta name="twitter:title" content="${title}">\n  <meta name="twitter:description" content="${description}">\n  <meta name="twitter:image" content="${escapeAttr(shareImage)}">${schemaTag}\n  <!-- production URL metadata end -->`;
@@ -133,7 +151,8 @@ for (const relative of pages) {
 const sitemapEntries = pages.map(relative => {
   const html = fs.readFileSync(path.join(root, relative), 'utf8');
   const schemas = [...html.matchAll(/<script type="application\/ld\+json">([^<]+)<\/script>/g)].map(match => JSON.parse(match[1]));
-  const modified = schemas.find(schema => ['BlogPosting','CollectionPage'].includes(schema['@type']))?.dateModified;
+  const modified = schemas.find(schema => ['BlogPosting','Article','CollectionPage'].includes(schema['@type']))?.dateModified
+    || schemas.flatMap(schema => schema['@graph'] || []).find(schema => schema['@type'] === 'WebPage')?.dateModified;
   const lastmod = /^\d{4}-\d{2}-\d{2}$/.test(modified || '') ? `<lastmod>${modified}</lastmod>` : '';
   return `  <url><loc>${escapeAttr(`${origin}/${relative === 'index.html' ? '' : relative}`)}</loc>${lastmod}</url>`;
 });
