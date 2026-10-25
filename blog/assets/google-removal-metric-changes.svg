@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="864pt" height="518.4pt" viewBox="0 0 864 518.4" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>ReviewRemoval</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 518.4
+L 864 518.4
+L 864 0
+L 0 0
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 259.2 388.8
+L 751.68 388.8
+L 751.68 145.152
+L 259.2 145.152
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g id="matplotlib.axis_1">
+    <g id="xtick_1">
+     <g id="line2d_1">
+      <path d="M 299.402449 388.8
+L 299.402449 145.152
+" clip-path="url(#p9477b46141)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.15; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_2">
+      <defs>
+       <path id="m697f24a111" d="M 0 0
+L 0 3.5
+" style="stroke: #000000; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#m697f24a111" x="299.402449" y="388.8" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_1">
+      <text style="font-size: 12px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: middle" x="299.402449" y="404.918125" transform="rotate(-0 299.402449 404.918125)">-20%</text>
+     </g>
+    </g>
+    <g id="xtick_2">
+     <g id="line2d_3">
+      <path d="M 399.908571 388.8
+L 399.908571 145.152
+" clip-path="url(#p9477b46141)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.15; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_4">
+      <g>
+       <use xlink:href="#m697f24a111" x="399.908571" y="388.8" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_2">
+      <text style="font-size: 12px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: middle" x="399.908571" y="404.918125" transform="rotate(-0 399.908571 404.918125)">-10%</text>
+     </g>
+    </g>
+    <g id="xtick_3">
+     <g id="line2d_5">
+      <path d="M 500.414694 388.8
+L 500.414694 145.152
+" clip-path="url(#p9477b46141)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.15; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_6">
+      <g>
+       <use xlink:href="#m697f24a111" x="500.414694" y="388.8" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_3">
+      <text style="font-size: 12px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: middle" x="500.414694" y="404.918125" transform="rotate(-0 500.414694 404.918125)">0%</text>
+     </g>
+    </g>
+    <g id="xtick_4">
+     <g id="line2d_7">
+      <path d="M 600.920816 388.8
+L 600.920816 145.152
+" clip-path="url(#p9477b46141)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.15; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_8">
+      <g>
+       <use xlink:href="#m697f24a111" x="600.920816" y="388.8" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_4">
+      <text style="font-size: 12px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: middle" x="600.920816" y="404.918125" transform="rotate(-0 600.920816 404.918125)">10%</text>
+     </g>
+    </g>
+    <g id="xtick_5">
+     <g id="line2d_9">
+      <path d="M 701.426939 388.8
+L 701.426939 145.152
+" clip-path="url(#p9477b46141)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.15; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_10">
+      <g>
+       <use xlink:href="#m697f24a111" x="701.426939" y="388.8" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_5">
+      <text style="font-size: 12px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: middle" x="701.426939" y="404.918125" transform="rotate(-0 701.426939 404.918125)">20%</text>
+     </g>
+    </g>
+    <g id="text_6">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: middle" x="505.44" y="426.531875" transform="rotate(-0 505.44 426.531875)">Nominal change within each metric; units are not added</text>
+    </g>
+   </g>
+   <g id="matplotlib.axis_2">
+    <g id="ytick_1">
+     <g id="line2d_11"/>
+     <g id="text_7">
+      <text style="font-size: 12px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: end" x="249.2" y="169.797052" transform="rotate(-0 249.2 169.797052)">Reviews removed</text>
+     </g>
+    </g>
+    <g id="ytick_2">
+     <g id="line2d_12"/>
+     <g id="text_8">
+      <text style="font-size: 12px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: end" x="249.2" y="198.865055" transform="rotate(-0 249.2 198.865055)">Reviews published</text>
+     </g>
+    </g>
+    <g id="ytick_3">
+     <g id="line2d_13"/>
+     <g id="text_9">
+      <text style="font-size: 12px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: end" x="249.2" y="227.933058" transform="rotate(-0 249.2 227.933058)">Photos / videos published</text>
+     </g>
+    </g>
+    <g id="ytick_4">
+     <g id="line2d_14"/>
+     <g id="text_10">
+      <text style="font-size: 12px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: end" x="249.2" y="257.001061" transform="rotate(-0 249.2 257.001061)">Business Profiles removed</text>
+     </g>
+    </g>
+    <g id="ytick_5">
+     <g id="line2d_15"/>
+     <g id="text_11">
+      <text style="font-size: 12px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: end" x="249.2" y="286.069064" transform="rotate(-0 249.2 286.069064)">Place edits published</text>
+     </g>
+    </g>
+    <g id="ytick_6">
+     <g id="line2d_16"/>
+     <g id="text_12">
+      <text style="font-size: 12px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: end" x="249.2" y="315.137067" transform="rotate(-0 249.2 315.137067)">Place edits removed</text>
+     </g>
+    </g>
+    <g id="ytick_7">
+     <g id="line2d_17"/>
+     <g id="text_13">
+      <text style="font-size: 12px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: end" x="249.2" y="344.20507" transform="rotate(-0 249.2 344.20507)">Photos / videos removed</text>
+     </g>
+    </g>
+    <g id="ytick_8">
+     <g id="line2d_18"/>
+     <g id="text_14">
+      <text style="font-size: 12px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: end" x="249.2" y="373.273073" transform="rotate(-0 249.2 373.273073)">Accounts restricted</text>
+     </g>
+    </g>
+   </g>
+   <g id="patch_3">
+    <path d="M 500.414694 156.226909
+L 693.222357 156.226909
+L 693.222357 174.249071
+L 500.414694 174.249071
+z
+" clip-path="url(#p9477b46141)" style="fill: #b75939"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 500.414694 185.294912
+L 642.270182 185.294912
+L 642.270182 203.317074
+L 500.414694 203.317074
+z
+" clip-path="url(#p9477b46141)" style="fill: #b75939"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 500.414694 214.362915
+L 600.653513 214.362915
+L 600.653513 232.385077
+L 500.414694 232.385077
+z
+" clip-path="url(#p9477b46141)" style="fill: #b75939"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 500.414694 243.430918
+L 584.169796 243.430918
+L 584.169796 261.453079
+L 500.414694 261.453079
+z
+" clip-path="url(#p9477b46141)" style="fill: #b75939"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 500.414694 272.498921
+L 464.08718 272.498921
+L 464.08718 290.521082
+L 500.414694 290.521082
+z
+" clip-path="url(#p9477b46141)" style="fill: #8aaca4"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 500.414694 301.566923
+L 463.644161 301.566923
+L 463.644161 319.589085
+L 500.414694 319.589085
+z
+" clip-path="url(#p9477b46141)" style="fill: #8aaca4"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 500.414694 330.634926
+L 440.943616 330.634926
+L 440.943616 348.657088
+L 500.414694 348.657088
+z
+" clip-path="url(#p9477b46141)" style="fill: #8aaca4"/>
+   </g>
+   <g id="patch_10">
+    <path d="M 500.414694 359.702929
+L 323.549336 359.702929
+L 323.549336 377.725091
+L 500.414694 377.725091
+z
+" clip-path="url(#p9477b46141)" style="fill: #8aaca4"/>
+   </g>
+   <g id="line2d_19">
+    <path d="M 500.414694 388.8
+L 500.414694 145.152
+" clip-path="url(#p9477b46141)" style="fill: none; stroke: #19323a; stroke-width: 0.8; stroke-linecap: square"/>
+   </g>
+   <g id="patch_11">
+    <path d="M 259.2 388.8
+L 751.68 388.8
+" style="fill: none; stroke: #cad8d1; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="text_15">
+    <text style="font-size: 11px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: start; fill: #19323a" x="697.745133" y="168.273302" transform="rotate(-0 697.745133 168.273302)">+19.2%</text>
+   </g>
+   <g id="text_16">
+    <text style="font-size: 11px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: start; fill: #19323a" x="646.792958" y="197.341305" transform="rotate(-0 646.792958 197.341305)">+14.1%</text>
+   </g>
+   <g id="text_17">
+    <text style="font-size: 11px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: start; fill: #19323a" x="605.176288" y="226.409308" transform="rotate(-0 605.176288 226.409308)">+10.0%</text>
+   </g>
+   <g id="text_18">
+    <text style="font-size: 11px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: start; fill: #19323a" x="588.692571" y="255.477311" transform="rotate(-0 588.692571 255.477311)">+8.3%</text>
+   </g>
+   <g id="text_19">
+    <text style="font-size: 11px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: end; fill: #19323a" x="459.564404" y="284.545314" transform="rotate(-0 459.564404 284.545314)">-3.6%</text>
+   </g>
+   <g id="text_20">
+    <text style="font-size: 11px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: end; fill: #19323a" x="459.121386" y="313.613317" transform="rotate(-0 459.121386 313.613317)">-3.7%</text>
+   </g>
+   <g id="text_21">
+    <text style="font-size: 11px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: end; fill: #19323a" x="436.42084" y="342.68132" transform="rotate(-0 436.42084 342.68132)">-5.9%</text>
+   </g>
+   <g id="text_22">
+    <text style="font-size: 11px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: end; fill: #19323a" x="319.026561" y="371.749323" transform="rotate(-0 319.026561 371.749323)">-17.6%</text>
+   </g>
+  </g>
+  <g id="text_23">
+   <text style="font-size: 11px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: start; fill: #b75939" x="56.16" y="28.512" transform="rotate(-0 56.16 28.512)">REVIEWREMOVAL / GOOGLE DATA AUDIT / VERSION 1.0</text>
+  </g>
+  <g id="text_24">
+   <text style="font-weight: 700; font-size: 23px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: start; fill: #19323a" x="56.16" y="68.4288" transform="rotate(-0 56.16 68.4288)">More review removals; fewer restricted accounts.</text>
+  </g>
+  <g id="text_25">
+   <text style="font-size: 11.5px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: start; fill: #56656a" x="56.16" y="97.4592" transform="rotate(-0 56.16 97.4592)">2024 to 2025 changes calculated from Google’s current snapshot magnitudes; rounded, not exact counts.</text>
+  </g>
+  <g id="text_26">
+   <text style="font-size: 9px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: start; fill: #56656a" x="56.16" y="486.2592" transform="rotate(-0 56.16 486.2592)">Sources: Google Maps transparency report and correction notice; checked October 24, 2026. Global, not a Canadian sample.</text>
+  </g>
+  <g id="text_27">
+   <text style="font-size: 9px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: start; fill: #56656a" x="56.16" y="502.3296" transform="rotate(-0 56.16 502.3296)">Original compilation and calculations: ReviewRemoval / CC BY 4.0. Display precision and inequalities are preserved in the dataset.</text>
+  </g>
+  <g id="text_28">
+   <text style="font-size: 10px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: start; fill: #56656a" x="56.16" y="445.824" transform="rotate(-0 56.16 445.824)">Review removals: 245M → 292M. Restricted accounts: 949K → 782K. These changes do not prove why enforcement changed.</text>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p9477b46141">
+   <rect x="259.2" y="145.152" width="492.48" height="243.648"/>
+  </clipPath>
+ </defs>
+</svg>

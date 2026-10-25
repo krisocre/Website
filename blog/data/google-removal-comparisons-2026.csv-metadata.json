@@ -1,0 +1,130 @@
+{
+  "@context": "http://www.w3.org/ns/csvw",
+  "url": "https://reviewremoval.ca/blog/data/google-removal-comparisons-2026.csv",
+  "dc:title": "Google review removal denominator audit: 2024–2025 — 13 comparisons",
+  "dc:license": "https://creativecommons.org/licenses/by/4.0/",
+  "tableSchema": {
+    "columns": [
+      {
+        "name": "metric",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "Metric key shared with source records; different units must remain separate."
+      },
+      {
+        "name": "label",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "Human-readable metric name."
+      },
+      {
+        "name": "before_record",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "2024 source record ID in the source CSV."
+      },
+      {
+        "name": "after_record",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "2025 source record ID in the source CSV."
+      },
+      {
+        "name": "unit",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "Measurement unit of the original displays."
+      },
+      {
+        "name": "before_display",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "2024 source display, preserving rounding or bounds."
+      },
+      {
+        "name": "after_display",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "2025 source display, preserving rounding or bounds."
+      },
+      {
+        "name": "denominator",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "all_reviews_contributed for reason rates; blank for counts."
+      },
+      {
+        "name": "nominal_delta",
+        "datatype": "number",
+        "null": [
+          ""
+        ],
+        "dc:description": "Difference between displayed magnitudes; blank where bounds do not identify a difference."
+      },
+      {
+        "name": "nominal_relative_change_percent",
+        "datatype": "number",
+        "null": [
+          ""
+        ],
+        "dc:description": "100 × (after − before) / before, using displayed values; not an exact event-count change."
+      },
+      {
+        "name": "per_10000_before",
+        "datatype": "number",
+        "null": [
+          ""
+        ],
+        "dc:description": "Rescaled 2024 rate per illustrative 10,000 contributions, not an observed sample."
+      },
+      {
+        "name": "per_10000_after",
+        "datatype": "number",
+        "null": [
+          ""
+        ],
+        "dc:description": "Rescaled 2025 rate per illustrative 10,000 contributions, not an observed sample."
+      },
+      {
+        "name": "per_10000_operator",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "nominal_display_conversion for rescaling a displayed percentage; lt retains a strict upper bound."
+      },
+      {
+        "name": "nominal_delta_unit",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "Unit of the nominal difference, including percentage_points for rates."
+      },
+      {
+        "name": "interpretation",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "Limits on inference for this comparison."
+      }
+    ]
+  }
+}

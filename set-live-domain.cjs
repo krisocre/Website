@@ -18,7 +18,8 @@ const pages = [
   'remove-facebook-reviews.html', 'remove-yelp-reviews.html', 'remove-trustpilot-reviews.html', 'remove-tripadvisor-reviews.html', 'remove-booking-com-reviews.html', 'remove-glassdoor-reviews.html', 'remove-indeed-reviews.html',
   'blog/index.html', 'blog/google-review-moderation-2019-2025.html', 'blog/trustpilot-fake-reviews-by-star-rating.html',
   'blog/canadian-tourism-google-reviews-2023.html', 'blog/review-removal-questions-answered.html', 'blog/review-report-evidence-checklist.html', 'blog/yelp-reviews-disappear-reappear-data.html', 'blog/tripadvisor-fake-review-statistics-removal-rates.html', 'blog/trustpilot-appeal-outcomes-2025.html', 'blog/google-review-removal-rating-impact-study.html',
-  ...require('./google-guides.cjs').map(guide => guide.file)
+  ...require('./google-guides.cjs').map(guide => guide.file),
+  'blog/google-review-removal-denominator-audit.html'
 ];
 const escapeAttr = value => value.replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;');
 const marker = /\n  <!-- production URL metadata start -->[\s\S]*?<!-- production URL metadata end -->/;
@@ -34,6 +35,7 @@ const googleTag = `
   </script>
   <!-- /Google tag (gtag.js) -->`;
 const shareImages = {
+  'blog/google-review-removal-denominator-audit.html': 'blog/assets/google-removal-reasons-denominators.png',
   'blog/google-review-removal-rating-impact-study.html': 'blog/assets/rating-removal-uncertainty.png',
   'blog/trustpilot-appeal-outcomes-2025.html': 'blog/assets/trustpilot-appeals-2025.png',
   'blog/yelp-reviews-disappear-reappear-data.html': 'blog/assets/yelp-review-transitions.png',
@@ -43,6 +45,7 @@ const shareImages = {
   'blog/canadian-tourism-google-reviews-2023.html': 'blog/assets/canadian-sme-online-activities-2023.png'
 };
 const shareImageAlts = {
+  'blog/google-review-removal-denominator-audit.html': 'Google removal-reason rates for 2024 and 2025, as a share of all contributed reviews',
   'blog/google-review-removal-rating-impact-study.html': 'Original mathematical ranges for star ratings after removing one one-star Google review',
   'blog/trustpilot-appeal-outcomes-2025.html': 'Trustpilot 2025 reversal counts separated by the decision being challenged',
   'blog/yelp-reviews-disappear-reappear-data.html': 'Historical Yelp review recommendation transitions in a matched sample of 66,922 reviews',
@@ -93,7 +96,7 @@ for (const relative of pages) {
           { '@type': 'WebSite', '@id': `${origin}/#website`, url: `${origin}/`, name: 'ReviewRemoval', publisher: { '@id': `${origin}/#organization` }, inLanguage: 'en-CA' },
           service,
           { '@type': 'WebPage', '@id': `${origin}/#webpage`, url: `${origin}/`, name: decodeEntities(title),
-            description: decodeEntities(description), inLanguage: 'en-CA', dateModified: '2026-10-13',
+            description: decodeEntities(description), inLanguage: 'en-CA', dateModified: '2026-10-24',
             isPartOf: { '@id': `${origin}/#website` }, mainEntity: { '@id': `${origin}/#service` } }
         ] }
       : isCanada ? { '@context': 'https://schema.org', '@graph': [service, {
@@ -110,6 +113,7 @@ for (const relative of pages) {
         }] };
     schemaTag = `\n  <script type="application/ld+json">${JSON.stringify(schema).replaceAll('<', '\\u003c')}</script>`;
   }
+  let articleTimeTags = "";
   if (isArticle) {
     const published = html.match(/<time datetime="([0-9-]+)"/)?.[1];
     if (!published) { console.error(`Missing article publication date in ${relative}`); process.exit(1); }
@@ -123,7 +127,22 @@ for (const relative of pages) {
       publisher: { '@type': 'Organization', name: 'ReviewRemoval', url: origin },
       isAccessibleForFree: true, inLanguage: 'en-CA', citation: citations
     };
+    articleTimeTags = `\n  <meta property="article:published_time" content="${schema.datePublished}">\n  <meta property="article:modified_time" content="${schema.dateModified}">`;
     schema.image = shareImage;
+    if (relative === 'blog/google-review-removal-denominator-audit.html') {
+      schema.mainEntity = { '@id': `${canonical}#dataset` };
+      schema.articleSection = 'Original research / Google removal data';
+      schema.image = [
+        ['google-removal-reasons-denominators','Google review removal reason rates, 2024–2025; denominator: all contributed reviews'],
+        ['google-removal-metric-changes','Nominal changes in eight separate Google Maps metrics, calculated from rounded displays'],
+        ['google-removal-source-corrections','Google reporting corrections: superseded and revised 2024 place-edit values']
+      ].map(([name,caption]) => ({ '@type':'ImageObject', '@id':`${origin}/blog/assets/${name}.png#image`,
+        contentUrl:`${origin}/blog/assets/${name}.png`, url:`${origin}/blog/assets/${name}.png`,
+        width:1200,height:720,caption,creditText:'ReviewRemoval; underlying disclosures: Google',
+        creator:{'@type':'Organization',name:'ReviewRemoval',url:`${origin}/`},
+        license:'https://creativecommons.org/licenses/by/4.0/',acquireLicensePage:`${canonical}#downloads`
+      }));
+    }
     schemaTag = `\n  <script type="application/ld+json">${JSON.stringify(schema).replaceAll('<', '\\u003c')}</script>`;
     const breadcrumbs = {
       '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [
@@ -143,7 +162,7 @@ for (const relative of pages) {
     }
   }
   const imageAlt = shareImageAlts[relative] || 'ReviewRemoval: review concerns, handled for you';
-  const tags = `\n  <!-- production URL metadata start -->\n  <link rel="canonical" href="${escapeAttr(canonical)}">\n  <meta name="robots" content="index, follow, max-image-preview:large">\n  <meta property="og:type" content="${isArticle ? 'article' : 'website'}">\n  <meta property="og:site_name" content="ReviewRemoval">\n  <meta property="og:locale" content="en_CA">\n  <meta property="og:url" content="${escapeAttr(canonical)}">\n  <meta property="og:title" content="${title}">\n  <meta property="og:description" content="${description}">\n  <meta property="og:image" content="${escapeAttr(shareImage)}">\n  <meta property="og:image:width" content="1200">\n  <meta property="og:image:height" content="${relative === 'blog/trustpilot-appeal-outcomes-2025.html' ? '720' : shareImages[relative] ? '672' : '630'}">\n  <meta property="og:image:alt" content="${escapeAttr(imageAlt)}">\n  <meta name="twitter:card" content="summary_large_image">\n  <meta name="twitter:title" content="${title}">\n  <meta name="twitter:description" content="${description}">\n  <meta name="twitter:image" content="${escapeAttr(shareImage)}">${schemaTag}\n  <!-- production URL metadata end -->`;
+  const tags = `\n  <!-- production URL metadata start -->\n  <link rel="canonical" href="${escapeAttr(canonical)}">\n  <meta name="robots" content="index, follow, max-image-preview:large">\n  <meta property="og:type" content="${isArticle ? 'article' : 'website'}">\n  <meta property="og:site_name" content="ReviewRemoval">\n  <meta property="og:locale" content="en_CA">\n  <meta property="og:url" content="${escapeAttr(canonical)}">\n  <meta property="og:title" content="${title}">\n  <meta property="og:description" content="${description}">\n  <meta property="og:image" content="${escapeAttr(shareImage)}">\n  <meta property="og:image:width" content="1200">\n  <meta property="og:image:height" content="${['blog/trustpilot-appeal-outcomes-2025.html','blog/google-review-removal-denominator-audit.html'].includes(relative) ? '720' : shareImages[relative] ? '672' : '630'}">\n  <meta property="og:image:alt" content="${escapeAttr(imageAlt)}">\n  <meta name="twitter:card" content="summary_large_image">\n  <meta name="twitter:title" content="${title}">\n  <meta name="twitter:description" content="${description}">\n  <meta name="twitter:image" content="${escapeAttr(shareImage)}">\n  <meta name="twitter:image:alt" content="${escapeAttr(imageAlt)}">${articleTimeTags}${schemaTag}\n  <!-- production URL metadata end -->`;
   html = html.replace('</head>', `${tags}${googleTag}\n</head>`);
   fs.writeFileSync(file, html, 'utf8');
 }
@@ -154,9 +173,22 @@ const sitemapEntries = pages.map(relative => {
   const modified = schemas.find(schema => ['BlogPosting','Article','CollectionPage'].includes(schema['@type']))?.dateModified
     || schemas.flatMap(schema => schema['@graph'] || []).find(schema => schema['@type'] === 'WebPage')?.dateModified;
   const lastmod = /^\d{4}-\d{2}-\d{2}$/.test(modified || '') ? `<lastmod>${modified}</lastmod>` : '';
-  return `  <url><loc>${escapeAttr(`${origin}/${relative === 'index.html' ? '' : relative}`)}</loc>${lastmod}</url>`;
+  const images = relative === 'blog/google-review-removal-denominator-audit.html'
+    ? ['google-removal-reasons-denominators','google-removal-metric-changes','google-removal-source-corrections'].map(name => `<image:image><image:loc>${origin}/blog/assets/${name}.svg</image:loc></image:image>`).join('') : '';
+  return `  <url><loc>${escapeAttr(`${origin}/${relative === 'index.html' ? '' : relative}`)}</loc>${lastmod}${images}</url>`;
 });
-const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapEntries.join('\n')}\n</urlset>\n`;
+const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n${sitemapEntries.join('\n')}\n</urlset>\n`;
 fs.writeFileSync(path.join(root, 'sitemap.xml'), sitemap, 'utf8');
 fs.writeFileSync(path.join(root, 'robots.txt'), `User-agent: *\nAllow: /\nSitemap: ${origin}/sitemap.xml\n`, 'utf8');
+// Publish a crawlable feed of dated blog articles; regenerate it with the canonical domain.
+const xml = value => String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[char]));
+const feedItems = pages.filter(name => name.startsWith('blog/') && name !== 'blog/index.html').map(name => {
+  const html = fs.readFileSync(path.join(root,name),'utf8');
+  const schemas = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map(match=>JSON.parse(match[1]));
+  const article = schemas.find(schema=>schema['@type']==='BlogPosting');
+  if (!article) throw new Error(`Missing BlogPosting for feed item ${name}`);
+  return { ...article,url:`${origin}/${name}` };
+}).sort((a,b)=>b.datePublished.localeCompare(a.datePublished)||a.url.localeCompare(b.url));
+const rss = `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>ReviewRemoval Research and Guides</title><link>${origin}/blog/index.html</link><description>Original review moderation research and practical reporting guides for Canadian businesses.</description><language>en-CA</language><atom:link href="${origin}/feed.xml" rel="self" type="application/rss+xml"/>${feedItems.map(article=>`<item><title>${xml(article.headline)}</title><link>${xml(article.url)}</link><guid isPermaLink="true">${xml(article.url)}</guid><description>${xml(article.description)}</description><pubDate>${new Date(article.datePublished+'T00:00:00Z').toUTCString()}</pubDate></item>`).join('')}</channel></rss>\n`;
+fs.writeFileSync(path.join(root,'feed.xml'),rss,'utf8');
 console.log(`Set canonical and social URLs on ${pages.length} pages; wrote sitemap.xml and robots.txt for ${origin}`);

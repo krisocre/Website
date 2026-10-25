@@ -1,0 +1,108 @@
+{
+  "title": "Google review removal denominator audit: source values",
+  "checked": "2026-10-24",
+  "years": [
+    {
+      "year": 2024,
+      "snapshot_date": "2025-01-31",
+      "metrics": {
+        "reviews_published": "999M",
+        "reviews_removed": "245M",
+        "media_published": "752M",
+        "media_removed": "169M",
+        "edits_published": "83M",
+        "edits_removed": "82M",
+        "accounts_restricted": "949K",
+        "profiles_removed": "12M"
+      },
+      "reasons": {
+        "Fake or misleading": "15.1%",
+        "Vandalism or off-topic": "3.6%",
+        "Account restrictions": "0.8%",
+        "Harm": "<0.1%",
+        "Other": "0.1%"
+      },
+      "sources": {
+        "enforcement": {
+          "url": "https://transparencyreport.google.com/maps-content/enforcement?hl=en&lu=page&page=ef2:2024",
+          "body_text_sha256": "a0ab69567ce572ea007356f918a20c0b1e2ab2ba683227c702cd2f56f40d8aa3"
+        },
+        "overview": {
+          "url": "https://transparencyreport.google.com/maps-content/overview?hl=en&lu=page&page=of1:2024",
+          "body_text_sha256": "584b45930c9edff95dda1f32c80175678ada542bef1741d5897858cd759d0608"
+        }
+      }
+    },
+    {
+      "year": 2025,
+      "snapshot_date": "2026-01-31",
+      "metrics": {
+        "reviews_published": "1.14B",
+        "reviews_removed": "292M",
+        "media_published": "827M",
+        "media_removed": "159M",
+        "edits_published": "80M",
+        "edits_removed": "79M",
+        "accounts_restricted": "782K",
+        "profiles_removed": "13M"
+      },
+      "reasons": {
+        "Fake or misleading": "15.4%",
+        "Vandalism or off-topic": "3.9%",
+        "Account restrictions": "0.7%",
+        "Harm": "<0.1%",
+        "Other": "0.2%"
+      },
+      "sources": {
+        "enforcement": {
+          "url": "https://transparencyreport.google.com/maps-content/enforcement?hl=en",
+          "body_text_sha256": "d71f03027a12ec5c09c9481feeac1b02104f6ebb4388830a917e09456458d0ea"
+        },
+        "overview": {
+          "url": "https://transparencyreport.google.com/maps-content/overview?hl=en",
+          "body_text_sha256": "a7ae0eee98a82c08af2ef9aba605d99b83de07b4b15ee4aac62abdf878cad8fc"
+        }
+      }
+    }
+  ],
+  "correction_url": "https://support.google.com/transparencyreport/answer/16939440?hl=en",
+  "correction_period_label": "March 2026",
+  "corrections": [
+    {
+      "metric": "edits_published",
+      "year": 2024,
+      "old": "94M",
+      "new": "83M"
+    },
+    {
+      "metric": "edits_removed",
+      "year": 2024,
+      "old": "70M",
+      "new": "82M"
+    },
+    {
+      "metric": "reason_harm",
+      "year": 2024,
+      "old": "<0.01%",
+      "new": "<0.1%"
+    }
+  ],
+  "headlines": [
+    {
+      "year": 2024,
+      "value": "more than 240 million",
+      "numeric_threshold": 240000000,
+      "comparator": "gt",
+      "publication_date": "2025-04-07",
+      "source_url": "https://blog.google/products-and-platforms/products/maps/google-business-profiles-ai-fake-reviews/"
+    },
+    {
+      "year": 2025,
+      "value": "over 292 million",
+      "numeric_threshold": 292000000,
+      "comparator": "gt",
+      "publication_date": "2026-04-16",
+      "source_url": "https://blog.google/products-and-platforms/products/maps/new-ways-were-protecting-businesses-on-maps/"
+    }
+  ]
+}

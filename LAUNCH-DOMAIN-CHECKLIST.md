@@ -1,6 +1,6 @@
 # ReviewRemoval production SEO and launch checklist
 
-The preferred public origin is **https://reviewremoval.ca**. The site contains 26 indexable pages: the original 21 pages and five Google resources covering pricing, fake reviews, reporting/appeals, missing reviews and evidence preparation. `CNAME` identifies the apex domain for GitHub Pages. `404.html` provides a useful error page and is excluded from the sitemap.
+The preferred public origin is **https://reviewremoval.ca**. The site contains 27 indexable pages: the original 21 pages, five Google resources covering pricing, fake reviews, reporting/appeals, missing reviews and evidence preparation, and the October 24 denominator audit. `CNAME` identifies the apex domain for GitHub Pages. `404.html` provides a useful error page and is excluded from the sitemap.
 
 ## Rebuild order
 
@@ -10,6 +10,9 @@ Run these commands after changing generated platform or blog content, then publi
 node build-platform-pages.cjs
 node blog/data/build-rating-study.cjs
 node blog/data/audit-rating-study.cjs
+node blog/data/build-google-removal-audit.cjs
+node blog/data/audit-google-removal-audit.cjs
+python blog/data/plot-google-removal-audit.py
 python blog/data/plot-rating-study.py
 node build-blog.cjs
 node build-research-assets.cjs
@@ -23,7 +26,7 @@ node launch-check.cjs
 node seo-audit.cjs
 ```
 
-The domain script is repeatable. It adds unique canonical and social URLs, a social image, Organization/WebSite/Service and article structured data where appropriate, installs Google tag `AW-18449308865` once in the head of all 26 indexable pages, and writes `sitemap.xml` and `robots.txt`. Article, homepage and blog-index sitemap entries use their recorded modification dates; unrelated pages receive no invented freshness date. The same tag is installed directly in `404.html`. Generated HTML loses the domain metadata and tag when rebuilt, so run the Google focus script and then the domain script afterward. Keep the apex domain as the canonical host.
+The domain script is repeatable. It adds unique canonical and social URLs, a social image, Organization/WebSite/Service and article structured data where appropriate, installs Google tag `AW-18449308865` once in the head of all 27 indexable pages, and writes `sitemap.xml` and `robots.txt`. Article, homepage and blog-index sitemap entries use their recorded modification dates; unrelated pages receive no invented freshness date. The same tag is installed directly in `404.html`. Generated HTML loses the domain metadata and tag when rebuilt, so run the Google focus script and then the domain script afterward. Keep the apex domain as the canonical host.
 
 The supplied Google tag loads the Google Ads base tag. It does not define a quote-submission conversion event; that requires the specific conversion event snippet or conversion label from Google Ads. Do not send form contents to the tag.
 

@@ -47,3 +47,58 @@ Primary guidance checked: Google score definition (4801187), reporting process (
 Google's cited scoring page confirms an average but does not document the tie-rounding rule. All display boundaries use an explicit nearest-tenth, half-up assumption. New-review update guidance is not presented as a removal deadline. Simulated inputs are not described as empirical Canadian data; grid frequencies are not probabilities. Citation language, Dataset schema and visible methods preserve these limits. Original data/code/figures are licensed CC BY 4.0.
 
 Reproduction: `node blog/data/build-rating-study.cjs`, `node blog/data/audit-rating-study.cjs`, `python blog/data/plot-rating-study.py`, `node build-blog.cjs`, then `node set-live-domain.cjs https://reviewremoval.ca`. The article is linked from the homepage, blog archive and related article cards. The sitemap records article and blog-index modification dates from their existing schema instead of stamping every page with today's date.
+
+
+## October 24, 2026: Google removal denominator audit
+
+New article: `blog/google-review-removal-denominator-audit.html`. An original
+compilation of 34 source records and 13 nominal comparisons distinguishes
+contribution-based reason rates, count units, announcement thresholds and
+superseded/revised reporting values. The new article is featured in the blog,
+linked from the homepage and included in the sitemap with three figure entries.
+
+Primary sources are Google's 2024/2025 overview and enforcement exhibits, report
+FAQ, March 2026 correction notice and 2025/2026 company announcements. Localo's
+original review-velocity study provides separate selection-method context; its
+counts are not merged into this dataset. Captured source text is kept privately
+in the ignored `.seo-private/maps-source/` directory. Four release fingerprints
+are preserved in the public input JSON.
+
+The current display magnitudes 245M and 292M yield a nominal 19.2% change. They
+are not exact counts. The >240M and >292M announcement thresholds remain separate
+records. Reason percentages use all contributed reviews. Harm stays a strict
+<0.1% bound; there is no inferred zero, point estimate or unchanged-rate claim.
+The correction from 70M to 82M reverses the nominal direction of the comparison
+with 2025's 79M removed place edits. Accounts/profiles use action-year timing,
+not the content contribution snapshot date.
+
+Reproduce the dataset with `node blog/data/build-google-removal-audit.cjs`, audit
+with `node blog/data/audit-google-removal-audit.cjs`, and plot with
+`python blog/data/plot-google-removal-audit.py`. The optional
+`node blog/data/collect-google-removal-sources.cjs` needs Puppeteer and Chrome;
+it checks current public displays and writes new live-check files without
+overwriting release captures. It fails on changed values. Then rebuild the
+blog, apply the Google focus changes and run the domain script, in the launch
+checklist's documented order.
+
+The three figures are 1200 by 720 pixels plus accessible-text SVGs with font
+fallbacks. CSV/JSON, CSVW definitions, CFF/BibTeX and scripts are downloadable.
+Original compilation, calculations and figures: CC BY 4.0; external sources
+retain their rights. This is global company-reported data, not a Canadian
+case-success dataset, original user survey or independently audited Google
+moderation log. No ranking or citation outcome is guaranteed.
+
+### Research-page SEO additions (October 24, 2026)
+
+The audit now has a statistics-focused title, connected BlogPosting/Dataset
+identifiers, explicit source derivation and named, licensed downloads. All three
+original graphs have ImageObject captions, creator credits, dimensions and licence
+links. Both CSVs have downloadable column definitions. Contextual links from the
+fake-review and report-evidence guides lead readers to the audit.
+
+`set-live-domain.cjs` also generates `feed.xml` from the twelve dated blog articles
+and guides; the blog pages advertise it and the index provides a visible RSS link.
+The feed uses canonical URLs and recorded publication dates. The domain launch
+check verifies the feed when changing hosts. After publishing, inspect the new
+article in Search Console and Bing Webmaster Tools and verify that the article,
+images, datasets and feed return successfully on the live domain.

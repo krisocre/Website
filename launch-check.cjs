@@ -8,7 +8,8 @@ const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'reviewremoval-launch-'))
 const pages = [
   'index.html','platforms.html','review-removal-canada.html','about.html','remove-facebook-reviews.html','remove-yelp-reviews.html','remove-trustpilot-reviews.html','remove-tripadvisor-reviews.html','remove-booking-com-reviews.html','remove-glassdoor-reviews.html','remove-indeed-reviews.html',
   'blog/index.html','blog/google-review-moderation-2019-2025.html','blog/trustpilot-fake-reviews-by-star-rating.html','blog/canadian-tourism-google-reviews-2023.html','blog/review-removal-questions-answered.html','blog/review-report-evidence-checklist.html', 'blog/yelp-reviews-disappear-reappear-data.html', 'blog/tripadvisor-fake-review-statistics-removal-rates.html', 'blog/trustpilot-appeal-outcomes-2025.html', 'blog/google-review-removal-rating-impact-study.html',
-  ...require('./google-guides.cjs').map(guide => guide.file)
+  ...require('./google-guides.cjs').map(guide => guide.file),
+  'blog/google-review-removal-denominator-audit.html'
 ];
 
 try {
@@ -29,6 +30,10 @@ try {
       throw new Error(`${relative}: Google tag was omitted or duplicated`);
     }
   }
+  const feed = fs.readFileSync(path.join(tempRoot, 'feed.xml'), 'utf8');
+  const feedPages = pages.filter(name => name.startsWith('blog/') && name !== 'blog/index.html');
+  if ((feed.match(/<item>/g) || []).length !== feedPages.length || !feed.includes('href="https://example.com/feed.xml"')) throw new Error('Research RSS feed is missing items or its canonical self URL');
+  for (const name of feedPages) if (!feed.includes(`<link>https://example.com/${name}</link>`)) throw new Error(`RSS canonical host was not updated: ${name}`);
   const html = fs.readFileSync(path.join(tempRoot, 'blog/google-review-moderation-2019-2025.html'), 'utf8');
   if ((html.match(/rel="canonical"/g) || []).length !== 1) throw new Error('Canonical tag was duplicated');
   const json = html.match(/<script type="application\/ld\+json">([^<]+)<\/script>/)?.[1];
@@ -54,7 +59,7 @@ try {
   const sitemap = fs.readFileSync(path.join(tempRoot, 'sitemap.xml'), 'utf8');
   if ((sitemap.match(/<loc>/g) || []).length !== pages.length) throw new Error('Sitemap does not list every page');
   if(!sitemap.includes('<loc>https://example.com/blog/google-review-removal-rating-impact-study.html</loc><lastmod>2026-10-08</lastmod>')) throw new Error('Rating study sitemap date or URL is incorrect');
-  if(!sitemap.includes('<loc>https://example.com/blog/index.html</loc><lastmod>2026-10-13</lastmod>')) throw new Error('Blog index sitemap date is incorrect');
+  if(!sitemap.includes('<loc>https://example.com/blog/index.html</loc><lastmod>2026-10-24</lastmod>')) throw new Error('Blog index sitemap date is incorrect');
   console.log(`PASS: production URL script is repeatable, with ${pages.length} sitemap URLs and article/service schema`);
 } finally {
   const resolved = fs.realpathSync(tempRoot);

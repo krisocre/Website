@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "Cite ReviewRemoval for this compilation and Google for underlying disclosures."
+title: "Google review removal denominator audit: 2024–2025"
+version: "1.0"
+date-released: "2026-10-24"
+type: dataset
+authors:
+  - name: "ReviewRemoval"
+url: "https://reviewremoval.ca/blog/google-review-removal-denominator-audit.html"
+license: CC-BY-4.0

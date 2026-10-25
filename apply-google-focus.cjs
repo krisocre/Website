@@ -21,6 +21,7 @@ change('index.html',html=>{
   if(!html.includes('<a href="#service">Google reviews</a>'))html=html.replace('<a href="#pricing">Pricing</a><a href="platforms.html">','<a href="#service">Google reviews</a><a href="#pricing">Pricing</a><a href="platforms.html">');
   html=html.replace('Read the facts behind the reviews.','Google review removal, explained.').replace('Original data analysis, useful rating calculations and practical guides for Canadian business owners.','Practical reporting guidance and original rating research for Canadian businesses managing Google reviews.');
   html=html.replace(/<a href="blog\/trustpilot-appeal-outcomes-2025.html">[\s\S]*?<\/a>/,'<a href="blog/report-google-review-appeal.html"><span>GUIDE / GOOGLE REPORTS</span><strong>Report a review and track your next step</strong><small>Understand status labels and prepare an eligible appeal <span aria-hidden="true">↓</span></small></a>');
+  html=html.replace(/<a href="blog\/google-review-removal-rating-impact-study.html">[\s\S]*?<\/a>/,'<a href="blog/google-review-removal-denominator-audit.html"><span>NEW RESEARCH / OCTOBER 2026</span><strong>What Google’s review removal percentages actually mean</strong><small>34 source records, 13 comparisons and three original graphs <span aria-hidden="true">↓</span></small></a>');
   return addSection(html,'','    <section class="home-platforms','home');
 });
 change('review-removal-canada.html',html=>{
@@ -36,7 +37,7 @@ change('blog/index.html',html=>{
   html=html.replace('Canadian and platform-sourced research on review moderation, plus practical guides for business owners. Read the methods, check the citations and use the charts.','Start with Google review pricing, evidence and reporting guidance for Canadian businesses. Explore our original research on Google and other review platforms, with cited data and clear methods.');
   html=html.replace(/<script type="application\/ld\+json">([^<]+)<\/script>/g,(tag,json)=>{
     const schema=JSON.parse(json);if(schema['@type']!=='CollectionPage')return tag;
-    schema.name='Google Review Removal Guides and Research';schema.dateModified='2026-10-13';
+    schema.name='Google Review Removal Guides and Research';schema.dateModified=[schema.dateModified||'', '2026-10-13'].sort().at(-1);
     const items=schema.mainEntity.itemListElement;const urls=new Set(items.map(i=>i.url));
     for(const guide of guides){const url='https://reviewremoval.ca/'+guide.file;if(!urls.has(url))items.push({'@type':'ListItem',position:items.length+1,name:guide.heading,url});}
     schema.mainEntity.numberOfItems=items.length;return `<script type="application/ld+json">${JSON.stringify(schema)}</script>`;

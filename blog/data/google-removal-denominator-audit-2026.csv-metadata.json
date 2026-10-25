@@ -1,0 +1,146 @@
+{
+  "@context": "http://www.w3.org/ns/csvw",
+  "url": "https://reviewremoval.ca/blog/data/google-removal-denominator-audit-2026.csv",
+  "dc:title": "Google review removal denominator audit: 2024–2025",
+  "dc:license": "https://creativecommons.org/licenses/by/4.0/",
+  "tableSchema": {
+    "columns": [
+      {
+        "name": "record_id",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "Stable source-record reference for this release."
+      },
+      {
+        "name": "geography",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "Reported geography, not a Canadian sample."
+      },
+      {
+        "name": "checked",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "Date source values were checked for this release."
+      },
+      {
+        "name": "year",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "Activity year, not the publication year."
+      },
+      {
+        "name": "metric",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "Normalized metric; identical keys with different source_kind values remain distinct disclosures."
+      },
+      {
+        "name": "label",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "Human-readable measurement."
+      },
+      {
+        "name": "source_kind",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "current_snapshot, superseded_value, correction_notice_value or announcement_threshold."
+      },
+      {
+        "name": "unit",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "Unit; reviews, edits, media, accounts and profiles are not additive."
+      },
+      {
+        "name": "display",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "Source display string, retaining magnitude abbreviations or inequality."
+      },
+      {
+        "name": "value",
+        "datatype": "number",
+        "null": [
+          ""
+        ],
+        "dc:description": "Numeric display magnitude or threshold; interpret with operator, never as an exact count."
+      },
+      {
+        "name": "operator",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "lt = strict upper bound; gt = strict lower threshold; displayed_rounded = reported display magnitude."
+      },
+      {
+        "name": "denominator",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "all_reviews_contributed for source reason percentages; null for counts."
+      },
+      {
+        "name": "snapshot_status_date",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "Content status date per the FAQ. Null for account/profile action counts and announcements, which use a different timing basis."
+      },
+      {
+        "name": "population_time_basis",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "For current count records, distinguishes selected-year content snapshots from account-level actions during the year."
+      },
+      {
+        "name": "source_url",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "Primary source, including selected-year state where applicable."
+      },
+      {
+        "name": "notes",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "Source-version and interpretation limits."
+      },
+      {
+        "name": "source_publication_date",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "Announcement date when provided."
+      }
+    ]
+  }
+}
