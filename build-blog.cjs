@@ -193,6 +193,7 @@ articles.splice(1,0,...require('./blog/research-posts.cjs'));
 articles.push(require('./blog/trustpilot-appeals-post.cjs'));
 articles.splice(1,0,require('./blog/rating-impact-post.cjs'));
 articles.splice(1,0,require('./blog/google-denominator-post.cjs'));
+articles.splice(1,0,require('./blog/google-risk-post.cjs'));
 
 const escapeHtml = value => String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 function head(title, description, extra = "") { return `<!doctype html>\n<html lang="en-CA">\n<head>\n  <meta charset="utf-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1">\n  <meta name="theme-color" content="#17353e">\n  <meta name="description" content="${escapeHtml(description)}">\n  <meta name="author" content="ReviewRemoval">\n  <title>${escapeHtml(title)} | ReviewRemoval</title>\n  <link rel="icon" href="../favicon.svg" type="image/svg+xml">\n  <link rel="alternate" type="application/rss+xml" title="ReviewRemoval Research and Guides" href="../feed.xml">\n  <link rel="stylesheet" href="../styles.css">\n  <link rel="stylesheet" href="blog.css">\n  <script src="../script.js" defer></script>${extra}\n</head>`; }
@@ -203,7 +204,7 @@ function articlePage(article) { const serviceHref = article.serviceHref || (arti
 
 for (const article of articles) fs.writeFileSync(path.join(root, `${article.slug}.html`), articlePage(article), 'utf8');
 
-const featured = articles.find(article => article.slug === 'google-review-removal-denominator-audit') || articles[0];
+const featured = articles.find(article => article.slug === 'google-review-risk-score-denominator-study') || articles[0];
 const archive = articles.filter(article => article.slug !== featured.slug).sort((a,b) => (b.published || published).localeCompare(a.published || published)).map((article, i) => `<a class="article-card" href="${article.slug}.html"><div class="card-top"><span class="content-kicker">${article.type}</span><span class="card-art" aria-hidden="true">${article.art}</span></div><h3>${article.title}</h3><p>${article.deck}</p><div class="card-bottom"><span>${article.minutes} min read</span><span aria-hidden="true">↗</span></div></a>`).join('');
 const blogSchema = {'@context':'https://schema.org','@type':'CollectionPage',name:'ReviewRemoval Research & Guides',url:'https://reviewremoval.ca/blog/index.html',dateModified:articles.map(a=>a.published || published).sort().at(-1),mainEntity:{'@type':'ItemList',numberOfItems:articles.length,itemListElement:articles.map((a,i)=>({'@type':'ListItem',position:i+1,name:a.title,url:'https://reviewremoval.ca/blog/'+a.slug+'.html'}))}};
 const blogHeadExtras = '\n  <script type="application/ld+json">'+JSON.stringify(blogSchema)+'</script>';

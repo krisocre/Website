@@ -1,0 +1,8 @@
+record_id,record_type,velocity_label,profiles,median_lifespan_days,average_deletions_per_profile,five_star_deleted_share_percent,share_denominator,source_url
+V01,source_aggregate,1-2,773,594,16,72.6,profile_deleted_review_set_not_full_profile,https://localo.com/blog/review-velocity-study
+V02,source_aggregate,3-5,1472,129,21,86.6,profile_deleted_review_set_not_full_profile,https://localo.com/blog/review-velocity-study
+V03,source_aggregate,6-10,1557,53,30,90.2,profile_deleted_review_set_not_full_profile,https://localo.com/blog/review-velocity-study
+V04,source_aggregate,11-20,1155,20,54,91.4,profile_deleted_review_set_not_full_profile,https://localo.com/blog/review-velocity-study
+V05,source_aggregate,21-50,639,9,106,91.9,profile_deleted_review_set_not_full_profile,https://localo.com/blog/review-velocity-study
+V06,source_aggregate,51-100,137,8,218,91.9,profile_deleted_review_set_not_full_profile,https://localo.com/blog/review-velocity-study
+V07,source_aggregate,100+,71,6,533,93.4,profile_deleted_review_set_not_full_profile,https://localo.com/blog/review-velocity-study

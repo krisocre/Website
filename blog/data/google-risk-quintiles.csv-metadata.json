@@ -1,0 +1,82 @@
+{
+  "@context": "http://www.w3.org/ns/csvw",
+  "url": "https://reviewremoval.ca/blog/data/google-risk-quintiles.csv",
+  "dc:title": "Google review risk-score denominators: source audit and identification models \u2014 google-risk-quintiles.csv",
+  "dc:license": "https://creativecommons.org/licenses/by/4.0/",
+  "tableSchema": {
+    "columns": [
+      {
+        "name": "record_id",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "record id"
+      },
+      {
+        "name": "record_type",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "Distinguishes attributed source aggregates from constructed models; never a Canadian case outcome."
+      },
+      {
+        "name": "metric",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "metric"
+      },
+      {
+        "name": "unit",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "unit"
+      },
+      {
+        "name": "top_quintile_display",
+        "datatype": "number",
+        "null": [
+          ""
+        ],
+        "dc:description": "top quintile display"
+      },
+      {
+        "name": "bottom_quintile_display",
+        "datatype": "number",
+        "null": [
+          ""
+        ],
+        "dc:description": "bottom quintile display"
+      },
+      {
+        "name": "nominal_ratio",
+        "datatype": "number",
+        "null": [
+          ""
+        ],
+        "dc:description": "Top displayed summary divided by bottom displayed summary; not an outcome probability."
+      },
+      {
+        "name": "source_url",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "source url"
+      },
+      {
+        "name": "notes",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "notes"
+      }
+    ]
+  }
+}

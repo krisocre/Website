@@ -1,0 +1,122 @@
+{
+  "@context": "http://www.w3.org/ns/csvw",
+  "url": "https://reviewremoval.ca/blog/data/google-risk-examples.csv",
+  "dc:title": "Google review risk-score denominators: source audit and identification models \u2014 google-risk-examples.csv",
+  "dc:license": "https://creativecommons.org/licenses/by/4.0/",
+  "tableSchema": {
+    "columns": [
+      {
+        "name": "record_id",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "record id"
+      },
+      {
+        "name": "record_type",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "Distinguishes attributed source aggregates from constructed models; never a Canadian case outcome."
+      },
+      {
+        "name": "label",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "label"
+      },
+      {
+        "name": "original_reviews",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "original reviews"
+      },
+      {
+        "name": "deleted_reviews",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "deleted reviews"
+      },
+      {
+        "name": "deleted_five_star",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "deleted five star"
+      },
+      {
+        "name": "deleted_other_stars",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "deleted other stars"
+      },
+      {
+        "name": "surviving_reviews",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "surviving reviews"
+      },
+      {
+        "name": "surviving_five_star",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "surviving five star"
+      },
+      {
+        "name": "surviving_other_stars",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "surviving other stars"
+      },
+      {
+        "name": "original_five_star",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "original five star"
+      },
+      {
+        "name": "deleted_five_star_share_percent",
+        "datatype": "number",
+        "null": [
+          ""
+        ],
+        "dc:description": "Fixed 93.4% in the constructed example, numerically matching a source display, without asserting an observed cohort."
+      },
+      {
+        "name": "original_five_star_share_percent",
+        "datatype": "number",
+        "null": [
+          ""
+        ],
+        "dc:description": "original five star share percent"
+      },
+      {
+        "name": "surviving_five_star_share_percent",
+        "datatype": "number",
+        "null": [
+          ""
+        ],
+        "dc:description": "surviving five star share percent"
+      }
+    ]
+  }
+}

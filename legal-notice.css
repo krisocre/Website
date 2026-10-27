@@ -1,0 +1,24 @@
+/* Compact, readable notices. Links stay visible before the final action. */
+.submission-legal{margin:12px 0 10px!important;color:#4b565b!important;font:400 12px/1.55 Arial,sans-serif!important;letter-spacing:normal!important;text-align:left!important}
+.submission-legal a{color:inherit!important;text-decoration:underline!important;text-underline-offset:2px;font-weight:400!important}
+.submission-legal a:hover{color:#163d54!important}
+.submission-legal a:focus-visible,.legal-page a:focus-visible{outline:2px solid #175781;outline-offset:3px}
+.enquiry-form>.submission-legal{margin-top:10px!important}
+.enquiry-form>.submission-legal[hidden]{display:none!important}
+.legal-hero{padding:65px 0 35px;background:#edf1ed}
+.legal-hero h1{font-size:clamp(38px,5vw,60px);margin:0 0 16px}
+.legal-hero p:last-child{font-size:14px;color:#526466}
+.legal-body{max-width:880px!important;padding-top:30px;padding-bottom:65px;font-size:16px;line-height:1.8;color:#34484e}
+.legal-body p{margin:0 0 20px}
+.legal-body h2{font:700 26px/1.3 Georgia,serif;margin:34px 0 14px;letter-spacing:normal}
+.legal-body section,.legal-translation{scroll-margin-top:90px}
+.legal-body strong{font-weight:700}
+.legal-body a{color:#195377;text-decoration:underline;text-underline-offset:3px}
+.legal-language{display:flex;align-items:center;flex-wrap:wrap;gap:20px;margin:0 0 25px;font-size:14px}
+.legal-print{margin-left:auto;border:1px solid #c5cfce;background:#fff;color:#34484e;padding:7px 12px;cursor:pointer;font:400 13px Arial,sans-serif}
+.legal-summary{padding:18px 20px;background:#f2f5f4;border-left:3px solid #57786e}
+.legal-toc{display:grid;grid-template-columns:1fr 1fr;gap:5px 24px;font-size:13px;margin:25px 0 35px}
+.legal-translation{border-top:1px solid #ccd6d3;margin-top:55px;padding-top:12px}
+.legal-page .legal-body .legal-translation>h2{font-size:31px}
+@media(max-width:600px){.legal-hero{padding:42px 0 25px}.legal-body{font-size:15px;overflow-wrap:anywhere}.legal-toc{grid-template-columns:1fr}.legal-body h2{font-size:23px}.legal-print{margin-left:0}.legal-page .legal-body .legal-translation>h2{font-size:27px}}
+@media print{.legal-page .site-header,.legal-page .site-footer,.legal-print,.legal-page .skip-link{display:none!important}.legal-body{max-width:none!important;font-size:11pt;padding:0}.legal-body a{color:#000}.legal-toc{display:none}.legal-body section{break-inside:auto}.legal-body h2{break-after:avoid}.legal-hero{padding:0;background:none}.legal-translation{break-before:page}}

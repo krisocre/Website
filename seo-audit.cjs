@@ -6,6 +6,10 @@ const origin = 'https://reviewremoval.ca';
 const sitemap = fs.readFileSync(path.join(root, 'sitemap.xml'), 'utf8');
 const pages = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => match[1]);
 const errors = [];
+const publishConfig=fs.readFileSync(path.join(root,'_config.yml'),'utf8');
+for(const file of fs.readdirSync(root).filter(name=>name.endsWith('.md'))){
+ if(!publishConfig.split(/\r?\n/).some(line=>line.trim()===`- ${file}`))errors.push(`${file}: internal notes must be excluded from publication`);
+}
 const titles = new Set();
 const descriptions = new Set();
 const googleTagUrl = 'https://www.googletagmanager.com/gtag/js?id=AW-18449308865';
@@ -29,6 +33,7 @@ if (!fs.readFileSync(path.join(root, 'robots.txt'), 'utf8').includes(`Sitemap: $
 const notFoundHtml = fs.readFileSync(path.join(root, '404.html'), 'utf8');
 if (!notFoundHtml.includes('name="robots" content="noindex')) errors.push('404 page must be noindex');
 checkGoogleTag(notFoundHtml, '404.html');
+for(const match of notFoundHtml.matchAll(/\b(?:href|src)="([^"]+)"/g))if(!/^(?:\/|#|https?:|mailto:|tel:|data:)/.test(match[1]))errors.push(`404.html: relative link breaks on nested missing URLs: ${match[1]}`);
 
 for (const url of pages) {
   if (!url.startsWith(`${origin}/`)) { errors.push(`Wrong sitemap host: ${url}`); continue; }
@@ -69,10 +74,18 @@ for (const url of pages) {
     const link = match[1];
     if (/^(?:https?:|mailto:|tel:|data:|blob:)/.test(link)) continue;
     const [target, hash] = link.split('#');
-    const targetFile = target ? path.resolve(path.dirname(file), target.split('?')[0]) : file;
+    const targetUrl=new URL(link,url);
+    const targetFile=path.join(root,decodeURIComponent(targetUrl.pathname).replace(/^\//,'')||'index.html');
     if (!fs.existsSync(targetFile)) { errors.push(`${relative}: missing internal target ${link}`); continue; }
     if (hash && targetFile.endsWith('.html') && !fs.readFileSync(targetFile, 'utf8').includes(`id="${hash}"`)) errors.push(`${relative}: missing anchor ${link}`);
   }
+}
+
+// Branded identity and public links must stay within this site's own origin.
+for(const relative of indexableFiles){
+ const html=fs.readFileSync(path.join(root,relative),'utf8');
+ if(/https?:\/\/(?:www\.)?reviewsboost\.ca\b/i.test(html))errors.push(`${relative}: foreign brand URL`);
+ if((relative.startsWith('blog/')? /href="\.\.\/index\.html(?:[?#"])/ : /href="(?:\.\/)?index\.html(?:[?#"])/).test(html))errors.push(`${relative}: noncanonical homepage link`);
 }
 
 const home = fs.readFileSync(path.join(root, 'index.html'), 'utf8');

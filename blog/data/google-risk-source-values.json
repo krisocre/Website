@@ -1,0 +1,29 @@
+{
+  "source_url": "https://localo.com/blog/review-velocity-study",
+  "source_publisher": "Localo",
+  "source_published": "2026-05-29",
+  "checked": "2026-10-27",
+  "capture_sha256": "3a4f5051be6e999f87168b151bb13b17e23162134cde4f08e5857f71f1b7a273",
+  "study_profiles": 22292,
+  "study_deleted_reviews": 335520,
+  "correlation_profiles": 5804,
+  "correlation_inclusion": "Profiles with more than 10 deleted reviews",
+  "window": "November 2023 to January 2026",
+  "percent_definition": "Share of each profile's deleted-review set, not its full review base",
+  "velocity_definition": "Maximum number of reviews created per profile in any rolling 7-day window",
+  "velocity_rows": [
+    ["1-2",773,594,16,72.6],
+    ["3-5",1472,129,21,86.6],
+    ["6-10",1557,53,30,90.2],
+    ["11-20",1155,20,54,91.4],
+    ["21-50",639,9,106,91.9],
+    ["51-100",137,8,218,91.9],
+    ["100+",71,6,533,93.4]
+  ],
+  "quintile_rows": [
+    ["Five-star share of deleted reviews","percent",97.6,59.3],
+    ["Generic-phrase share of deleted reviews","percent",26.2,11.2],
+    ["Maximum reviews per week","reviews_per_week",39.7,4.6],
+    ["Average deletions per profile","reviews_per_profile",114,23]
+  ]
+}

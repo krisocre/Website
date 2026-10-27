@@ -13,13 +13,15 @@ if (parsed.protocol !== 'https:' || parsed.pathname !== '/' || parsed.search || 
 }
 const origin = parsed.origin;
 const root = __dirname;
+require('./build-editorial-page.cjs')();
+require('./build-legal-pages.cjs')(origin);
 const pages = [
-  'index.html', 'platforms.html', 'review-removal-canada.html', 'about.html',
+  'index.html', 'platforms.html', 'review-removal-canada.html', 'about.html', 'terms-of-service.html', 'privacy-policy.html', 'editorial-policy.html',
   'remove-facebook-reviews.html', 'remove-yelp-reviews.html', 'remove-trustpilot-reviews.html', 'remove-tripadvisor-reviews.html', 'remove-booking-com-reviews.html', 'remove-glassdoor-reviews.html', 'remove-indeed-reviews.html',
   'blog/index.html', 'blog/google-review-moderation-2019-2025.html', 'blog/trustpilot-fake-reviews-by-star-rating.html',
   'blog/canadian-tourism-google-reviews-2023.html', 'blog/review-removal-questions-answered.html', 'blog/review-report-evidence-checklist.html', 'blog/yelp-reviews-disappear-reappear-data.html', 'blog/tripadvisor-fake-review-statistics-removal-rates.html', 'blog/trustpilot-appeal-outcomes-2025.html', 'blog/google-review-removal-rating-impact-study.html',
   ...require('./google-guides.cjs').map(guide => guide.file),
-  'blog/google-review-removal-denominator-audit.html'
+  'blog/google-review-removal-denominator-audit.html', 'blog/google-review-risk-score-denominator-study.html'
 ];
 const escapeAttr = value => value.replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;');
 const marker = /\n  <!-- production URL metadata start -->[\s\S]*?<!-- production URL metadata end -->/;
@@ -35,6 +37,7 @@ const googleTag = `
   </script>
   <!-- /Google tag (gtag.js) -->`;
 const shareImages = {
+  'blog/google-review-risk-score-denominator-study.html':'blog/assets/google-risk-identification-bounds.png',
   'blog/google-review-removal-denominator-audit.html': 'blog/assets/google-removal-reasons-denominators.png',
   'blog/google-review-removal-rating-impact-study.html': 'blog/assets/rating-removal-uncertainty.png',
   'blog/trustpilot-appeal-outcomes-2025.html': 'blog/assets/trustpilot-appeals-2025.png',
@@ -45,6 +48,7 @@ const shareImages = {
   'blog/canadian-tourism-google-reviews-2023.html': 'blog/assets/canadian-sme-online-activities-2023.png'
 };
 const shareImageAlts = {
+  'blog/google-review-risk-score-denominator-study.html':'Constructed identification ranges show why deleted-review percentages cannot identify a whole-profile five-star share',
   'blog/google-review-removal-denominator-audit.html': 'Google removal-reason rates for 2024 and 2025, as a share of all contributed reviews',
   'blog/google-review-removal-rating-impact-study.html': 'Original mathematical ranges for star ratings after removing one one-star Google review',
   'blog/trustpilot-appeal-outcomes-2025.html': 'Trustpilot 2025 reversal counts separated by the decision being challenged',
@@ -65,6 +69,16 @@ for (const relative of pages) {
   const file = path.join(root, relative);
   if (!fs.existsSync(file)) { console.error(`Missing ${relative}. Run the build scripts first.`); process.exit(1); }
   let html = fs.readFileSync(file, 'utf8').replace(/\r+\n/g, '\n').replace(/\r/g, '\n').replace(marker, '').replace(googleTagMarker, '').replace(/\n(?:[ \t]*\n)*(?=<\/head>)/, '\n');
+  // Link to the canonical homepage; blog/index.html remains the blog's own URL.
+  html = relative.startsWith('blog/')
+    ? html.replace(/href="\.\.\/index\.html([?#][^"]*)?"/g,(_,suffix)=>`href="/${suffix||''}"`)
+    : html.replace(/href="(?:\.\/)?index\.html([?#][^"]*)?"/g,(_,suffix)=>`href="/${suffix||''}"`);
+  if (relative.startsWith('blog/') && relative !== 'blog/index.html' && !html.includes('class="editorial-disclosure"')) {
+    html=html.replace('<article class="article-body">','<article class="article-body"><p class="editorial-disclosure">Published by ReviewRemoval. <a href="../editorial-policy.html#authorship" rel="author">Authorship, sources and correction standards</a>.</p>');
+  }
+  if (['about.html','blog/index.html'].includes(relative) && !html.includes('class="editorial-disclosure"')) {
+    html=html.replace('</main>',`<section class="wrap editorial-disclosure"><h2>How our research is checked</h2><p>Read our <a href="${relative.startsWith('blog/')?'../':''}editorial-policy.html">editorial standards, source policy and correction process</a>. Platform-wide figures and mathematical examples do not measure our service outcomes.</p></section></main>`);
+  }
   const title = html.match(/<title>([^<]+)<\/title>/)?.[1];
   const description = html.match(/<meta name="description" content="([^"]*)">/)?.[1];
   if (!title || !description || !html.includes('</head>')) { console.error(`Missing metadata in ${relative}`); process.exit(1); }
@@ -85,6 +99,7 @@ for (const relative of pages) {
       areaServed: { '@type': 'Country', name: 'Canada' },
       provider: { '@id': `${origin}/#organization`, '@type': 'Organization', name: 'ReviewRemoval', url: origin }
     };
+    if (!isCanada) service.offers = { '@type':'Offer',price:'50',priceCurrency:'CAD',eligibleRegion:'CA',url:`${canonical}#pricing`,description:'CAD $50 upfront per review, plus CAD $125 for each successfully removed review. Taxes and written terms confirmed before paid work.' };
     if (relative === 'index.html') {
       service.name = 'Google review removal service in Canada';
       service.offers = { '@type': 'Offer', price: '50', priceCurrency: 'CAD', eligibleRegion: 'CA',
@@ -111,6 +126,7 @@ for (const relative of pages) {
             { '@type': 'ListItem', position: 2, name: platform, item: canonical }
           ]
         }] };
+    if(isCanada)schema['@graph'].push({'@type':'WebPage','@id':canonical+'#webpage',url:canonical,name:decodeEntities(title),dateModified:'2026-10-27',inLanguage:'en-CA',mainEntity:{'@id':canonical+'#service'}});
     schemaTag = `\n  <script type="application/ld+json">${JSON.stringify(schema).replaceAll('<', '\\u003c')}</script>`;
   }
   let articleTimeTags = "";
@@ -129,6 +145,13 @@ for (const relative of pages) {
     };
     articleTimeTags = `\n  <meta property="article:published_time" content="${schema.datePublished}">\n  <meta property="article:modified_time" content="${schema.dateModified}">`;
     schema.image = shareImage;
+    schema.publisher = { ...organization };
+    schema.url = canonical;
+    if(relative==='blog/google-review-risk-score-denominator-study.html'){
+      schema.mainEntity={'@id':canonical+'#dataset'};
+      schema.articleSection='Original research / Google risk metrics';
+      schema.image=['google-risk-deleted-share','google-risk-identification-bounds','google-risk-same-subset'].map(name=>({'@id':`${origin}/blog/assets/${name}.png#image`}));
+    }
     if (relative === 'blog/google-review-removal-denominator-audit.html') {
       schema.mainEntity = { '@id': `${canonical}#dataset` };
       schema.articleSection = 'Original research / Google removal data';
@@ -161,8 +184,14 @@ for (const relative of pages) {
         publisher: { '@id': `${origin}/#organization` } }).replaceAll('<', '\\u003c')}</script>`;
     }
   }
+  if (['about.html','platforms.html','editorial-policy.html'].includes(relative)) {
+    const pageSchema={'@context':'https://schema.org','@graph':[organization,{'@type':relative==='about.html'?'AboutPage':relative==='platforms.html'?'CollectionPage':'WebPage','@id':canonical+'#webpage',url:canonical,name:decodeEntities(title),description:decodeEntities(description),inLanguage:'en-CA',isPartOf:{'@id':origin+'/#website'},about:{'@id':origin+'/#organization'},...(relative==='editorial-policy.html'?{datePublished:'2026-10-27',dateModified:'2026-10-27'}:{})},{'@type':'BreadcrumbList',itemListElement:[{'@type':'ListItem',position:1,name:'Home',item:origin+'/'},{'@type':'ListItem',position:2,name:decodeEntities(title.replace(/ \| ReviewRemoval$/,'')),item:canonical}]}]};
+    // The editorial source shell supplies dates; the production graph supplies its canonical identity.
+    if(relative==='editorial-policy.html')html=html.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/g,'');
+    schemaTag=`\n  <script type="application/ld+json">${JSON.stringify(pageSchema).replaceAll('<','\\u003c')}</script>`;
+  }
   const imageAlt = shareImageAlts[relative] || 'ReviewRemoval: review concerns, handled for you';
-  const tags = `\n  <!-- production URL metadata start -->\n  <link rel="canonical" href="${escapeAttr(canonical)}">\n  <meta name="robots" content="index, follow, max-image-preview:large">\n  <meta property="og:type" content="${isArticle ? 'article' : 'website'}">\n  <meta property="og:site_name" content="ReviewRemoval">\n  <meta property="og:locale" content="en_CA">\n  <meta property="og:url" content="${escapeAttr(canonical)}">\n  <meta property="og:title" content="${title}">\n  <meta property="og:description" content="${description}">\n  <meta property="og:image" content="${escapeAttr(shareImage)}">\n  <meta property="og:image:width" content="1200">\n  <meta property="og:image:height" content="${['blog/trustpilot-appeal-outcomes-2025.html','blog/google-review-removal-denominator-audit.html'].includes(relative) ? '720' : shareImages[relative] ? '672' : '630'}">\n  <meta property="og:image:alt" content="${escapeAttr(imageAlt)}">\n  <meta name="twitter:card" content="summary_large_image">\n  <meta name="twitter:title" content="${title}">\n  <meta name="twitter:description" content="${description}">\n  <meta name="twitter:image" content="${escapeAttr(shareImage)}">\n  <meta name="twitter:image:alt" content="${escapeAttr(imageAlt)}">${articleTimeTags}${schemaTag}\n  <!-- production URL metadata end -->`;
+  const tags = `\n  <!-- production URL metadata start -->\n  <link rel="canonical" href="${escapeAttr(canonical)}">\n  <meta name="robots" content="index, follow, max-image-preview:large">\n  <meta property="og:type" content="${isArticle ? 'article' : 'website'}">\n  <meta property="og:site_name" content="ReviewRemoval">\n  <meta property="og:locale" content="en_CA">\n  <meta property="og:url" content="${escapeAttr(canonical)}">\n  <meta property="og:title" content="${title}">\n  <meta property="og:description" content="${description}">\n  <meta property="og:image" content="${escapeAttr(shareImage)}">\n  <meta property="og:image:width" content="1200">\n  <meta property="og:image:height" content="${relative==='blog/google-review-risk-score-denominator-study.html'?'780':['blog/trustpilot-appeal-outcomes-2025.html','blog/google-review-removal-denominator-audit.html'].includes(relative)?'720':shareImages[relative]?'672':'630'}">\n  <meta property="og:image:alt" content="${escapeAttr(imageAlt)}">\n  <meta name="twitter:card" content="summary_large_image">\n  <meta name="twitter:title" content="${title}">\n  <meta name="twitter:description" content="${description}">\n  <meta name="twitter:image" content="${escapeAttr(shareImage)}">\n  <meta name="twitter:image:alt" content="${escapeAttr(imageAlt)}">${articleTimeTags}${schemaTag}\n  <!-- production URL metadata end -->`;
   html = html.replace('</head>', `${tags}${googleTag}\n</head>`);
   fs.writeFileSync(file, html, 'utf8');
 }
@@ -173,8 +202,8 @@ const sitemapEntries = pages.map(relative => {
   const modified = schemas.find(schema => ['BlogPosting','Article','CollectionPage'].includes(schema['@type']))?.dateModified
     || schemas.flatMap(schema => schema['@graph'] || []).find(schema => schema['@type'] === 'WebPage')?.dateModified;
   const lastmod = /^\d{4}-\d{2}-\d{2}$/.test(modified || '') ? `<lastmod>${modified}</lastmod>` : '';
-  const images = relative === 'blog/google-review-removal-denominator-audit.html'
-    ? ['google-removal-reasons-denominators','google-removal-metric-changes','google-removal-source-corrections'].map(name => `<image:image><image:loc>${origin}/blog/assets/${name}.svg</image:loc></image:image>`).join('') : '';
+  const imageNames=relative==='blog/google-review-removal-denominator-audit.html'?['google-removal-reasons-denominators','google-removal-metric-changes','google-removal-source-corrections']:relative==='blog/google-review-risk-score-denominator-study.html'?['google-risk-deleted-share','google-risk-identification-bounds','google-risk-same-subset']:[];
+  const images=imageNames.map(name=>`<image:image><image:loc>${origin}/blog/assets/${name}.svg</image:loc></image:image>`).join('');
   return `  <url><loc>${escapeAttr(`${origin}/${relative === 'index.html' ? '' : relative}`)}</loc>${lastmod}${images}</url>`;
 });
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n${sitemapEntries.join('\n')}\n</urlset>\n`;

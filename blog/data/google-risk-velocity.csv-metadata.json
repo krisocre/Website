@@ -1,0 +1,82 @@
+{
+  "@context": "http://www.w3.org/ns/csvw",
+  "url": "https://reviewremoval.ca/blog/data/google-risk-velocity.csv",
+  "dc:title": "Google review risk-score denominators: source audit and identification models \u2014 google-risk-velocity.csv",
+  "dc:license": "https://creativecommons.org/licenses/by/4.0/",
+  "tableSchema": {
+    "columns": [
+      {
+        "name": "record_id",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "record id"
+      },
+      {
+        "name": "record_type",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "Distinguishes attributed source aggregates from constructed models; never a Canadian case outcome."
+      },
+      {
+        "name": "velocity_label",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "velocity label"
+      },
+      {
+        "name": "profiles",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "Source profile count in the labelled velocity row; selected correlation set."
+      },
+      {
+        "name": "median_lifespan_days",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "Source creation-to-removal median among selected deleted reviews; not report-processing time."
+      },
+      {
+        "name": "average_deletions_per_profile",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "Source cumulative deletions over the measurement window; not an annual rate."
+      },
+      {
+        "name": "five_star_deleted_share_percent",
+        "datatype": "number",
+        "null": [
+          ""
+        ],
+        "dc:description": "Published percentage of a profile deleted-review set; not five-star share of every review on a profile."
+      },
+      {
+        "name": "share_denominator",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "share denominator"
+      },
+      {
+        "name": "source_url",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "source url"
+      }
+    ]
+  }
+}

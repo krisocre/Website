@@ -1,0 +1,20 @@
+exclude:
+  - LEGAL-SETUP.md
+  - build-legal-pages.cjs
+  - legal-settings.json
+  - BLOG-RESEARCH-NOTES.md
+  - GOOGLE-RISK-RESEARCH-NOTES.md
+  - FORM-SETUP.md
+  - GOOGLE-SEARCH-IMPROVEMENTS.md
+  - LAUNCH-DOMAIN-CHECKLIST.md
+  - SEO-GAP-AUDIT.md
+  - SEO-AUDIT-2026-10-27.md
+  - audit-site.mjs
+  - build-editorial-page.cjs
+  - set-live-domain.cjs
+  - seo-audit.cjs
+  - site-check.cjs
+  - launch-check.cjs
+  - google-focus-check.cjs
+  - google-apps-script.gs
+  - previews

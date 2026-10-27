@@ -2,8 +2,11 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url><loc>https://reviewremoval.ca/</loc><lastmod>2026-10-24</lastmod></url>
   <url><loc>https://reviewremoval.ca/platforms.html</loc></url>
-  <url><loc>https://reviewremoval.ca/review-removal-canada.html</loc></url>
+  <url><loc>https://reviewremoval.ca/review-removal-canada.html</loc><lastmod>2026-10-27</lastmod></url>
   <url><loc>https://reviewremoval.ca/about.html</loc></url>
+  <url><loc>https://reviewremoval.ca/terms-of-service.html</loc></url>
+  <url><loc>https://reviewremoval.ca/privacy-policy.html</loc></url>
+  <url><loc>https://reviewremoval.ca/editorial-policy.html</loc><lastmod>2026-10-27</lastmod></url>
   <url><loc>https://reviewremoval.ca/remove-facebook-reviews.html</loc></url>
   <url><loc>https://reviewremoval.ca/remove-yelp-reviews.html</loc></url>
   <url><loc>https://reviewremoval.ca/remove-trustpilot-reviews.html</loc></url>
@@ -11,7 +14,7 @@
   <url><loc>https://reviewremoval.ca/remove-booking-com-reviews.html</loc></url>
   <url><loc>https://reviewremoval.ca/remove-glassdoor-reviews.html</loc></url>
   <url><loc>https://reviewremoval.ca/remove-indeed-reviews.html</loc></url>
-  <url><loc>https://reviewremoval.ca/blog/index.html</loc><lastmod>2026-10-24</lastmod></url>
+  <url><loc>https://reviewremoval.ca/blog/index.html</loc><lastmod>2026-10-27</lastmod></url>
   <url><loc>https://reviewremoval.ca/blog/google-review-moderation-2019-2025.html</loc><lastmod>2026-09-21</lastmod></url>
   <url><loc>https://reviewremoval.ca/blog/trustpilot-fake-reviews-by-star-rating.html</loc><lastmod>2026-09-21</lastmod></url>
   <url><loc>https://reviewremoval.ca/blog/canadian-tourism-google-reviews-2023.html</loc><lastmod>2026-09-26</lastmod></url>
@@ -23,8 +26,9 @@
   <url><loc>https://reviewremoval.ca/blog/google-review-removal-rating-impact-study.html</loc><lastmod>2026-10-08</lastmod></url>
   <url><loc>https://reviewremoval.ca/google-review-removal-cost-canada.html</loc><lastmod>2026-10-13</lastmod></url>
   <url><loc>https://reviewremoval.ca/remove-fake-google-reviews.html</loc><lastmod>2026-10-13</lastmod></url>
-  <url><loc>https://reviewremoval.ca/blog/report-google-review-appeal.html</loc><lastmod>2026-10-13</lastmod></url>
+  <url><loc>https://reviewremoval.ca/blog/report-google-review-appeal.html</loc><lastmod>2026-10-27</lastmod></url>
   <url><loc>https://reviewremoval.ca/google-review-removal-checker.html</loc><lastmod>2026-10-13</lastmod></url>
   <url><loc>https://reviewremoval.ca/blog/google-reviews-not-showing.html</loc><lastmod>2026-10-13</lastmod></url>
   <url><loc>https://reviewremoval.ca/blog/google-review-removal-denominator-audit.html</loc><lastmod>2026-10-24</lastmod><image:image><image:loc>https://reviewremoval.ca/blog/assets/google-removal-reasons-denominators.svg</image:loc></image:image><image:image><image:loc>https://reviewremoval.ca/blog/assets/google-removal-metric-changes.svg</image:loc></image:image><image:image><image:loc>https://reviewremoval.ca/blog/assets/google-removal-source-corrections.svg</image:loc></image:image></url>
+  <url><loc>https://reviewremoval.ca/blog/google-review-risk-score-denominator-study.html</loc><lastmod>2026-10-27</lastmod><image:image><image:loc>https://reviewremoval.ca/blog/assets/google-risk-deleted-share.svg</image:loc></image:image><image:image><image:loc>https://reviewremoval.ca/blog/assets/google-risk-identification-bounds.svg</image:loc></image:image><image:image><image:loc>https://reviewremoval.ca/blog/assets/google-risk-same-subset.svg</image:loc></image:image></url>
 </urlset>

@@ -1,0 +1,334 @@
+{
+  "title": "Google review risk-score denominators: source audit and identification models",
+  "version": "1.0",
+  "published": "2026-10-27",
+  "article_url": "https://reviewremoval.ca/blog/google-review-risk-score-denominator-study.html",
+  "license": "https://creativecommons.org/licenses/by/4.0/",
+  "source": {
+    "source_url": "https://localo.com/blog/review-velocity-study",
+    "source_publisher": "Localo",
+    "source_published": "2026-05-29",
+    "checked": "2026-10-27",
+    "capture_sha256": "3a4f5051be6e999f87168b151bb13b17e23162134cde4f08e5857f71f1b7a273",
+    "study_profiles": 22292,
+    "study_deleted_reviews": 335520,
+    "correlation_profiles": 5804,
+    "correlation_inclusion": "Profiles with more than 10 deleted reviews",
+    "window": "November 2023 to January 2026",
+    "percent_definition": "Share of each profile's deleted-review set, not its full review base",
+    "velocity_definition": "Maximum number of reviews created per profile in any rolling 7-day window",
+    "velocity_rows": [
+      [
+        "1-2",
+        773,
+        594,
+        16,
+        72.6
+      ],
+      [
+        "3-5",
+        1472,
+        129,
+        21,
+        86.6
+      ],
+      [
+        "6-10",
+        1557,
+        53,
+        30,
+        90.2
+      ],
+      [
+        "11-20",
+        1155,
+        20,
+        54,
+        91.4
+      ],
+      [
+        "21-50",
+        639,
+        9,
+        106,
+        91.9
+      ],
+      [
+        "51-100",
+        137,
+        8,
+        218,
+        91.9
+      ],
+      [
+        "100+",
+        71,
+        6,
+        533,
+        93.4
+      ]
+    ],
+    "quintile_rows": [
+      [
+        "Five-star share of deleted reviews",
+        "percent",
+        97.6,
+        59.3
+      ],
+      [
+        "Generic-phrase share of deleted reviews",
+        "percent",
+        26.2,
+        11.2
+      ],
+      [
+        "Maximum reviews per week",
+        "reviews_per_week",
+        39.7,
+        4.6
+      ],
+      [
+        "Average deletions per profile",
+        "reviews_per_profile",
+        114,
+        23
+      ]
+    ]
+  },
+  "summary": {
+    "source_rows": 11,
+    "constructed_rows": 6,
+    "total_records": 17,
+    "velocity_row_profile_sum": 5804,
+    "correlation_profiles": 5804,
+    "study_profiles": 22292,
+    "correlation_to_study_profile_percent": 26.036246186972907,
+    "example_original_share_gap_percentage_points": 47.5
+  },
+  "velocity": [
+    {
+      "record_id": "V01",
+      "record_type": "source_aggregate",
+      "velocity_label": "1-2",
+      "profiles": 773,
+      "median_lifespan_days": 594,
+      "average_deletions_per_profile": 16,
+      "five_star_deleted_share_percent": 72.6,
+      "share_denominator": "profile_deleted_review_set_not_full_profile",
+      "source_url": "https://localo.com/blog/review-velocity-study"
+    },
+    {
+      "record_id": "V02",
+      "record_type": "source_aggregate",
+      "velocity_label": "3-5",
+      "profiles": 1472,
+      "median_lifespan_days": 129,
+      "average_deletions_per_profile": 21,
+      "five_star_deleted_share_percent": 86.6,
+      "share_denominator": "profile_deleted_review_set_not_full_profile",
+      "source_url": "https://localo.com/blog/review-velocity-study"
+    },
+    {
+      "record_id": "V03",
+      "record_type": "source_aggregate",
+      "velocity_label": "6-10",
+      "profiles": 1557,
+      "median_lifespan_days": 53,
+      "average_deletions_per_profile": 30,
+      "five_star_deleted_share_percent": 90.2,
+      "share_denominator": "profile_deleted_review_set_not_full_profile",
+      "source_url": "https://localo.com/blog/review-velocity-study"
+    },
+    {
+      "record_id": "V04",
+      "record_type": "source_aggregate",
+      "velocity_label": "11-20",
+      "profiles": 1155,
+      "median_lifespan_days": 20,
+      "average_deletions_per_profile": 54,
+      "five_star_deleted_share_percent": 91.4,
+      "share_denominator": "profile_deleted_review_set_not_full_profile",
+      "source_url": "https://localo.com/blog/review-velocity-study"
+    },
+    {
+      "record_id": "V05",
+      "record_type": "source_aggregate",
+      "velocity_label": "21-50",
+      "profiles": 639,
+      "median_lifespan_days": 9,
+      "average_deletions_per_profile": 106,
+      "five_star_deleted_share_percent": 91.9,
+      "share_denominator": "profile_deleted_review_set_not_full_profile",
+      "source_url": "https://localo.com/blog/review-velocity-study"
+    },
+    {
+      "record_id": "V06",
+      "record_type": "source_aggregate",
+      "velocity_label": "51-100",
+      "profiles": 137,
+      "median_lifespan_days": 8,
+      "average_deletions_per_profile": 218,
+      "five_star_deleted_share_percent": 91.9,
+      "share_denominator": "profile_deleted_review_set_not_full_profile",
+      "source_url": "https://localo.com/blog/review-velocity-study"
+    },
+    {
+      "record_id": "V07",
+      "record_type": "source_aggregate",
+      "velocity_label": "100+",
+      "profiles": 71,
+      "median_lifespan_days": 6,
+      "average_deletions_per_profile": 533,
+      "five_star_deleted_share_percent": 93.4,
+      "share_denominator": "profile_deleted_review_set_not_full_profile",
+      "source_url": "https://localo.com/blog/review-velocity-study"
+    }
+  ],
+  "quintiles": [
+    {
+      "record_id": "Q01",
+      "record_type": "source_aggregate_with_derived_ratio",
+      "metric": "Five-star share of deleted reviews",
+      "unit": "percent",
+      "top_quintile_display": 97.6,
+      "bottom_quintile_display": 59.3,
+      "nominal_ratio": 1.6458684654300169,
+      "source_url": "https://localo.com/blog/review-velocity-study",
+      "notes": "Ratio of displayed source summaries, not a deletion probability or causal effect."
+    },
+    {
+      "record_id": "Q02",
+      "record_type": "source_aggregate_with_derived_ratio",
+      "metric": "Generic-phrase share of deleted reviews",
+      "unit": "percent",
+      "top_quintile_display": 26.2,
+      "bottom_quintile_display": 11.2,
+      "nominal_ratio": 2.3392857142857144,
+      "source_url": "https://localo.com/blog/review-velocity-study",
+      "notes": "Ratio of displayed source summaries, not a deletion probability or causal effect."
+    },
+    {
+      "record_id": "Q03",
+      "record_type": "source_aggregate_with_derived_ratio",
+      "metric": "Maximum reviews per week",
+      "unit": "reviews_per_week",
+      "top_quintile_display": 39.7,
+      "bottom_quintile_display": 4.6,
+      "nominal_ratio": 8.630434782608697,
+      "source_url": "https://localo.com/blog/review-velocity-study",
+      "notes": "Ratio of displayed source summaries, not a deletion probability or causal effect."
+    },
+    {
+      "record_id": "Q04",
+      "record_type": "source_aggregate_with_derived_ratio",
+      "metric": "Average deletions per profile",
+      "unit": "reviews_per_profile",
+      "top_quintile_display": 114,
+      "bottom_quintile_display": 23,
+      "nominal_ratio": 4.956521739130435,
+      "source_url": "https://localo.com/blog/review-velocity-study",
+      "notes": "Ratio of displayed source summaries, not a deletion probability or causal effect."
+    }
+  ],
+  "bounds": [
+    {
+      "record_id": "MB1",
+      "record_type": "constructed_identification_bound_not_observed",
+      "original_reviews": 10000,
+      "deleted_reviews": 500,
+      "deleted_five_star": 467,
+      "deleted_five_star_share_percent": 93.4,
+      "deletion_fraction_percent": 5.0,
+      "original_five_star_min": 467,
+      "original_five_star_max": 9967,
+      "original_five_star_share_min_percent": 4.67,
+      "original_five_star_share_max_percent": 99.67,
+      "assumption": "Deleted reviews are a subset of a fixed original review set; surviving star composition unknown. No new reviews or other changes."
+    },
+    {
+      "record_id": "MB2",
+      "record_type": "constructed_identification_bound_not_observed",
+      "original_reviews": 10000,
+      "deleted_reviews": 1000,
+      "deleted_five_star": 934,
+      "deleted_five_star_share_percent": 93.4,
+      "deletion_fraction_percent": 10.0,
+      "original_five_star_min": 934,
+      "original_five_star_max": 9934,
+      "original_five_star_share_min_percent": 9.34,
+      "original_five_star_share_max_percent": 99.33999999999999,
+      "assumption": "Deleted reviews are a subset of a fixed original review set; surviving star composition unknown. No new reviews or other changes."
+    },
+    {
+      "record_id": "MB3",
+      "record_type": "constructed_identification_bound_not_observed",
+      "original_reviews": 10000,
+      "deleted_reviews": 2500,
+      "deleted_five_star": 2335,
+      "deleted_five_star_share_percent": 93.4,
+      "deletion_fraction_percent": 25.0,
+      "original_five_star_min": 2335,
+      "original_five_star_max": 9835,
+      "original_five_star_share_min_percent": 23.35,
+      "original_five_star_share_max_percent": 98.35000000000001,
+      "assumption": "Deleted reviews are a subset of a fixed original review set; surviving star composition unknown. No new reviews or other changes."
+    },
+    {
+      "record_id": "MB4",
+      "record_type": "constructed_identification_bound_not_observed",
+      "original_reviews": 10000,
+      "deleted_reviews": 5000,
+      "deleted_five_star": 4670,
+      "deleted_five_star_share_percent": 93.4,
+      "deletion_fraction_percent": 50.0,
+      "original_five_star_min": 4670,
+      "original_five_star_max": 9670,
+      "original_five_star_share_min_percent": 46.7,
+      "original_five_star_share_max_percent": 96.7,
+      "assumption": "Deleted reviews are a subset of a fixed original review set; surviving star composition unknown. No new reviews or other changes."
+    }
+  ],
+  "examples": [
+    {
+      "record_id": "ME1",
+      "record_type": "synthetic_integer_example_not_google_or_client_data",
+      "label": "A",
+      "original_reviews": 2000,
+      "deleted_reviews": 500,
+      "deleted_five_star": 467,
+      "deleted_other_stars": 33,
+      "surviving_reviews": 1500,
+      "surviving_five_star": 500,
+      "surviving_other_stars": 1000,
+      "original_five_star": 967,
+      "deleted_five_star_share_percent": 93.4,
+      "original_five_star_share_percent": 48.35,
+      "surviving_five_star_share_percent": 33.33333333333333
+    },
+    {
+      "record_id": "ME2",
+      "record_type": "synthetic_integer_example_not_google_or_client_data",
+      "label": "B",
+      "original_reviews": 2000,
+      "deleted_reviews": 500,
+      "deleted_five_star": 467,
+      "deleted_other_stars": 33,
+      "surviving_reviews": 1500,
+      "surviving_five_star": 1450,
+      "surviving_other_stars": 50,
+      "original_five_star": 1917,
+      "deleted_five_star_share_percent": 93.4,
+      "original_five_star_share_percent": 95.85,
+      "surviving_five_star_share_percent": 96.66666666666667
+    }
+  ],
+  "limitations": [
+    "Secondary analysis; no individual review records or independent replication of Google moderation.",
+    "Published correlation set explicitly includes only profiles with more than ten deleted reviews.",
+    "Source percentage summaries refer to each profile deleted-review set, not all public reviews.",
+    "Constructed bounds and examples are mathematical and not observed Google or client outcomes.",
+    "The source does not identify a separate Canadian sample.",
+    "Source velocity labels are preserved; the exact 100 boundary is not redefined.",
+    "Source quintile scores cannot be externally validated without their full scoring rule and raw records."
+  ]
+}

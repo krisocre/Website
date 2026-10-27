@@ -26,7 +26,7 @@ node launch-check.cjs
 node seo-audit.cjs
 ```
 
-The domain script is repeatable. It adds unique canonical and social URLs, a social image, Organization/WebSite/Service and article structured data where appropriate, installs Google tag `AW-18449308865` once in the head of all 27 indexable pages, and writes `sitemap.xml` and `robots.txt`. Article, homepage and blog-index sitemap entries use their recorded modification dates; unrelated pages receive no invented freshness date. The same tag is installed directly in `404.html`. Generated HTML loses the domain metadata and tag when rebuilt, so run the Google focus script and then the domain script afterward. Keep the apex domain as the canonical host.
+The domain script is repeatable. It adds unique canonical and social URLs, a social image, Organization/WebSite/Service and article structured data where appropriate, installs Google tag `AW-18449308865` once in the head of all 31 indexable pages, and writes `sitemap.xml` and `robots.txt`. Article, homepage and blog-index sitemap entries use their recorded modification dates; unrelated pages receive no invented freshness date. The same tag is installed directly in `404.html`. Generated HTML loses the domain metadata and tag when rebuilt, so run the Google focus script and then the domain script afterward. Keep the apex domain as the canonical host.
 
 The supplied Google tag loads the Google Ads base tag. It does not define a quote-submission conversion event; that requires the specific conversion event snippet or conversion label from Google Ads. Do not send form contents to the tag.
 
@@ -35,9 +35,15 @@ The supplied Google tag loads the Google Ads base tag. It does not define a quot
 1. Publish the updated files to the live site. Verify HTTPS and the preferred-domain redirect, then check the live homepage, Canada page, Canadian research article, charts, sitemap, and 404 response.
 2. Verify `reviewremoval.ca` in Google Search Console and submit `https://reviewremoval.ca/sitemap.xml`. Check indexing and search queries after Google crawls the pages. A sitemap helps discovery; it does not force indexing or ranking.
 3. Redeploy the corrected `google-apps-script.gs` and set its `NOTIFICATION_EMAIL` property before relying on owner email notifications from the quote forms. See `FORM-SETUP.md`. The supplied deployment previously accepted the sheet row but reported an email-recipient error.
-4. Supply a real public business contact address or email and the verified legal business name. Add them to the About page and Organization data when confirmed. Publish a privacy notice explaining the quote data sent to Google Apps Script and stored in Google Sheets, who can access it, its actual retention period, and how clients can request access or deletion; link it beside each form.
+4. Complete the actual legal supplier name, mailing address and monitored public contact in `legal-settings.json` and rebuild. Bilingual terms/privacy pages and compact form notices are implemented. Confirm that real data-handling, retention, access and cancellation practices match them, identify the legal supplier in every paid order, and obtain Canadian legal review. See `LEGAL-SETUP.md` for sources and outstanding operational details.
 5. Maintain the research articles when source reports change. Update text, source tables, charts, and visible revision dates together after a material edit. For the rating model, also preserve or clearly revise the rounding assumption and version. Do not change dates merely to appear fresh.
 6. If ReviewRemoval serves customers in person and meets Google Business Profile eligibility rules, create a profile with the real business details. An online-only service should not claim a physical local presence.
 7. Share the cited research and practical guides with relevant Canadian publications and business groups. Monitor earned links, citations, search queries, and indexing reports, then improve pages based on actual reader questions.
 
 Search ranking depends on many factors outside this site. These changes improve technical access and page relevance but cannot guarantee a top position.
+
+
+October 27 SEO follow-up: the domain pass also generates the editorial-standards
+page, normalizes homepage links and preserves source/publication dates. See
+`SEO-AUDIT-2026-10-27.md` for live findings, publication exclusions, the exact
+homepage redirect condition and separate webmaster-account tasks.

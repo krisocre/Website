@@ -68,6 +68,7 @@ form?.addEventListener('submit', async event => {
   }
 
   const payload = new FormData(form);
+  window.SubmissionTerms?.prepare(payload);
   payload.set('contact_detail', String(payload.get('email_address') || ''));
   payload.set('review_count', String(clamp(payload.get('review_count'))));
   const count = Number(payload.get('review_count'));

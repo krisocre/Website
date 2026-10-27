@@ -1,0 +1,106 @@
+{
+  "@context": "http://www.w3.org/ns/csvw",
+  "url": "https://reviewremoval.ca/blog/data/google-risk-bounds.csv",
+  "dc:title": "Google review risk-score denominators: source audit and identification models \u2014 google-risk-bounds.csv",
+  "dc:license": "https://creativecommons.org/licenses/by/4.0/",
+  "tableSchema": {
+    "columns": [
+      {
+        "name": "record_id",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "record id"
+      },
+      {
+        "name": "record_type",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "Distinguishes attributed source aggregates from constructed models; never a Canadian case outcome."
+      },
+      {
+        "name": "original_reviews",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "original reviews"
+      },
+      {
+        "name": "deleted_reviews",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "deleted reviews"
+      },
+      {
+        "name": "deleted_five_star",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "deleted five star"
+      },
+      {
+        "name": "deleted_five_star_share_percent",
+        "datatype": "number",
+        "null": [
+          ""
+        ],
+        "dc:description": "Fixed 93.4% in the constructed example, numerically matching a source display, without asserting an observed cohort."
+      },
+      {
+        "name": "deletion_fraction_percent",
+        "datatype": "number",
+        "null": [
+          ""
+        ],
+        "dc:description": "deletion fraction percent"
+      },
+      {
+        "name": "original_five_star_min",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "original five star min"
+      },
+      {
+        "name": "original_five_star_max",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "original five star max"
+      },
+      {
+        "name": "original_five_star_share_min_percent",
+        "datatype": "number",
+        "null": [
+          ""
+        ],
+        "dc:description": "Conditional mathematical lower bound under the fixed-original-set model."
+      },
+      {
+        "name": "original_five_star_share_max_percent",
+        "datatype": "number",
+        "null": [
+          ""
+        ],
+        "dc:description": "Conditional mathematical upper bound with surviving star composition unknown."
+      },
+      {
+        "name": "assumption",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "assumption"
+      }
+    ]
+  }
+}

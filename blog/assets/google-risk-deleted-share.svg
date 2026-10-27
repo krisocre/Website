@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="864pt" height="561.6pt" viewBox="0 0 864 561.6" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-10-27</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>ReviewRemoval</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 561.6
+L 864 561.6
+L 864 0
+L 0 0
+z
+" style="fill: #faf8f2"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 164.16 449.28
+L 812.16 449.28
+L 812.16 134.784
+L 164.16 134.784
+z
+" style="fill: #faf8f2"/>
+   </g>
+   <g id="matplotlib.axis_1">
+    <g id="xtick_1">
+     <g id="line2d_1">
+      <path d="M 164.16 449.28
+L 164.16 134.784
+" clip-path="url(#paeff3f0947)" style="fill: none; stroke: #dfe5df; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_2">
+      <defs>
+       <path id="m49eacdefbd" d="M 0 0
+L 0 3.5
+" style="stroke: #000000; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#m49eacdefbd" x="164.16" y="449.28" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_1">
+      <text style="font-size: 12px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: middle" x="164.16" y="465.398125" transform="rotate(-0 164.16 465.398125)">0</text>
+     </g>
+    </g>
+    <g id="xtick_2">
+     <g id="line2d_3">
+      <path d="M 287.588571 449.28
+L 287.588571 134.784
+" clip-path="url(#paeff3f0947)" style="fill: none; stroke: #dfe5df; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_4">
+      <g>
+       <use xlink:href="#m49eacdefbd" x="287.588571" y="449.28" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_2">
+      <text style="font-size: 12px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: middle" x="287.588571" y="465.398125" transform="rotate(-0 287.588571 465.398125)">20</text>
+     </g>
+    </g>
+    <g id="xtick_3">
+     <g id="line2d_5">
+      <path d="M 411.017143 449.28
+L 411.017143 134.784
+" clip-path="url(#paeff3f0947)" style="fill: none; stroke: #dfe5df; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_6">
+      <g>
+       <use xlink:href="#m49eacdefbd" x="411.017143" y="449.28" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_3">
+      <text style="font-size: 12px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: middle" x="411.017143" y="465.398125" transform="rotate(-0 411.017143 465.398125)">40</text>
+     </g>
+    </g>
+    <g id="xtick_4">
+     <g id="line2d_7">
+      <path d="M 534.445714 449.28
+L 534.445714 134.784
+" clip-path="url(#paeff3f0947)" style="fill: none; stroke: #dfe5df; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_8">
+      <g>
+       <use xlink:href="#m49eacdefbd" x="534.445714" y="449.28" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_4">
+      <text style="font-size: 12px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: middle" x="534.445714" y="465.398125" transform="rotate(-0 534.445714 465.398125)">60</text>
+     </g>
+    </g>
+    <g id="xtick_5">
+     <g id="line2d_9">
+      <path d="M 657.874286 449.28
+L 657.874286 134.784
+" clip-path="url(#paeff3f0947)" style="fill: none; stroke: #dfe5df; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_10">
+      <g>
+       <use xlink:href="#m49eacdefbd" x="657.874286" y="449.28" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_5">
+      <text style="font-size: 12px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: middle" x="657.874286" y="465.398125" transform="rotate(-0 657.874286 465.398125)">80</text>
+     </g>
+    </g>
+    <g id="xtick_6">
+     <g id="line2d_11">
+      <path d="M 781.302857 449.28
+L 781.302857 134.784
+" clip-path="url(#paeff3f0947)" style="fill: none; stroke: #dfe5df; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_12">
+      <g>
+       <use xlink:href="#m49eacdefbd" x="781.302857" y="449.28" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_6">
+      <text style="font-size: 12px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: middle" x="781.302857" y="465.398125" transform="rotate(-0 781.302857 465.398125)">100</text>
+     </g>
+    </g>
+    <g id="text_7">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: middle" x="488.16" y="481.011875" transform="rotate(-0 488.16 481.011875)">Published five-star share of deleted-review set (%)</text>
+    </g>
+   </g>
+   <g id="matplotlib.axis_2">
+    <g id="ytick_1">
+     <g id="line2d_13">
+      <defs>
+       <path id="mf3db7c3518" d="M 0 0
+L -3.5 0
+" style="stroke: #000000; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#mf3db7c3518" x="164.16" y="162.467595" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_8">
+      <text style="font-size: 12px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: end" x="157.16" y="167.026657" transform="rotate(-0 157.16 167.026657)">1-2 / week</text>
+     </g>
+    </g>
+    <g id="ytick_2">
+     <g id="line2d_14">
+      <g>
+       <use xlink:href="#mf3db7c3518" x="164.16" y="205.65573" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_9">
+      <text style="font-size: 12px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: end" x="157.16" y="210.214792" transform="rotate(-0 157.16 210.214792)">3-5 / week</text>
+     </g>
+    </g>
+    <g id="ytick_3">
+     <g id="line2d_15">
+      <g>
+       <use xlink:href="#mf3db7c3518" x="164.16" y="248.843865" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_10">
+      <text style="font-size: 12px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: end" x="157.16" y="253.402927" transform="rotate(-0 157.16 253.402927)">6-10 / week</text>
+     </g>
+    </g>
+    <g id="ytick_4">
+     <g id="line2d_16">
+      <g>
+       <use xlink:href="#mf3db7c3518" x="164.16" y="292.032" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_11">
+      <text style="font-size: 12px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: end" x="157.16" y="296.591063" transform="rotate(-0 157.16 296.591063)">11-20 / week</text>
+     </g>
+    </g>
+    <g id="ytick_5">
+     <g id="line2d_17">
+      <g>
+       <use xlink:href="#mf3db7c3518" x="164.16" y="335.220135" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_12">
+      <text style="font-size: 12px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: end" x="157.16" y="339.779198" transform="rotate(-0 157.16 339.779198)">21-50 / week</text>
+     </g>
+    </g>
+    <g id="ytick_6">
+     <g id="line2d_18">
+      <g>
+       <use xlink:href="#mf3db7c3518" x="164.16" y="378.40827" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_13">
+      <text style="font-size: 12px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: end" x="157.16" y="382.967333" transform="rotate(-0 157.16 382.967333)">51-100 / week</text>
+     </g>
+    </g>
+    <g id="ytick_7">
+     <g id="line2d_19">
+      <g>
+       <use xlink:href="#mf3db7c3518" x="164.16" y="421.596405" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_14">
+      <text style="font-size: 12px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: end" x="157.16" y="426.155468" transform="rotate(-0 157.16 426.155468)">100+ / week</text>
+     </g>
+    </g>
+   </g>
+   <g id="patch_3">
+    <path d="M 164.16 149.079273
+L 612.205714 149.079273
+L 612.205714 175.855917
+L 164.16 175.855917
+z
+" clip-path="url(#paeff3f0947)" style="fill: #17353e"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 164.16 192.267408
+L 698.605714 192.267408
+L 698.605714 219.044052
+L 164.16 219.044052
+z
+" clip-path="url(#paeff3f0947)" style="fill: #17353e"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 164.16 235.455543
+L 720.822857 235.455543
+L 720.822857 262.232187
+L 164.16 262.232187
+z
+" clip-path="url(#paeff3f0947)" style="fill: #17353e"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 164.16 278.643678
+L 728.228571 278.643678
+L 728.228571 305.420322
+L 164.16 305.420322
+z
+" clip-path="url(#paeff3f0947)" style="fill: #17353e"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 164.16 321.831813
+L 731.314286 321.831813
+L 731.314286 348.608457
+L 164.16 348.608457
+z
+" clip-path="url(#paeff3f0947)" style="fill: #17353e"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 164.16 365.019948
+L 731.314286 365.019948
+L 731.314286 391.796592
+L 164.16 391.796592
+z
+" clip-path="url(#paeff3f0947)" style="fill: #17353e"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 164.16 408.208083
+L 740.571429 408.208083
+L 740.571429 434.984727
+L 164.16 434.984727
+z
+" clip-path="url(#paeff3f0947)" style="fill: #17353e"/>
+   </g>
+   <g id="patch_10">
+    <path d="M 164.16 449.28
+L 812.16 449.28
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="text_15">
+    <text style="font-size: 12px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: start; fill: #17353e" x="618.377143" y="165.778845" transform="rotate(-0 618.377143 165.778845)">72.6%</text>
+   </g>
+   <g id="text_16">
+    <text style="font-size: 12px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: start; fill: #17353e" x="704.777143" y="208.96698" transform="rotate(-0 704.777143 208.96698)">86.6%</text>
+   </g>
+   <g id="text_17">
+    <text style="font-size: 12px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: start; fill: #17353e" x="726.994286" y="252.155115" transform="rotate(-0 726.994286 252.155115)">90.2%</text>
+   </g>
+   <g id="text_18">
+    <text style="font-size: 12px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: start; fill: #17353e" x="734.4" y="295.34325" transform="rotate(-0 734.4 295.34325)">91.4%</text>
+   </g>
+   <g id="text_19">
+    <text style="font-size: 12px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: start; fill: #17353e" x="737.485714" y="338.531385" transform="rotate(-0 737.485714 338.531385)">91.9%</text>
+   </g>
+   <g id="text_20">
+    <text style="font-size: 12px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: start; fill: #17353e" x="737.485714" y="381.71952" transform="rotate(-0 737.485714 381.71952)">91.9%</text>
+   </g>
+   <g id="text_21">
+    <text style="font-size: 12px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: start; fill: #17353e" x="746.742857" y="424.907655" transform="rotate(-0 746.742857 424.907655)">93.4%</text>
+   </g>
+  </g>
+  <g id="text_22">
+   <text style="font-weight: 700; font-size: 23px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: start; fill: #17353e" x="47.52" y="39.312" transform="rotate(-0 47.52 39.312)">A percentage about the reviews that disappeared</text>
+  </g>
+  <g id="text_23">
+   <text style="font-size: 12px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: start; fill: #17353e" x="47.52" y="75.816" transform="rotate(-0 47.52 75.816)">Published five-star summaries use each profile’s deleted-review set, not its whole review base.</text>
+  </g>
+  <g id="text_24">
+   <text style="font-size: 10px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: start; fill: #17353e" x="47.52" y="508.248" transform="rotate(-0 47.52 508.248)">Seven selected velocity rows. “Per week” is maximum observed rolling 7-day count; not an official threshold.</text>
+  </g>
+  <g id="text_25">
+   <text style="font-size: 9px; font-family: 'DejaVu Sans', Arial, sans-serif; text-anchor: start; fill: #526768" x="47.52" y="539.136" transform="rotate(-0 47.52 539.136)">ReviewRemoval · Original analysis and figures: CC BY 4.0 · Source aggregates: Localo (2026)</text>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="paeff3f0947">
+   <rect x="164.16" y="134.784" width="648" height="314.496"/>
+  </clipPath>
+ </defs>
+</svg>

@@ -1,0 +1,5 @@
+record_id,record_type,metric,unit,top_quintile_display,bottom_quintile_display,nominal_ratio,source_url,notes
+Q01,source_aggregate_with_derived_ratio,Five-star share of deleted reviews,percent,97.6,59.3,1.6458684654300169,https://localo.com/blog/review-velocity-study,"Ratio of displayed source summaries, not a deletion probability or causal effect."
+Q02,source_aggregate_with_derived_ratio,Generic-phrase share of deleted reviews,percent,26.2,11.2,2.3392857142857144,https://localo.com/blog/review-velocity-study,"Ratio of displayed source summaries, not a deletion probability or causal effect."
+Q03,source_aggregate_with_derived_ratio,Maximum reviews per week,reviews_per_week,39.7,4.6,8.630434782608697,https://localo.com/blog/review-velocity-study,"Ratio of displayed source summaries, not a deletion probability or causal effect."
+Q04,source_aggregate_with_derived_ratio,Average deletions per profile,reviews_per_profile,114,23,4.956521739130435,https://localo.com/blog/review-velocity-study,"Ratio of displayed source summaries, not a deletion probability or causal effect."

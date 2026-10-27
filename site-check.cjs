@@ -3,11 +3,13 @@ const fs = require('node:fs');
 const puppeteer = require('C:/Users/alkhi/node_modules/puppeteer');
 
 const root = __dirname;
+const previewRoot=path.resolve(root,process.env.SITE_CHECK_PREVIEWS||'previews');
+fs.mkdirSync(previewRoot,{recursive:true});
 const pages = [
-  'index.html', 'platforms.html', 'review-removal-canada.html', 'about.html', 'remove-facebook-reviews.html', 'remove-yelp-reviews.html', 'remove-trustpilot-reviews.html', 'remove-tripadvisor-reviews.html', 'remove-booking-com-reviews.html', 'remove-glassdoor-reviews.html', 'remove-indeed-reviews.html',
+  'index.html', 'platforms.html', 'review-removal-canada.html', 'about.html', 'terms-of-service.html', 'privacy-policy.html', 'editorial-policy.html', 'remove-facebook-reviews.html', 'remove-yelp-reviews.html', 'remove-trustpilot-reviews.html', 'remove-tripadvisor-reviews.html', 'remove-booking-com-reviews.html', 'remove-glassdoor-reviews.html', 'remove-indeed-reviews.html',
   'blog/index.html', 'blog/google-review-moderation-2019-2025.html', 'blog/trustpilot-fake-reviews-by-star-rating.html', 'blog/canadian-tourism-google-reviews-2023.html', 'blog/review-removal-questions-answered.html', 'blog/review-report-evidence-checklist.html', 'blog/yelp-reviews-disappear-reappear-data.html', 'blog/tripadvisor-fake-review-statistics-removal-rates.html', 'blog/trustpilot-appeal-outcomes-2025.html', 'blog/google-review-removal-rating-impact-study.html',
   ...require('./google-guides.cjs').map(guide => guide.file),
-  'blog/google-review-removal-denominator-audit.html'
+  'blog/google-review-removal-denominator-audit.html', 'blog/google-review-risk-score-denominator-study.html'
 ];
 const errors = [];
 const titles = new Set();
@@ -52,7 +54,8 @@ for (const name of ['google-moderation-2019-2025.png', 'trustpilot-fake-reviews-
       const links = await page.$$eval('a[href]', nodes => nodes.map(n => n.getAttribute('href')).filter(h => h && !h.startsWith('http') && !h.startsWith('mailto:')));
       for (const link of links) {
         const target = link.split('#')[0];
-        const resolved = target ? path.resolve(root, path.dirname(name), target) : path.join(root, name);
+        const linkUrl=new URL(link,`https://reviewremoval.ca/${name}`);
+        const resolved=path.join(root,linkUrl.pathname.replace(/^\//,'')||'index.html');
         if (target && !fs.existsSync(resolved)) errors.push(`${name}: broken link ${link}`);
         const hash = link.split('#')[1];
         if (hash && fs.existsSync(resolved)) {
@@ -106,27 +109,27 @@ for (const name of ['google-moderation-2019-2025.png', 'trustpilot-fake-reviews-
         await page.setViewport({width, height: 900, deviceScaleFactor: 1});
         const layout = await page.evaluate(() => ({scroll: document.documentElement.scrollWidth, viewport: innerWidth, heading: document.querySelector('h1')?.getBoundingClientRect().width}));
         if (layout.scroll > layout.viewport + 1) errors.push(`${name} @${width}: horizontal overflow ${layout.scroll}`);
-        if (name === 'blog/google-review-removal-rating-impact-study.html' && width === 1440) await page.screenshot({path:path.join(root,'previews','rating-study-desktop.png'),fullPage:true});
-        if (name === 'blog/google-review-removal-rating-impact-study.html' && width === 390) await page.screenshot({path:path.join(root,'previews','rating-study-mobile.png'),fullPage:true});
-        if (name === 'index.html' && width === 1440) await page.screenshot({path: path.join(root, 'previews', 'home-desktop.png'), fullPage: true});
-        if (name === 'index.html' && width === 1440) await page.screenshot({path: path.join(root, 'previews', 'home-desktop-top.png')});
-        if (name === 'index.html' && width === 390) await page.screenshot({path: path.join(root, 'previews', 'home-mobile.png'), fullPage: true});
-        if (name === 'index.html' && width === 390) await page.screenshot({path: path.join(root, 'previews', 'home-mobile-top.png')});
-        if (name === 'about.html' && width === 1440) await page.screenshot({path: path.join(root, 'previews', 'about-desktop.png'), fullPage: true});
-        if (name === 'about.html' && width === 390) await page.screenshot({path: path.join(root, 'previews', 'about-mobile-top.png')});
-        if (name === 'platforms.html' && width === 1440) await page.screenshot({path: path.join(root, 'previews', 'platforms-desktop.png'), fullPage: true});
-        if (name === 'review-removal-canada.html' && width === 1440) await page.screenshot({path: path.join(root, 'previews', 'canada-desktop.png'), fullPage: true});
-        if (name === 'review-removal-canada.html' && width === 390) await page.screenshot({path: path.join(root, 'previews', 'canada-mobile.png'), fullPage: true});
-        if (name === 'remove-facebook-reviews.html' && width === 1440) await page.screenshot({path: path.join(root, 'previews', 'facebook-desktop.png'), fullPage: true});
-        if (name === 'remove-trustpilot-reviews.html' && width === 390) await page.screenshot({path: path.join(root, 'previews', 'trustpilot-mobile.png'), fullPage: true});
-        if (name === 'blog/index.html' && width === 1440) await page.screenshot({path: path.join(root, 'previews', 'blog-desktop.png'), fullPage: true});
-        if (name === 'blog/google-review-moderation-2019-2025.html' && width === 1440) await page.screenshot({path: path.join(root, 'previews', 'google-study-desktop.png'), fullPage: true});
-        if (name === 'blog/trustpilot-fake-reviews-by-star-rating.html' && width === 390) await page.screenshot({path: path.join(root, 'previews', 'trustpilot-study-mobile.png'), fullPage: true});
-        if (name === 'blog/yelp-reviews-disappear-reappear-data.html' && width === 1440) await page.screenshot({path:path.join(root,'previews','yelp-research-desktop.png'),fullPage:true});
-        if (name === 'blog/yelp-reviews-disappear-reappear-data.html' && width === 390) await page.screenshot({path:path.join(root,'previews','yelp-research-mobile.png'),fullPage:true});
-        if (name === 'blog/tripadvisor-fake-review-statistics-removal-rates.html' && width === 1440) await page.screenshot({path:path.join(root,'previews','tripadvisor-research-desktop.png'),fullPage:true});
-        if (name === 'blog/tripadvisor-fake-review-statistics-removal-rates.html' && width === 390) await page.screenshot({path:path.join(root,'previews','tripadvisor-research-mobile.png'),fullPage:true});
-        if (name === 'blog/canadian-tourism-google-reviews-2023.html' && width === 1440) await page.screenshot({path: path.join(root, 'previews', 'canada-study-desktop.png'), fullPage: true});
+        if (name === 'blog/google-review-removal-rating-impact-study.html' && width === 1440) await page.screenshot({path:path.join(previewRoot,'rating-study-desktop.png'),fullPage:true});
+        if (name === 'blog/google-review-removal-rating-impact-study.html' && width === 390) await page.screenshot({path:path.join(previewRoot,'rating-study-mobile.png'),fullPage:true});
+        if (name === 'index.html' && width === 1440) await page.screenshot({path: path.join(previewRoot, 'home-desktop.png'), fullPage: true});
+        if (name === 'index.html' && width === 1440) await page.screenshot({path: path.join(previewRoot, 'home-desktop-top.png')});
+        if (name === 'index.html' && width === 390) await page.screenshot({path: path.join(previewRoot, 'home-mobile.png'), fullPage: true});
+        if (name === 'index.html' && width === 390) await page.screenshot({path: path.join(previewRoot, 'home-mobile-top.png')});
+        if (name === 'about.html' && width === 1440) await page.screenshot({path: path.join(previewRoot, 'about-desktop.png'), fullPage: true});
+        if (name === 'about.html' && width === 390) await page.screenshot({path: path.join(previewRoot, 'about-mobile-top.png')});
+        if (name === 'platforms.html' && width === 1440) await page.screenshot({path: path.join(previewRoot, 'platforms-desktop.png'), fullPage: true});
+        if (name === 'review-removal-canada.html' && width === 1440) await page.screenshot({path: path.join(previewRoot, 'canada-desktop.png'), fullPage: true});
+        if (name === 'review-removal-canada.html' && width === 390) await page.screenshot({path: path.join(previewRoot, 'canada-mobile.png'), fullPage: true});
+        if (name === 'remove-facebook-reviews.html' && width === 1440) await page.screenshot({path: path.join(previewRoot, 'facebook-desktop.png'), fullPage: true});
+        if (name === 'remove-trustpilot-reviews.html' && width === 390) await page.screenshot({path: path.join(previewRoot, 'trustpilot-mobile.png'), fullPage: true});
+        if (name === 'blog/index.html' && width === 1440) await page.screenshot({path: path.join(previewRoot, 'blog-desktop.png'), fullPage: true});
+        if (name === 'blog/google-review-moderation-2019-2025.html' && width === 1440) await page.screenshot({path: path.join(previewRoot, 'google-study-desktop.png'), fullPage: true});
+        if (name === 'blog/trustpilot-fake-reviews-by-star-rating.html' && width === 390) await page.screenshot({path: path.join(previewRoot, 'trustpilot-study-mobile.png'), fullPage: true});
+        if (name === 'blog/yelp-reviews-disappear-reappear-data.html' && width === 1440) await page.screenshot({path:path.join(previewRoot,'yelp-research-desktop.png'),fullPage:true});
+        if (name === 'blog/yelp-reviews-disappear-reappear-data.html' && width === 390) await page.screenshot({path:path.join(previewRoot,'yelp-research-mobile.png'),fullPage:true});
+        if (name === 'blog/tripadvisor-fake-review-statistics-removal-rates.html' && width === 1440) await page.screenshot({path:path.join(previewRoot,'tripadvisor-research-desktop.png'),fullPage:true});
+        if (name === 'blog/tripadvisor-fake-review-statistics-removal-rates.html' && width === 390) await page.screenshot({path:path.join(previewRoot,'tripadvisor-research-mobile.png'),fullPage:true});
+        if (name === 'blog/canadian-tourism-google-reviews-2023.html' && width === 1440) await page.screenshot({path: path.join(previewRoot, 'canada-study-desktop.png'), fullPage: true});
       }
       if (name.startsWith('remove-') && !require('./google-guides.cjs').some(guide => guide.file === name)) {
         const platform = await page.$eval('body', el => el.dataset.platform.toLowerCase());
