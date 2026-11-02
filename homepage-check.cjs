@@ -65,14 +65,14 @@ const server=http.createServer((req,res)=>{
    if(width===390)await page.screenshot({path:path.join(output,'assessment-390.png')});
    results.push(layout);
   }
-  // Verify motion and the regression: Resume must work while its button retains focus.
+  // The banner has no visible control; hover/focus and reduced motion keep links usable.
   await page.goto(base,{waitUntil:'load'});
   const tickerDelta=()=>page.$eval('.platform-track',async e=>{const before=e.getBoundingClientRect().left;await new Promise(r=>setTimeout(r,160));return e.getBoundingClientRect().left-before;});
   assert.ok(await tickerDelta() < -1,'Platform banner actually moves');
-  await page.click('.platform-toggle');assert.equal(await page.$eval('.platform-toggle',e=>e.getAttribute('aria-pressed')),'true');
-  assert.ok(Math.abs(await tickerDelta())<.1,'Pause stops movement');
-  await page.click('.platform-toggle');assert.equal(await page.$eval('.platform-toggle',e=>e===document.activeElement),true);
-  assert.ok(await tickerDelta() < -1,'Resume moves the banner with the control focused');
+  assert.equal(await page.$('.platform-toggle'),null,'Pause button is removed');
+  await page.$eval('.platform-banner',e=>e.scrollIntoView({block:'center',behavior:'instant'}));
+  await page.hover('.platform-banner');assert.ok(Math.abs(await tickerDelta())<.1,'Hover pauses movement');
+  await page.mouse.move(0,0);assert.ok(await tickerDelta() < -1,'Leaving the banner resumes movement');
   await page.$eval('.platform-track',e=>{e.getAnimations()[0].currentTime=20000;});
   await page.focus('.platform-list a');
   assert.ok(await page.$eval('.platform-list a',e=>{const link=e.getBoundingClientRect(),viewport=e.closest('.platform-window').getBoundingClientRect();return link.left>=viewport.left&&link.right<=viewport.right;}),'Keyboard focus reveals the platform link even halfway through the loop');
@@ -121,6 +121,6 @@ const server=http.createServer((req,res)=>{
   assert.equal(await page.$$eval('title',n=>n.length),1);assert.equal(await page.$$eval('link[rel="canonical"]',n=>n.length),1);
   assert.deepEqual(errors,[]);assert.deepEqual(posts,[],'Never send a real POST');
   fs.writeFileSync(path.join(output,'layout-results.json'),JSON.stringify(results,null,2));
-  console.log('PASS: homepage at five widths; circular portrait; one moving eight-platform row; pause/resume with button focus, keyboard access and reduced motion; visible CTA; mobile form order; quote bounds/totals; mocked error/retry/success/notification failure; legal payload; native POST fallback; zero real submissions.');
+  console.log('PASS: homepage at five widths; circular portrait; one moving eight-platform row without a pause button; hover, keyboard access and reduced motion; visible CTA; mobile form order; quote bounds/totals; mocked error/retry/success/notification failure; legal payload; native POST fallback; zero real submissions.');
  }finally{if(browser)await browser.close();server.closeAllConnections();await new Promise(r=>server.close(r));}
 })().catch(e=>{console.error(e);process.exitCode=1;});
