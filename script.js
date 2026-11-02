@@ -14,16 +14,27 @@ navigation?.querySelectorAll('a').forEach(link => link.addEventListener('click',
   menuButton.setAttribute('aria-label', 'Open menu');
 }));
 
-const platformBanner = document.querySelector('.home-page .platform-marquee');
-const bannerToggle = platformBanner?.querySelector('.marquee-toggle');
-if (bannerToggle) {
+const platformBanner = document.querySelector('.home-page .platform-banner');
+const bannerToggle = platformBanner?.querySelector('.platform-toggle');
+const platformList = platformBanner?.querySelector('.platform-list');
+if (bannerToggle && platformList) {
+  // One accessible list; an inert visual copy keeps the single row looping.
+  const loopCopy = platformList.cloneNode(true);
+  loopCopy.setAttribute('aria-hidden', 'true');
+  loopCopy.setAttribute('inert', '');
+  loopCopy.querySelectorAll('a').forEach(link => {
+    const label = document.createElement('span');
+    label.textContent = link.textContent;
+    link.replaceWith(label);
+  });
+  platformList.after(loopCopy);
   bannerToggle.hidden = false;
   platformBanner.classList.add('is-ready');
   bannerToggle.addEventListener('click', () => {
     const paused = platformBanner.classList.toggle('is-paused');
     bannerToggle.setAttribute('aria-pressed', String(paused));
     bannerToggle.setAttribute('aria-label', paused ? 'Resume platform banner' : 'Pause platform banner');
-    bannerToggle.textContent = paused ? 'Resume' : 'Pause';
+    bannerToggle.querySelector('.platform-toggle-text').textContent = paused ? 'Play' : 'Pause';
   });
 }
 

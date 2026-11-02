@@ -35,16 +35,18 @@ const server=http.createServer((req,res)=>{
    await page.evaluate(()=>document.fonts.ready);
    const layout=await page.evaluate(()=>{
     const cta=document.querySelector('.hero-actions .button').getBoundingClientRect(),form=document.querySelector('form').getBoundingClientRect(),summary=document.querySelector('.quote-summary').getBoundingClientRect();
-    return {width:innerWidth,height:document.documentElement.scrollHeight,overflow:document.documentElement.scrollWidth>innerWidth+1,ctaTop:cta.top,ctaBottom:cta.bottom,viewportHeight:innerHeight,formTop:form.top,summaryTop:summary.top,brokenImages:[...document.images].filter(i=>i.complete&&!i.naturalWidth).map(i=>i.src),animated:document.getAnimations().filter(a=>a.playState==='running'&&!a.effect.target.matches('.marquee-track')).length};
+    return {width:innerWidth,height:document.documentElement.scrollHeight,overflow:document.documentElement.scrollWidth>innerWidth+1,ctaTop:cta.top,ctaBottom:cta.bottom,viewportHeight:innerHeight,formTop:form.top,summaryTop:summary.top,brokenImages:[...document.images].filter(i=>i.complete&&!i.naturalWidth).map(i=>i.src),animated:document.getAnimations().filter(a=>a.playState==='running'&&!a.effect.target.matches('.platform-track')).length};
    });
    assert.equal(layout.overflow,false,'Overflow at '+width);assert.ok(layout.ctaTop>=0&&layout.ctaBottom<layout.viewportHeight,'Primary CTA must be visible at '+width);assert.deepEqual(layout.brokenImages,[]);assert.equal(layout.animated,0,'No unrelated homepage animations');
    assert.ok(await page.$eval('.hero-secondary',e=>e.getBoundingClientRect().height>=44),'Pricing link has a 44px tap target');
    const testimonial=await page.$eval('.hero-testimonial',e=>({name:e.querySelector('figcaption strong').textContent,quote:e.querySelector('blockquote').textContent,rating:e.querySelector('.testimonial-stars').getAttribute('aria-label')}));
    assert.equal(testimonial.name,'Luke Hapher');assert.equal(testimonial.quote,'“The team took care of my bad review.”');assert.equal(testimonial.rating,'5 out of 5 stars');
    assert.equal(await page.$eval('.testimonial-overall',e=>e.getAttribute('aria-label')),'Overall customer rating: 4.9 out of 5 from 50 customer reviews');
-   const portrait=await page.$eval('.testimonial-avatar',e=>{const img=e.querySelector('img');return {loaded:img.complete&&img.naturalWidth===400&&img.naturalHeight===482,circle:getComputedStyle(e).borderRadius,width:e.getBoundingClientRect().width,height:e.getBoundingClientRect().height};});
+   const portrait=await page.$eval('.testimonial-avatar',e=>{const img=e.querySelector('img');return {loaded:img.complete&&img.naturalWidth===480&&img.naturalHeight===600,circle:getComputedStyle(e).borderRadius,width:e.getBoundingClientRect().width,height:e.getBoundingClientRect().height};});
    assert.equal(portrait.loaded,true,'Luke’s portrait is loaded');assert.equal(portrait.circle,'50%');assert.equal(portrait.width,portrait.height,'Portrait frame stays circular at every viewport');
    assert.equal(await page.evaluate(()=>performance.getEntriesByType('resource').filter(r=>/shop-owner.*\.(?:webp|jpg)/.test(r.name)).length),0,'Retired hero photograph is not downloaded');
+   const banner=await page.$eval('.platform-banner',e=>({height:e.getBoundingClientRect().height,links:e.querySelectorAll('.platform-list a').length,rows:new Set([...e.querySelectorAll('.platform-list li')].map(n=>Math.round(n.getBoundingClientRect().top))).size,lists:e.querySelectorAll('.platform-list:not([aria-hidden])').length}));
+   assert.equal(await page.$$eval('.platform-banner',e=>e.length),1);assert.equal(banner.lists,1);assert.equal(banner.links,8);assert.equal(banner.rows,1,'Banner remains one row');assert.ok(banner.height<=72,'No stacked banner');
    if(width<=680)assert.ok(layout.formTop<layout.summaryTop,'Mobile form precedes summary');
    assert.equal(await page.$eval('.hero-actions .button',e=>e.getAttribute('href')),'#quote');
    assert.equal(await page.$$eval('.assessment-steps>li',e=>e.length),3);
@@ -63,6 +65,22 @@ const server=http.createServer((req,res)=>{
    if(width===390)await page.screenshot({path:path.join(output,'assessment-390.png')});
    results.push(layout);
   }
+  // Verify motion and the regression: Resume must work while its button retains focus.
+  await page.goto(base,{waitUntil:'load'});
+  const tickerDelta=()=>page.$eval('.platform-track',async e=>{const before=e.getBoundingClientRect().left;await new Promise(r=>setTimeout(r,160));return e.getBoundingClientRect().left-before;});
+  assert.ok(await tickerDelta() < -1,'Platform banner actually moves');
+  await page.click('.platform-toggle');assert.equal(await page.$eval('.platform-toggle',e=>e.getAttribute('aria-pressed')),'true');
+  assert.ok(Math.abs(await tickerDelta())<.1,'Pause stops movement');
+  await page.click('.platform-toggle');assert.equal(await page.$eval('.platform-toggle',e=>e===document.activeElement),true);
+  assert.ok(await tickerDelta() < -1,'Resume moves the banner with the control focused');
+  await page.$eval('.platform-track',e=>{e.getAnimations()[0].currentTime=20000;});
+  await page.focus('.platform-list a');
+  assert.ok(await page.$eval('.platform-list a',e=>{const link=e.getBoundingClientRect(),viewport=e.closest('.platform-window').getBoundingClientRect();return link.left>=viewport.left&&link.right<=viewport.right;}),'Keyboard focus reveals the platform link even halfway through the loop');
+  await page.$eval('.platform-list a',e=>e.blur());
+  await page.emulateMediaFeatures([{name:'prefers-reduced-motion',value:'reduce'}]);
+  assert.equal(await page.$eval('.platform-track',e=>getComputedStyle(e).animationName),'none');
+  assert.equal(await page.$eval('.platform-list[aria-hidden]',e=>getComputedStyle(e).display),'none');
+  await page.emulateMediaFeatures([]);
   await page.goto(base,{waitUntil:'load'});
   await page.$eval('#priceQuantity',e=>{e.value='3';e.dispatchEvent(new Event('input',{bubbles:true}));});
   assert.equal(await page.$eval('#formQuantity',e=>e.value),'3');
@@ -97,10 +115,12 @@ const server=http.createServer((req,res)=>{
   });
   await page.waitForSelector('#submission-success:not([hidden])');assert.match(await page.$eval('#success-copy',e=>e.textContent),/saved, but the notification email was not sent/);
   await page.setJavaScriptEnabled(false);await page.goto(base,{waitUntil:'load'});
+  assert.equal(await page.$$eval('.platform-list',e=>e.length),1,'One list without JavaScript');
+  assert.equal(await page.$$eval('.platform-list a',e=>e.length),8,'All platforms remain accessible without JavaScript');
   assert.equal(await page.$eval('form',f=>f.method),'post');assert.equal(await page.$eval('form',f=>f.noValidate),false);assert.match(await page.$eval('noscript',n=>n.textContent),/confirm the scope and price/);
   assert.equal(await page.$$eval('title',n=>n.length),1);assert.equal(await page.$$eval('link[rel="canonical"]',n=>n.length),1);
   assert.deepEqual(errors,[]);assert.deepEqual(posts,[],'Never send a real POST');
   fs.writeFileSync(path.join(output,'layout-results.json'),JSON.stringify(results,null,2));
-  console.log('PASS: homepage at five widths; visible CTA; mobile form order; no unrelated animations; three steps; quote bounds/totals; mocked error/retry/success/notification failure; legal payload; native POST fallback; zero real submissions.');
+  console.log('PASS: homepage at five widths; circular portrait; one moving eight-platform row; pause/resume with button focus, keyboard access and reduced motion; visible CTA; mobile form order; quote bounds/totals; mocked error/retry/success/notification failure; legal payload; native POST fallback; zero real submissions.');
  }finally{if(browser)await browser.close();server.closeAllConnections();await new Promise(r=>server.close(r));}
 })().catch(e=>{console.error(e);process.exitCode=1;});

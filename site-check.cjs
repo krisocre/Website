@@ -97,12 +97,12 @@ for (const name of ['google-moderation-2019-2025.png', 'trustpilot-fake-reviews-
         const sectionIds = await page.$$eval('main > section', els => els.slice(0,3).map(el => el.id || el.className));
         if (sectionIds[1] !== 'pricing' || sectionIds[2] !== 'quote') errors.push(`${name}: section order ${sectionIds}`);
         const marquee = await page.evaluate(() => ({
-          names: [...document.querySelectorAll('.marquee-group:first-child [role="listitem"]')].map(el => el.textContent.trim()),
-          animation: getComputedStyle(document.querySelector('.marquee-track')).animationName
+          names: [...document.querySelectorAll('.platform-list:not([aria-hidden]) li')].map(el => el.textContent.trim()),
+          animation: getComputedStyle(document.querySelector('.platform-track')).animationName
         }));
-        if (marquee.names.length !== 8 || new Set(marquee.names).size !== 8 || marquee.animation !== 'platform-scroll') errors.push(`${name}: eight-platform banner must be complete and scroll`);
+        if (marquee.names.length !== 8 || new Set(marquee.names).size !== 8 || marquee.animation !== 'review-platform-loop') errors.push(`${name}: eight-platform banner must be complete and scroll`);
         await page.emulateMediaFeatures([{name: 'prefers-reduced-motion', value: 'reduce'}]);
-        const reducedAnimation = await page.$eval('.marquee-track', el => getComputedStyle(el).animationName);
+        const reducedAnimation = await page.$eval('.platform-track', el => getComputedStyle(el).animationName);
         if (reducedAnimation !== 'none') errors.push(`${name}: banner ignores reduced motion`);
         await page.emulateMediaFeatures([{name: 'prefers-reduced-motion', value: 'no-preference'}]);
       }
