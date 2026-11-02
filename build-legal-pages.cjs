@@ -144,6 +144,7 @@ function build(originOverride){
   }
   // An error template can be served at any depth; local links must resolve from /.
   if(file==='404.html')html=html.replace(/\b(href|src)="(?!(?:https?:|mailto:|tel:|data:|javascript:|#|\/))([^"]+)"/g,'$1="/$2"');
+  if(removal)html=require('./install-measurement.cjs').applyToHtml(html,file);
   if(html!==fs.readFileSync(target,'utf8'))fs.writeFileSync(target,html);
  }
  console.log(`${brand}: built bilingual terms/privacy and notices for ${forms} request forms (version ${VERSION}).`);

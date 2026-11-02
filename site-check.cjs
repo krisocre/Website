@@ -21,7 +21,7 @@ for (const name of pages) {
   titles.add(title);
 }
 const homeHtml = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
-if (!homeHtml.includes('Google Review Removal Canada') || !homeHtml.includes('id="service-area"') || !homeHtml.includes('id="policy-title"')) errors.push('Homepage search landing content is incomplete');
+if (!/<title>Google Review Removal[^<]*Canada[^<]*<\/title>/.test(homeHtml) || !homeHtml.includes('id="service-area"') || !homeHtml.includes('id="policy-title"')) errors.push('Homepage search landing content is incomplete');
 const googleRows = fs.readFileSync(path.join(root, 'blog/data/google-review-moderation-2019-2025.csv'), 'utf8').trim().split(/\r?\n/).slice(1);
 const trustRows = fs.readFileSync(path.join(root, 'blog/data/trustpilot-fake-reviews-by-star-2024.csv'), 'utf8').trim().split(/\r?\n/).slice(1);
 const canadaRows = fs.readFileSync(path.join(root, 'blog/data/canadian-sme-online-activities-2023.csv'), 'utf8').trim().split(/\r?\n/).slice(1);
@@ -99,7 +99,7 @@ for (const name of ['google-moderation-2019-2025.png', 'trustpilot-fake-reviews-
           names: [...document.querySelectorAll('.marquee-group:first-child [role="listitem"]')].map(el => el.textContent.trim()),
           animation: getComputedStyle(document.querySelector('.marquee-track')).animationName
         }));
-        if (marquee.names.length !== 8 || new Set(marquee.names).size !== 8 || marquee.animation !== 'platform-scroll') errors.push(`${name}: eight-platform banner is incomplete`);
+        if (marquee.names.length !== 8 || new Set(marquee.names).size !== 8 || marquee.animation !== 'none') errors.push(`${name}: eight-platform navigation must be complete and static`);
         await page.emulateMediaFeatures([{name: 'prefers-reduced-motion', value: 'reduce'}]);
         const reducedAnimation = await page.$eval('.marquee-track', el => getComputedStyle(el).animationName);
         if (reducedAnimation !== 'none') errors.push(`${name}: banner ignores reduced motion`);

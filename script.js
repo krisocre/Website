@@ -104,6 +104,11 @@ form?.addEventListener('submit', async event => {
     form.hidden = true;
     successPanel.hidden = false;
     successPanel.focus();
+    // Only explicit backend success confirms a lead. A legacy mail-error string
+    // may show a warning above, but is not sufficient conversion evidence.
+    if (result.result === 'success') {
+      try { window.ReviewRemovalMeasurement?.confirmedLead(form); } catch (_) { /* Measurement must never block an enquiry. */ }
+    }
   } catch (error) {
     message.className = 'form-message is-error';
     message.textContent = 'We could not confirm your request. Your details are still here; please wait a few minutes before trying again.';

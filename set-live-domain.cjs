@@ -26,16 +26,7 @@ const pages = [
 const escapeAttr = value => value.replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;');
 const marker = /\n  <!-- production URL metadata start -->[\s\S]*?<!-- production URL metadata end -->/;
 const googleTagMarker = /\n  <!-- Google tag \(gtag\.js\) -->[\s\S]*?<!-- \/Google tag \(gtag\.js\) -->/;
-const googleTag = `
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=AW-18449308865"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'AW-18449308865');
-  </script>
-  <!-- /Google tag (gtag.js) -->`;
+const {applyToHtml: applyMeasurement} = require('./install-measurement.cjs');
 const shareImages = {
   'blog/google-review-risk-score-denominator-study.html':'blog/assets/google-risk-identification-bounds.png',
   'blog/google-review-removal-denominator-audit.html': 'blog/assets/google-removal-reasons-denominators.png',
@@ -73,10 +64,11 @@ for (const relative of pages) {
   html = relative.startsWith('blog/')
     ? html.replace(/href="\.\.\/index\.html([?#][^"]*)?"/g,(_,suffix)=>`href="/${suffix||''}"`)
     : html.replace(/href="(?:\.\/)?index\.html([?#][^"]*)?"/g,(_,suffix)=>`href="/${suffix||''}"`);
-  if (relative.startsWith('blog/') && relative !== 'blog/index.html' && !html.includes('class="editorial-disclosure"')) {
+  const hasEditorialDisclosure = /\bclass="[^"]*\beditorial-disclosure\b/.test(html);
+  if (relative.startsWith('blog/') && relative !== 'blog/index.html' && !hasEditorialDisclosure) {
     html=html.replace('<article class="article-body">','<article class="article-body"><p class="editorial-disclosure">Published by ReviewRemoval. <a href="../editorial-policy.html#authorship" rel="author">Authorship, sources and correction standards</a>.</p>');
   }
-  if (['about.html','blog/index.html'].includes(relative) && !html.includes('class="editorial-disclosure"')) {
+  if (['about.html','blog/index.html'].includes(relative) && !hasEditorialDisclosure) {
     html=html.replace('</main>',`<section class="wrap editorial-disclosure"><h2>How our research is checked</h2><p>Read our <a href="${relative.startsWith('blog/')?'../':''}editorial-policy.html">editorial standards, source policy and correction process</a>. Platform-wide figures and mathematical examples do not measure our service outcomes.</p></section></main>`);
   }
   const title = html.match(/<title>([^<]+)<\/title>/)?.[1];
@@ -111,7 +103,7 @@ for (const relative of pages) {
           { '@type': 'WebSite', '@id': `${origin}/#website`, url: `${origin}/`, name: 'ReviewRemoval', publisher: { '@id': `${origin}/#organization` }, inLanguage: 'en-CA' },
           service,
           { '@type': 'WebPage', '@id': `${origin}/#webpage`, url: `${origin}/`, name: decodeEntities(title),
-            description: decodeEntities(description), inLanguage: 'en-CA', dateModified: '2026-10-24',
+            description: decodeEntities(description), inLanguage: 'en-CA', dateModified: '2026-11-01',
             isPartOf: { '@id': `${origin}/#website` }, mainEntity: { '@id': `${origin}/#service` } }
         ] }
       : isCanada ? { '@context': 'https://schema.org', '@graph': [service, {
@@ -192,7 +184,7 @@ for (const relative of pages) {
   }
   const imageAlt = shareImageAlts[relative] || 'ReviewRemoval: review concerns, handled for you';
   const tags = `\n  <!-- production URL metadata start -->\n  <link rel="canonical" href="${escapeAttr(canonical)}">\n  <meta name="robots" content="index, follow, max-image-preview:large">\n  <meta property="og:type" content="${isArticle ? 'article' : 'website'}">\n  <meta property="og:site_name" content="ReviewRemoval">\n  <meta property="og:locale" content="en_CA">\n  <meta property="og:url" content="${escapeAttr(canonical)}">\n  <meta property="og:title" content="${title}">\n  <meta property="og:description" content="${description}">\n  <meta property="og:image" content="${escapeAttr(shareImage)}">\n  <meta property="og:image:width" content="1200">\n  <meta property="og:image:height" content="${relative==='blog/google-review-risk-score-denominator-study.html'?'780':['blog/trustpilot-appeal-outcomes-2025.html','blog/google-review-removal-denominator-audit.html'].includes(relative)?'720':shareImages[relative]?'672':'630'}">\n  <meta property="og:image:alt" content="${escapeAttr(imageAlt)}">\n  <meta name="twitter:card" content="summary_large_image">\n  <meta name="twitter:title" content="${title}">\n  <meta name="twitter:description" content="${description}">\n  <meta name="twitter:image" content="${escapeAttr(shareImage)}">\n  <meta name="twitter:image:alt" content="${escapeAttr(imageAlt)}">${articleTimeTags}${schemaTag}\n  <!-- production URL metadata end -->`;
-  html = html.replace('</head>', `${tags}${googleTag}\n</head>`);
+  html = applyMeasurement(html.replace('</head>', `${tags}\n</head>`), relative);
   fs.writeFileSync(file, html, 'utf8');
 }
 

@@ -12,14 +12,13 @@ for(const file of fs.readdirSync(root).filter(name=>name.endsWith('.md'))){
 }
 const titles = new Set();
 const descriptions = new Set();
-const googleTagUrl = 'https://www.googletagmanager.com/gtag/js?id=AW-18449308865';
-const googleTagConfig = "gtag('config', 'AW-18449308865');";
 function checkGoogleTag(html, name) {
   const head = html.split('</head>')[0];
-  if ((head.split(googleTagUrl).length - 1) !== 1 || (head.split(googleTagConfig).length - 1) !== 1) {
-    errors.push(`${name}: Google tag must appear once in the head`);
-  }
+  for (const file of ['measurement-config.js','measurement.js','measurement.css'])
+    if ((head.match(new RegExp('(?:src|href)="[^"\\s]*'+file.replace('.','\\.')+'"','g'))||[]).length!==1)errors.push(`${name}: exactly one ${file} bootstrap required`);
+  if (/googletagmanager\.com\/(?:gtag\/js|gtm\.js)/.test(head)) errors.push(`${name}: direct Google loader bypasses consent`);
 }
+if (!fs.readFileSync(path.join(root,'measurement-config.js'),'utf8').includes("googleAdsId: 'AW-18449308865'")) errors.push('Existing Google Ads destination must be preserved');
 
 if (new Set(pages).size !== pages.length) errors.push('Sitemap URLs must be unique');
 const htmlFiles = [...fs.readdirSync(root).filter(name => name.endsWith('.html')),
@@ -70,14 +69,19 @@ for (const url of pages) {
   descriptions.add(desc);
   const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(match => match[1]);
   if (new Set(ids).size !== ids.length) errors.push(`${relative}: duplicate HTML IDs`);
-  for (const match of html.matchAll(/<(?:a|link|script|img|source)\b[^>]*\b(?:href|src|srcset)="([^"]+)"/g)) {
-    const link = match[1];
-    if (/^(?:https?:|mailto:|tel:|data:|blob:)/.test(link)) continue;
-    const [target, hash] = link.split('#');
-    const targetUrl=new URL(link,url);
-    const targetFile=path.join(root,decodeURIComponent(targetUrl.pathname).replace(/^\//,'')||'index.html');
-    if (!fs.existsSync(targetFile)) { errors.push(`${relative}: missing internal target ${link}`); continue; }
-    if (hash && targetFile.endsWith('.html') && !fs.readFileSync(targetFile, 'utf8').includes(`id="${hash}"`)) errors.push(`${relative}: missing anchor ${link}`);
+  for (const tag of html.matchAll(/<(?:a|link|script|img|source)\b[^>]*>/g)) {
+    for (const [,attribute,value] of tag[0].matchAll(/\b(href|src|srcset)="([^"]+)"/g)) {
+      if (/^(?:data:|blob:)/.test(value)) continue;
+      const links = attribute === 'srcset' ? value.split(',').map(candidate => candidate.trim().split(/\s+/)[0]) : [value];
+      for (const link of links) {
+        if (/^(?:https?:|mailto:|tel:|data:|blob:)/.test(link)) continue;
+        const hash = link.split('#')[1];
+        const targetUrl=new URL(link,url);
+        const targetFile=path.join(root,decodeURIComponent(targetUrl.pathname).replace(/^\//,'')||'index.html');
+        if (!fs.existsSync(targetFile)) { errors.push(`${relative}: missing internal target ${link}`); continue; }
+        if (hash && targetFile.endsWith('.html') && !fs.readFileSync(targetFile, 'utf8').includes(`id="${hash}"`)) errors.push(`${relative}: missing anchor ${link}`);
+      }
+    }
   }
 }
 

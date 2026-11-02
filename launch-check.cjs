@@ -15,7 +15,7 @@ const pages = [
 try {
   fs.copyFileSync(path.join(workspace, 'set-live-domain.cjs'), path.join(tempRoot, 'set-live-domain.cjs'));
   fs.copyFileSync(path.join(workspace, 'google-guides.cjs'), path.join(tempRoot, 'google-guides.cjs'));
-  for (const name of ['build-legal-pages.cjs','legal-settings.json','build-editorial-page.cjs']) fs.copyFileSync(path.join(workspace,name),path.join(tempRoot,name));
+  for (const name of ['build-legal-pages.cjs','legal-settings.json','build-editorial-page.cjs','install-measurement.cjs','measurement-config.js','measurement.js','measurement.css']) fs.copyFileSync(path.join(workspace,name),path.join(tempRoot,name));
   for (const relative of pages) {
     fs.mkdirSync(path.dirname(path.join(tempRoot, relative)), {recursive: true});
     fs.copyFileSync(path.join(workspace, relative), path.join(tempRoot, relative));
@@ -26,10 +26,9 @@ try {
   }
   for (const relative of pages) {
     const html = fs.readFileSync(path.join(tempRoot, relative), 'utf8');
-    if ((html.match(/googletagmanager\.com\/gtag\/js\?id=AW-18449308865/g) || []).length !== 1 ||
-        (html.match(/gtag\('config', 'AW-18449308865'\)/g) || []).length !== 1) {
-      throw new Error(`${relative}: Google tag was omitted or duplicated`);
-    }
+    for(const file of ['measurement-config.js','measurement.js','measurement.css'])if((html.match(new RegExp('(?:src|href)="[^"\\s]*'+file.replace('.','\\.')+'"','g'))||[]).length!==1)throw new Error(`${relative}: measurement bootstrap missing or duplicated: ${file}`);
+    if(/googletagmanager\.com\/(?:gtag\/js|gtm\.js)/.test(html.split('</head>')[0]))throw new Error(`${relative}: direct tag bypasses consent`);
+    if (['about.html','blog/index.html'].includes(relative) && (html.match(/<section class="wrap editorial-disclosure">/g)||[]).length !== 1) throw new Error(`${relative}: research disclosure duplicated by rebuild`);
   }
   const feed = fs.readFileSync(path.join(tempRoot, 'feed.xml'), 'utf8');
   const feedPages = pages.filter(name => name.startsWith('blog/') && name !== 'blog/index.html');

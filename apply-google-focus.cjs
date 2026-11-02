@@ -11,14 +11,17 @@ function addSection(html,prefix,marker,context){
   const section=guideSection(prefix,context);
   if(pattern.test(html))html=html.replace(pattern,section);
   else {if(!html.includes(marker))throw new Error('Missing Google section insertion marker '+context);html=html.replace(marker,section+'\n'+marker);}
+  if(context==='home')return html;
   const css=`<link rel="stylesheet" href="${prefix}google-guides.css">`;
   if(!html.includes(css))html=html.replace('</head>',css+'\n</head>');return html;
 }
 change('index.html',html=>{
-  html=metadata(html,'Google Review Removal Canada &amp; Toronto | ReviewRemoval','Google review removal for Canadian businesses. Let our team handle assessment, reporting and follow-up. CAD $50 upfront per review, plus $125 if removed.');
-  html=html.replace('Google review removal,<br><em>handled for you.</em>','Google review removal<br><em>across Canada.</em>');
-  html=html.replace('Send us the review. We assess it, prepare the report and manage the follow-through.','Send us the Google review. Our team assesses the case, prepares the report and handles the follow-through.');
-  if(!html.includes('<a href="#service">Google reviews</a>'))html=html.replace('<a href="#pricing">Pricing</a><a href="platforms.html">','<a href="#service">Google reviews</a><a href="#pricing">Pricing</a><a href="platforms.html">');
+  html=metadata(html,'Google Review Removal Service in Canada | ReviewRemoval','Policy-based Google review removal help for businesses in Toronto and across Canada. CAD $50 upfront per review + $125 if removed. Get a quote.');
+  if(!html.includes('class="home-page"')){
+    html=html.replace('Google review removal,<br><em>handled for you.</em>','Google review removal<br><em>across Canada.</em>');
+    html=html.replace('Send us the review. We assess it, prepare the report and manage the follow-through.','Send us the Google review. Our team assesses the case, prepares the report and handles the follow-through.');
+    if(!html.includes('<a href="#service">Google reviews</a>'))html=html.replace('<a href="#pricing">Pricing</a><a href="platforms.html">','<a href="#service">Google reviews</a><a href="#pricing">Pricing</a><a href="platforms.html">');
+  }
   html=html.replace('Read the facts behind the reviews.','Google review removal, explained.').replace('Original data analysis, useful rating calculations and practical guides for Canadian business owners.','Practical reporting guidance and original rating research for Canadian businesses managing Google reviews.');
   html=html.replace(/<a href="blog\/trustpilot-appeal-outcomes-2025.html">[\s\S]*?<\/a>/,'<a href="blog/report-google-review-appeal.html"><span>GUIDE / GOOGLE REPORTS</span><strong>Report a review and track your next step</strong><small>Understand status labels and prepare an eligible appeal <span aria-hidden="true">↓</span></small></a>');
   html=html.replace(/<a href="blog\/google-review-removal-rating-impact-study.html">[\s\S]*?<\/a>/,'<a href="blog/google-review-removal-denominator-audit.html"><span>NEW RESEARCH / OCTOBER 2026</span><strong>What Google’s review removal percentages actually mean</strong><small>34 source records, 13 comparisons and three original graphs <span aria-hidden="true">↓</span></small></a>');
