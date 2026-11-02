@@ -10,7 +10,7 @@ const virtualFs={...fs,readFileSync:(file,...args)=>virtualFiles.has(path.resolv
 const originalHome=fs.readFileSync(path.join(root,'index.html'),'utf8');
 for(let run=0;run<2;run++)vm.runInNewContext(fs.readFileSync(source,'utf8'),{require:name=>name==='node:fs'?virtualFs:localRequire(name),__dirname:root,console:{log(){}}},{filename:source});
 assert.equal(virtualFiles.get(path.join(root,'index.html'))||originalHome,originalHome,'Google-focus rebuilds must preserve the homepage exactly');
-const types={'.html':'text/html; charset=utf-8','.css':'text/css','.js':'text/javascript','.svg':'image/svg+xml','.jpg':'image/jpeg','.webp':'image/webp','.png':'image/png'};
+const types={'.html':'text/html; charset=utf-8','.css':'text/css','.js':'text/javascript','.svg':'image/svg+xml','.jpg':'image/jpeg','.webp':'image/webp','.png':'image/png','.avif':'image/avif'};
 const server=http.createServer((req,res)=>{
  if(req.method!=='GET'){res.writeHead(405).end();return;}
  const url=new URL(req.url,'http://localhost'),file=path.resolve(root,'.'+(url.pathname==='/'?'/index.html':decodeURIComponent(url.pathname)));
@@ -41,6 +41,9 @@ const server=http.createServer((req,res)=>{
    assert.ok(await page.$eval('.hero-secondary',e=>e.getBoundingClientRect().height>=44),'Pricing link has a 44px tap target');
    const testimonial=await page.$eval('.hero-testimonial',e=>({name:e.querySelector('figcaption strong').textContent,quote:e.querySelector('blockquote').textContent,rating:e.querySelector('.testimonial-stars').getAttribute('aria-label')}));
    assert.equal(testimonial.name,'Luke Hapher');assert.equal(testimonial.quote,'“The team took care of my bad review.”');assert.equal(testimonial.rating,'5 out of 5 stars');
+   assert.equal(await page.$eval('.testimonial-overall',e=>e.getAttribute('aria-label')),'Overall customer rating: 4.9 out of 5 from 50 customer reviews');
+   const portrait=await page.$eval('.testimonial-avatar',e=>{const img=e.querySelector('img');return {loaded:img.complete&&img.naturalWidth===400&&img.naturalHeight===482,circle:getComputedStyle(e).borderRadius,width:e.getBoundingClientRect().width,height:e.getBoundingClientRect().height};});
+   assert.equal(portrait.loaded,true,'Luke’s portrait is loaded');assert.equal(portrait.circle,'50%');assert.equal(portrait.width,portrait.height,'Portrait frame stays circular at every viewport');
    assert.equal(await page.evaluate(()=>performance.getEntriesByType('resource').filter(r=>/shop-owner.*\.(?:webp|jpg)/.test(r.name)).length),0,'Retired hero photograph is not downloaded');
    if(width<=680)assert.ok(layout.formTop<layout.summaryTop,'Mobile form precedes summary');
    assert.equal(await page.$eval('.hero-actions .button',e=>e.getAttribute('href')),'#quote');
