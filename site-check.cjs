@@ -9,7 +9,8 @@ const pages = [
   'index.html', 'platforms.html', 'review-removal-canada.html', 'about.html', 'terms-of-service.html', 'privacy-policy.html', 'editorial-policy.html', 'remove-facebook-reviews.html', 'remove-yelp-reviews.html', 'remove-trustpilot-reviews.html', 'remove-tripadvisor-reviews.html', 'remove-booking-com-reviews.html', 'remove-glassdoor-reviews.html', 'remove-indeed-reviews.html',
   'blog/index.html', 'blog/google-review-moderation-2019-2025.html', 'blog/trustpilot-fake-reviews-by-star-rating.html', 'blog/canadian-tourism-google-reviews-2023.html', 'blog/review-removal-questions-answered.html', 'blog/review-report-evidence-checklist.html', 'blog/yelp-reviews-disappear-reappear-data.html', 'blog/tripadvisor-fake-review-statistics-removal-rates.html', 'blog/trustpilot-appeal-outcomes-2025.html', 'blog/google-review-removal-rating-impact-study.html',
   ...require('./google-guides.cjs').map(guide => guide.file),
-  'blog/google-review-removal-denominator-audit.html', 'blog/google-review-risk-score-denominator-study.html'
+  'blog/google-review-removal-denominator-audit.html', 'blog/google-review-risk-score-denominator-study.html',
+  'blog/google-review-removal-appeals-data.html'
 ];
 const errors = [];
 const titles = new Set();
@@ -99,7 +100,7 @@ for (const name of ['google-moderation-2019-2025.png', 'trustpilot-fake-reviews-
           names: [...document.querySelectorAll('.marquee-group:first-child [role="listitem"]')].map(el => el.textContent.trim()),
           animation: getComputedStyle(document.querySelector('.marquee-track')).animationName
         }));
-        if (marquee.names.length !== 8 || new Set(marquee.names).size !== 8 || marquee.animation !== 'none') errors.push(`${name}: eight-platform navigation must be complete and static`);
+        if (marquee.names.length !== 8 || new Set(marquee.names).size !== 8 || marquee.animation !== 'platform-scroll') errors.push(`${name}: eight-platform banner must be complete and scroll`);
         await page.emulateMediaFeatures([{name: 'prefers-reduced-motion', value: 'reduce'}]);
         const reducedAnimation = await page.$eval('.marquee-track', el => getComputedStyle(el).animationName);
         if (reducedAnimation !== 'none') errors.push(`${name}: banner ignores reduced motion`);

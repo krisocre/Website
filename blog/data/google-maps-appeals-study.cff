@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "Cite this compilation and Google as the publisher of the underlying indicators."
+type: dataset
+title: "Google Maps Appeals Direction Audit, July 2025–June 2026"
+authors:
+  - name: "ReviewRemoval"
+version: 1.0.0
+date-released: 2026-11-02
+license: CC-BY-4.0
+url: "https://reviewremoval.ca/blog/google-review-removal-appeals-data.html"

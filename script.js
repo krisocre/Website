@@ -14,6 +14,19 @@ navigation?.querySelectorAll('a').forEach(link => link.addEventListener('click',
   menuButton.setAttribute('aria-label', 'Open menu');
 }));
 
+const platformBanner = document.querySelector('.home-page .platform-marquee');
+const bannerToggle = platformBanner?.querySelector('.marquee-toggle');
+if (bannerToggle) {
+  bannerToggle.hidden = false;
+  platformBanner.classList.add('is-ready');
+  bannerToggle.addEventListener('click', () => {
+    const paused = platformBanner.classList.toggle('is-paused');
+    bannerToggle.setAttribute('aria-pressed', String(paused));
+    bannerToggle.setAttribute('aria-label', paused ? 'Resume platform banner' : 'Pause platform banner');
+    bannerToggle.textContent = paused ? 'Resume' : 'Pause';
+  });
+}
+
 const quantityInputs = [...document.querySelectorAll('#priceQuantity, #formQuantity')];
 const platformName = document.body.dataset.platform || 'Google';
 const reviewNoun = document.body.dataset.reviewNoun || 'review';

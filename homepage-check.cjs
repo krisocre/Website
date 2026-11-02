@@ -35,14 +35,13 @@ const server=http.createServer((req,res)=>{
    await page.evaluate(()=>document.fonts.ready);
    const layout=await page.evaluate(()=>{
     const cta=document.querySelector('.hero-actions .button').getBoundingClientRect(),form=document.querySelector('form').getBoundingClientRect(),summary=document.querySelector('.quote-summary').getBoundingClientRect();
-    return {width:innerWidth,height:document.documentElement.scrollHeight,overflow:document.documentElement.scrollWidth>innerWidth+1,ctaTop:cta.top,ctaBottom:cta.bottom,viewportHeight:innerHeight,formTop:form.top,summaryTop:summary.top,brokenImages:[...document.images].filter(i=>i.complete&&!i.naturalWidth).map(i=>i.src),animated:document.getAnimations().filter(a=>a.playState==='running').length};
+    return {width:innerWidth,height:document.documentElement.scrollHeight,overflow:document.documentElement.scrollWidth>innerWidth+1,ctaTop:cta.top,ctaBottom:cta.bottom,viewportHeight:innerHeight,formTop:form.top,summaryTop:summary.top,brokenImages:[...document.images].filter(i=>i.complete&&!i.naturalWidth).map(i=>i.src),animated:document.getAnimations().filter(a=>a.playState==='running'&&!a.effect.target.matches('.marquee-track')).length};
    });
-   assert.equal(layout.overflow,false,'Overflow at '+width);assert.ok(layout.ctaTop>=0&&layout.ctaBottom<layout.viewportHeight,'Primary CTA must be visible at '+width);assert.deepEqual(layout.brokenImages,[]);assert.equal(layout.animated,0,'No running homepage animations');
+   assert.equal(layout.overflow,false,'Overflow at '+width);assert.ok(layout.ctaTop>=0&&layout.ctaBottom<layout.viewportHeight,'Primary CTA must be visible at '+width);assert.deepEqual(layout.brokenImages,[]);assert.equal(layout.animated,0,'No unrelated homepage animations');
    assert.ok(await page.$eval('.hero-secondary',e=>e.getBoundingClientRect().height>=44),'Pricing link has a 44px tap target');
-   const hero=await page.$eval('.hero-figure img',e=>({width:e.getAttribute('width'),height:e.getAttribute('height'),loading:e.loading,priority:e.getAttribute('fetchpriority'),source:e.closest('picture').querySelector('source').srcset}));
-   assert.equal(hero.width,'1200');assert.equal(hero.height,'1800');assert.equal(hero.loading,'eager');assert.equal(hero.priority,'high');
-   for(const candidate of hero.source.split(',')){const asset=candidate.trim().split(/\s+/)[0];assert.ok(fs.existsSync(path.join(root,asset)),'Responsive hero asset '+asset);}
-   assert.equal(await page.evaluate(()=>performance.getEntriesByType('resource').filter(r=>/shop-owner.*\.(?:webp|jpg)/.test(r.name)).length),1,'Download one selected hero image');
+   const testimonial=await page.$eval('.hero-testimonial',e=>({name:e.querySelector('figcaption strong').textContent,quote:e.querySelector('blockquote').textContent,rating:e.querySelector('.testimonial-stars').getAttribute('aria-label')}));
+   assert.equal(testimonial.name,'Luke Hapher');assert.equal(testimonial.quote,'“The team took care of my bad review.”');assert.equal(testimonial.rating,'5 out of 5 stars');
+   assert.equal(await page.evaluate(()=>performance.getEntriesByType('resource').filter(r=>/shop-owner.*\.(?:webp|jpg)/.test(r.name)).length),0,'Retired hero photograph is not downloaded');
    if(width<=680)assert.ok(layout.formTop<layout.summaryTop,'Mobile form precedes summary');
    assert.equal(await page.$eval('.hero-actions .button',e=>e.getAttribute('href')),'#quote');
    assert.equal(await page.$$eval('.assessment-steps>li',e=>e.length),3);
@@ -60,10 +59,6 @@ const server=http.createServer((req,res)=>{
    await page.evaluate(()=>{document.documentElement.style.scrollBehavior='auto';document.querySelector('#quote').scrollIntoView();});
    if(width===390)await page.screenshot({path:path.join(output,'assessment-390.png')});
    results.push(layout);
-  }
-  for(const [dpr,asset] of [[2,'shop-owner-800.webp'],[3,'shop-owner-1200.webp']]){
-   await page.setViewport({width:390,height:844,deviceScaleFactor:dpr});await page.goto(base,{waitUntil:'load'});
-   assert.ok(await page.$eval('.hero-figure img',(e,name)=>e.currentSrc.endsWith(name),asset),'Correct image selection at DPR '+dpr);
   }
   await page.goto(base,{waitUntil:'load'});
   await page.$eval('#priceQuantity',e=>{e.value='3';e.dispatchEvent(new Event('input',{bubbles:true}));});
@@ -103,6 +98,6 @@ const server=http.createServer((req,res)=>{
   assert.equal(await page.$$eval('title',n=>n.length),1);assert.equal(await page.$$eval('link[rel="canonical"]',n=>n.length),1);
   assert.deepEqual(errors,[]);assert.deepEqual(posts,[],'Never send a real POST');
   fs.writeFileSync(path.join(output,'layout-results.json'),JSON.stringify(results,null,2));
-  console.log('PASS: homepage at five widths; visible CTA; mobile form order; static platforms; three steps; quote bounds/totals; mocked error/retry/success/notification failure; legal payload; native POST fallback; zero real submissions.');
+  console.log('PASS: homepage at five widths; visible CTA; mobile form order; no unrelated animations; three steps; quote bounds/totals; mocked error/retry/success/notification failure; legal payload; native POST fallback; zero real submissions.');
  }finally{if(browser)await browser.close();server.closeAllConnections();await new Promise(r=>server.close(r));}
 })().catch(e=>{console.error(e);process.exitCode=1;});

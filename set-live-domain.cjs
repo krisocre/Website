@@ -21,13 +21,15 @@ const pages = [
   'blog/index.html', 'blog/google-review-moderation-2019-2025.html', 'blog/trustpilot-fake-reviews-by-star-rating.html',
   'blog/canadian-tourism-google-reviews-2023.html', 'blog/review-removal-questions-answered.html', 'blog/review-report-evidence-checklist.html', 'blog/yelp-reviews-disappear-reappear-data.html', 'blog/tripadvisor-fake-review-statistics-removal-rates.html', 'blog/trustpilot-appeal-outcomes-2025.html', 'blog/google-review-removal-rating-impact-study.html',
   ...require('./google-guides.cjs').map(guide => guide.file),
-  'blog/google-review-removal-denominator-audit.html', 'blog/google-review-risk-score-denominator-study.html'
+  'blog/google-review-removal-denominator-audit.html', 'blog/google-review-risk-score-denominator-study.html',
+  'blog/google-review-removal-appeals-data.html'
 ];
 const escapeAttr = value => value.replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;');
 const marker = /\n  <!-- production URL metadata start -->[\s\S]*?<!-- production URL metadata end -->/;
 const googleTagMarker = /\n  <!-- Google tag \(gtag\.js\) -->[\s\S]*?<!-- \/Google tag \(gtag\.js\) -->/;
 const {applyToHtml: applyMeasurement} = require('./install-measurement.cjs');
 const shareImages = {
+  'blog/google-review-removal-appeals-data.html':'blog/assets/google-maps-appeals-direction.png',
   'blog/google-review-risk-score-denominator-study.html':'blog/assets/google-risk-identification-bounds.png',
   'blog/google-review-removal-denominator-audit.html': 'blog/assets/google-removal-reasons-denominators.png',
   'blog/google-review-removal-rating-impact-study.html': 'blog/assets/rating-removal-uncertainty.png',
@@ -39,6 +41,7 @@ const shareImages = {
   'blog/canadian-tourism-google-reviews-2023.html': 'blog/assets/canadian-sme-online-activities-2023.png'
 };
 const shareImageAlts = {
+  'blog/google-review-removal-appeals-data.html':'Google Maps reversal shares separated by complaint direction; EU-focused disclosures, not Canadian review-removal odds',
   'blog/google-review-risk-score-denominator-study.html':'Constructed identification ranges show why deleted-review percentages cannot identify a whole-profile five-star share',
   'blog/google-review-removal-denominator-audit.html': 'Google removal-reason rates for 2024 and 2025, as a share of all contributed reviews',
   'blog/google-review-removal-rating-impact-study.html': 'Original mathematical ranges for star ratings after removing one one-star Google review',
@@ -139,6 +142,11 @@ for (const relative of pages) {
     schema.image = shareImage;
     schema.publisher = { ...organization };
     schema.url = canonical;
+    if(relative==='blog/google-review-removal-appeals-data.html'){
+      schema.mainEntity={'@id':canonical+'#dataset'};
+      schema.articleSection='Original research / Google Maps appeals';
+      schema.image=['google-maps-appeals-direction','google-maps-appeals-receipt-share','google-maps-appeals-median-hours'].map(name=>({'@id':`${origin}/blog/assets/${name}.png#image`}));
+    }
     if(relative==='blog/google-review-risk-score-denominator-study.html'){
       schema.mainEntity={'@id':canonical+'#dataset'};
       schema.articleSection='Original research / Google risk metrics';
@@ -183,7 +191,7 @@ for (const relative of pages) {
     schemaTag=`\n  <script type="application/ld+json">${JSON.stringify(pageSchema).replaceAll('<','\\u003c')}</script>`;
   }
   const imageAlt = shareImageAlts[relative] || 'ReviewRemoval: review concerns, handled for you';
-  const tags = `\n  <!-- production URL metadata start -->\n  <link rel="canonical" href="${escapeAttr(canonical)}">\n  <meta name="robots" content="index, follow, max-image-preview:large">\n  <meta property="og:type" content="${isArticle ? 'article' : 'website'}">\n  <meta property="og:site_name" content="ReviewRemoval">\n  <meta property="og:locale" content="en_CA">\n  <meta property="og:url" content="${escapeAttr(canonical)}">\n  <meta property="og:title" content="${title}">\n  <meta property="og:description" content="${description}">\n  <meta property="og:image" content="${escapeAttr(shareImage)}">\n  <meta property="og:image:width" content="1200">\n  <meta property="og:image:height" content="${relative==='blog/google-review-risk-score-denominator-study.html'?'780':['blog/trustpilot-appeal-outcomes-2025.html','blog/google-review-removal-denominator-audit.html'].includes(relative)?'720':shareImages[relative]?'672':'630'}">\n  <meta property="og:image:alt" content="${escapeAttr(imageAlt)}">\n  <meta name="twitter:card" content="summary_large_image">\n  <meta name="twitter:title" content="${title}">\n  <meta name="twitter:description" content="${description}">\n  <meta name="twitter:image" content="${escapeAttr(shareImage)}">\n  <meta name="twitter:image:alt" content="${escapeAttr(imageAlt)}">${articleTimeTags}${schemaTag}\n  <!-- production URL metadata end -->`;
+  const tags = `\n  <!-- production URL metadata start -->\n  <link rel="canonical" href="${escapeAttr(canonical)}">\n  <meta name="robots" content="index, follow, max-image-preview:large">\n  <meta property="og:type" content="${isArticle ? 'article' : 'website'}">\n  <meta property="og:site_name" content="ReviewRemoval">\n  <meta property="og:locale" content="en_CA">\n  <meta property="og:url" content="${escapeAttr(canonical)}">\n  <meta property="og:title" content="${title}">\n  <meta property="og:description" content="${description}">\n  <meta property="og:image" content="${escapeAttr(shareImage)}">\n  <meta property="og:image:width" content="1200">\n  <meta property="og:image:height" content="${['blog/google-review-risk-score-denominator-study.html','blog/google-review-removal-appeals-data.html'].includes(relative)?'780':['blog/trustpilot-appeal-outcomes-2025.html','blog/google-review-removal-denominator-audit.html'].includes(relative)?'720':shareImages[relative]?'672':'630'}">\n  <meta property="og:image:alt" content="${escapeAttr(imageAlt)}">\n  <meta name="twitter:card" content="summary_large_image">\n  <meta name="twitter:title" content="${title}">\n  <meta name="twitter:description" content="${description}">\n  <meta name="twitter:image" content="${escapeAttr(shareImage)}">\n  <meta name="twitter:image:alt" content="${escapeAttr(imageAlt)}">${articleTimeTags}${schemaTag}\n  <!-- production URL metadata end -->`;
   html = applyMeasurement(html.replace('</head>', `${tags}\n</head>`), relative);
   fs.writeFileSync(file, html, 'utf8');
 }
@@ -194,7 +202,7 @@ const sitemapEntries = pages.map(relative => {
   const modified = schemas.find(schema => ['BlogPosting','Article','CollectionPage'].includes(schema['@type']))?.dateModified
     || schemas.flatMap(schema => schema['@graph'] || []).find(schema => schema['@type'] === 'WebPage')?.dateModified;
   const lastmod = /^\d{4}-\d{2}-\d{2}$/.test(modified || '') ? `<lastmod>${modified}</lastmod>` : '';
-  const imageNames=relative==='blog/google-review-removal-denominator-audit.html'?['google-removal-reasons-denominators','google-removal-metric-changes','google-removal-source-corrections']:relative==='blog/google-review-risk-score-denominator-study.html'?['google-risk-deleted-share','google-risk-identification-bounds','google-risk-same-subset']:[];
+  const imageNames=relative==='blog/google-review-removal-appeals-data.html'?['google-maps-appeals-direction','google-maps-appeals-receipt-share','google-maps-appeals-median-hours']:relative==='blog/google-review-removal-denominator-audit.html'?['google-removal-reasons-denominators','google-removal-metric-changes','google-removal-source-corrections']:relative==='blog/google-review-risk-score-denominator-study.html'?['google-risk-deleted-share','google-risk-identification-bounds','google-risk-same-subset']:[];
   const images=imageNames.map(name=>`<image:image><image:loc>${origin}/blog/assets/${name}.svg</image:loc></image:image>`).join('');
   return `  <url><loc>${escapeAttr(`${origin}/${relative === 'index.html' ? '' : relative}`)}</loc>${lastmod}${images}</url>`;
 });

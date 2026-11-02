@@ -1,0 +1,163 @@
+{
+  "@context": "http://www.w3.org/ns/csvw",
+  "url": "https://reviewremoval.ca/blog/data/google-maps-appeals-categories.csv",
+  "dc:title": "Google Maps appeals direction audit, July 2025–June 2026 — google-maps-appeals-categories.csv",
+  "dc:license": "https://creativecommons.org/licenses/by/4.0/",
+  "tableSchema": {
+    "columns": [
+      {
+        "name": "record_id",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "record id"
+      },
+      {
+        "name": "record_type",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "record type"
+      },
+      {
+        "name": "source_id",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "source id"
+      },
+      {
+        "name": "period_start",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "period start"
+      },
+      {
+        "name": "period_end",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "period end"
+      },
+      {
+        "name": "group",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "group"
+      },
+      {
+        "name": "label",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "label"
+      },
+      {
+        "name": "received_complaints",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "Period receipts; not necessarily the same cohort as the period outcomes."
+      },
+      {
+        "name": "upheld_outcomes",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "upheld outcomes"
+      },
+      {
+        "name": "reversed_outcomes",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "reversed outcomes"
+      },
+      {
+        "name": "partially_reversed_outcomes",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "Blank in the source; preserved as null, not assumed zero."
+      },
+      {
+        "name": "omitted_outcomes",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "Only published for the overall group. Missing subgroup fields remain null."
+      },
+      {
+        "name": "upheld_plus_reversed_outcomes",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "Derived denominator: upheld outcomes plus fully reversed outcomes."
+      },
+      {
+        "name": "reversal_share_among_upheld_and_reversed_percent",
+        "datatype": "number",
+        "null": [
+          ""
+        ],
+        "dc:description": "100 * reversed / (upheld + reversed). Descriptive share of these two outcome classes; not a review-removal success probability."
+      },
+      {
+        "name": "reported_median_hours",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "Published median processing time, in hours. No conversion to days or guarantee for an individual case."
+      },
+      {
+        "name": "share_of_overall_received_percent",
+        "datatype": "number",
+        "null": [
+          ""
+        ],
+        "dc:description": "100 * category receipts / overall receipts in the same report; overall summary must not be added to its categories."
+      },
+      {
+        "name": "source_indicator",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "source indicator"
+      },
+      {
+        "name": "source_csv_rows",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "source csv rows"
+      },
+      {
+        "name": "source_url",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "source url"
+      }
+    ],
+    "primaryKey": "record_id"
+  }
+}

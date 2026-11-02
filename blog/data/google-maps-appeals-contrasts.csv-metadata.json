@@ -1,0 +1,59 @@
+{
+  "@context": "http://www.w3.org/ns/csvw",
+  "url": "https://reviewremoval.ca/blog/data/google-maps-appeals-contrasts.csv",
+  "dc:title": "Google Maps appeals direction audit, July 2025–June 2026 — google-maps-appeals-contrasts.csv",
+  "dc:license": "https://creativecommons.org/licenses/by/4.0/",
+  "tableSchema": {
+    "columns": [
+      {
+        "name": "source_id",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "source id"
+      },
+      {
+        "name": "record_type",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "record type"
+      },
+      {
+        "name": "overall_reversal_share_percent",
+        "datatype": "number",
+        "null": [
+          ""
+        ],
+        "dc:description": "overall reversal share percent"
+      },
+      {
+        "name": "article16_nonaction_reversal_share_percent",
+        "datatype": "number",
+        "null": [
+          ""
+        ],
+        "dc:description": "article16 nonaction reversal share percent"
+      },
+      {
+        "name": "difference_percentage_points",
+        "datatype": "number",
+        "null": [
+          ""
+        ],
+        "dc:description": "Overall descriptive reversal share minus Article 16 non-action share, using distinct reported groups."
+      },
+      {
+        "name": "interpretation",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "interpretation"
+      }
+    ],
+    "primaryKey": "source_id"
+  }
+}

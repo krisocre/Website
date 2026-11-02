@@ -134,7 +134,10 @@ function build(originOverride){
    const hidden={terms_version:VERSION,terms_url:termsUrl,terms_snapshot_url:origin+`/legal-versions/policies-${VERSION}.json`,privacy_version:VERSION,privacy_url:privacyUrl,terms_language:french?'fr-CA':'en-CA',terms_acknowledgement:text};
    const block=`<!-- submission legal notice start -->${Object.entries(hidden).map(([name,value])=>`<input type="hidden" name="${name}" value="${escape(value)}">`).join('')}<p class="submission-legal" id="submission-legal" data-version="${VERSION}">${notice}</p><!-- submission legal notice end -->`;
    form=form.replace(/(<button\b[^>]*type="submit"[^>]*>)/,block+'$1');
-   form=form.replace(/(<button\b[^>]*type="submit")([^>]*>)/,(_,start,end)=>start+end.replace(/ aria-describedby="submission-legal"/g,'').replace('>',' aria-describedby="submission-legal">'));
+   form=form.replace(/(<button\b[^>]*type="submit")([^>]*>)/,(_,start,end)=>{
+    const references=[...new Set([...end.matchAll(/\baria-describedby="([^"]*)"/g)].flatMap(match=>match[1].split(/\s+/)).filter(Boolean).concat('submission-legal'))];
+    return start+end.replace(/\s+aria-describedby="[^"]*"/g,'').replace('>',` aria-describedby="${references.join(' ')}">`);
+   });
    if(removal)form=form.replace(/<p class="form-help">No payment is taken here\.[\s\S]*?<\/p>/,'<p class="form-help">No payment is taken here. We use your details to assess and reply. Please omit passwords and private customer records.</p>');
    return form;
   });

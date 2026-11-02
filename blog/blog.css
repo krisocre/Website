@@ -16,6 +16,8 @@
 .featured-art>span{color:#e2aa91;font-size:10px;font-weight:700;letter-spacing:.18em}
 .featured-art strong{display:block;font:400 clamp(66px,10vw,132px)/1 Georgia,serif;letter-spacing:-.08em}
 .featured-art small{display:block;max-width:380px;color:#bad0c9;font-size:12px;line-height:1.5}
+.featured-art-chart{justify-content:center;background:var(--cream);padding:12px;min-width:0}
+.featured-art-chart img{width:100%;height:auto}
 .featured-copy{display:flex;flex-direction:column;align-items:start;justify-content:center;padding:40px 48px}
 .content-kicker{color:var(--accent-dark);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
 .featured-copy h3{max-width:520px;margin:17px 0 17px;font-size:clamp(34px,3.5vw,47px)}

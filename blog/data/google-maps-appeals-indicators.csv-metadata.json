@@ -1,0 +1,91 @@
+{
+  "@context": "http://www.w3.org/ns/csvw",
+  "url": "https://reviewremoval.ca/blog/data/google-maps-appeals-indicators.csv",
+  "dc:title": "Google Maps appeals direction audit, July 2025–June 2026 — google-maps-appeals-indicators.csv",
+  "dc:license": "https://creativecommons.org/licenses/by/4.0/",
+  "tableSchema": {
+    "columns": [
+      {
+        "name": "record_id",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "record id"
+      },
+      {
+        "name": "record_type",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "record type"
+      },
+      {
+        "name": "source_id",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "source id"
+      },
+      {
+        "name": "source_csv_row",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "One-based physical CSV record number including the header, in the named Google ZIP member."
+      },
+      {
+        "name": "section",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "section"
+      },
+      {
+        "name": "indicator",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "indicator"
+      },
+      {
+        "name": "scope",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "scope"
+      },
+      {
+        "name": "value",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "Publisher-reported integer; a blank is null/empty, never an imputed zero."
+      },
+      {
+        "name": "value_status",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "value status"
+      },
+      {
+        "name": "unit",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "Hours for Median time; counts for other indicators. Units verified against qualitative CSV row 18."
+      }
+    ],
+    "primaryKey": "record_id"
+  }
+}
