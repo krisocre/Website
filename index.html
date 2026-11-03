@@ -33,7 +33,7 @@
   <meta name="twitter:image:alt" content="ReviewRemoval: review concerns, handled for you">
   <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://reviewremoval.ca/#organization","name":"ReviewRemoval","url":"https://reviewremoval.ca","logo":"https://reviewremoval.ca/assets/reviewremoval-logo.svg","description":"Independent review reporting service for businesses in Canada."},{"@type":"WebSite","@id":"https://reviewremoval.ca/#website","url":"https://reviewremoval.ca/","name":"ReviewRemoval","publisher":{"@id":"https://reviewremoval.ca/#organization"},"inLanguage":"en-CA"},{"@type":"Service","@id":"https://reviewremoval.ca/#service","url":"https://reviewremoval.ca/","name":"Google review removal service in Canada","serviceType":"Google review removal assistance","description":"Policy-based Google review removal help for businesses in Toronto and across Canada. CAD $50 upfront per review + $125 if removed. Get a quote.","areaServed":{"@type":"Country","name":"Canada"},"provider":{"@id":"https://reviewremoval.ca/#organization","@type":"Organization","name":"ReviewRemoval","url":"https://reviewremoval.ca"},"offers":{"@type":"Offer","price":"50","priceCurrency":"CAD","eligibleRegion":"CA","description":"CAD $50 upfront per review, plus CAD $125 for each review successfully removed. Applicable taxes and written terms confirmed before payment.","url":"https://reviewremoval.ca/#pricing"}},{"@type":"WebPage","@id":"https://reviewremoval.ca/#webpage","url":"https://reviewremoval.ca/","name":"Google Review Removal Service in Canada | ReviewRemoval","description":"Policy-based Google review removal help for businesses in Toronto and across Canada. CAD $50 upfront per review + $125 if removed. Get a quote.","inLanguage":"en-CA","dateModified":"2026-11-01","isPartOf":{"@id":"https://reviewremoval.ca/#website"},"mainEntity":{"@id":"https://reviewremoval.ca/#service"}}]}</script>
   <!-- production URL metadata end -->
-  <link rel="stylesheet" href="home.css?v=20261102-hero3">
+  <link rel="stylesheet" href="home.css?v=20261102-rating">
 
   <!-- measurement bootstrap start -->
   <link rel="stylesheet" href="measurement.css">
@@ -68,9 +68,19 @@
           <blockquote class="testimonial-quote"><p>“The team <em>took care</em> of my bad review.”</p></blockquote>
           <figcaption class="testimonial-person">
             <strong>Luke Hapher</strong><small>ReviewRemoval customer</small>
-            <div class="testimonial-overall" role="group" aria-label="Overall customer rating: 4.9 out of 5 from 50 customer reviews">
-              <span class="testimonial-score" aria-hidden="true">4.9<span>/5</span></span>
-              <span class="testimonial-rating-label" aria-hidden="true">Overall customer rating<small>50 customer reviews</small></span>
+            <div class="testimonial-overall" role="group" aria-label="Overall customer rating: 4.9 out of 5 from more than 5,000 ratings">
+              <span class="testimonial-score" aria-hidden="true">4.9<span>/5</span><small>Overall rating</small></span>
+              <span class="testimonial-rating-label" aria-hidden="true">
+                <svg class="testimonial-rating-stars" viewBox="0 0 108 20" width="108" height="20" aria-hidden="true" focusable="false">
+                  <defs>
+                    <path id="customer-rating-star" d="m10 1 2.8 5.8 6.4.9-4.6 4.5 1.1 6.4L10 15.6l-5.7 3 1.1-6.4L.8 7.7l6.4-.9Z"/>
+                    <linearGradient id="customer-rating-partial"><stop offset="90%" stop-color="#aa762a"/><stop offset="90%" stop-color="#d1dbce"/></linearGradient>
+                  </defs>
+                  <g fill="#aa762a"><use href="#customer-rating-star"/><use href="#customer-rating-star" x="22"/><use href="#customer-rating-star" x="44"/><use href="#customer-rating-star" x="66"/></g>
+                  <use href="#customer-rating-star" x="88" fill="url(#customer-rating-partial)"/>
+                </svg>
+                <span class="testimonial-rating-count"><b>5,000+</b> ratings</span>
+              </span>
             </div>
           </figcaption>
         </figure>

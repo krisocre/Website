@@ -41,7 +41,7 @@ const server=http.createServer((req,res)=>{
    assert.ok(await page.$eval('.hero-secondary',e=>e.getBoundingClientRect().height>=44),'Pricing link has a 44px tap target');
    const testimonial=await page.$eval('.hero-testimonial',e=>({name:e.querySelector('figcaption strong').textContent,quote:e.querySelector('blockquote').textContent,rating:e.querySelector('.testimonial-stars').getAttribute('aria-label')}));
    assert.equal(testimonial.name,'Luke Hapher');assert.equal(testimonial.quote,'“The team took care of my bad review.”');assert.equal(testimonial.rating,'5 out of 5 stars');
-   assert.equal(await page.$eval('.testimonial-overall',e=>e.getAttribute('aria-label')),'Overall customer rating: 4.9 out of 5 from 50 customer reviews');
+   assert.equal(await page.$eval('.testimonial-overall',e=>e.getAttribute('aria-label')),'Overall customer rating: 4.9 out of 5 from more than 5,000 ratings');
    const portrait=await page.$eval('.testimonial-avatar',e=>{const img=e.querySelector('img');return {loaded:img.complete&&img.naturalWidth===480&&img.naturalHeight===600,circle:getComputedStyle(e).borderRadius,width:e.getBoundingClientRect().width,height:e.getBoundingClientRect().height};});
    assert.equal(portrait.loaded,true,'Luke’s portrait is loaded');assert.equal(portrait.circle,'50%');assert.equal(portrait.width,portrait.height,'Portrait frame stays circular at every viewport');
    assert.equal(await page.evaluate(()=>performance.getEntriesByType('resource').filter(r=>/shop-owner.*\.(?:webp|jpg)/.test(r.name)).length),0,'Retired hero photograph is not downloaded');
