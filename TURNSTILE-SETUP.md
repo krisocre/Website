@@ -4,7 +4,7 @@ Prepared November 3, 2026. Code and local tests are prepared; no project, widget
 
 ## Existing widget and protected request
 
-Use existing site key **`0x4AAAAAAFy2WEsCKuoqoOMl`**. The frontend submits `cf-turnstile-response`; the handler requires Siteverify `success === true`, action **`quote_request`**, and the exact configured ReviewRemoval hostname before accessing the spreadsheet or sending mail. No submitted brand/plan/page value can bypass verification. Preserve the existing widget mode and clearance setting.
+Use existing site key **`0x4AAAAAAFy2ZmcJCPhgxNBL`**. The frontend submits `cf-turnstile-response`; the handler requires Siteverify `success === true`, action **`quote_request`**, and the exact configured ReviewRemoval hostname before accessing the spreadsheet or sending mail. No submitted brand/plan/page value can bypass verification. Preserve the existing widget mode and clearance setting.
 
 The current ReviewRemoval and ReviewsBoost source uses this shared endpoint:
 
@@ -44,7 +44,7 @@ In the **new project**: **Project Settings** (gear) â†’ **Script Properties** â†
 | `SPREADSHEET_ID` | ReviewRemoval destination spreadsheet ID from step 1. |
 | `SHEET_NAME` | Exact receiving tab name; `Leads` if you used the suggested new tab. |
 | `NOTIFICATION_EMAIL` | The same inbox that should receive the existing ReviewRemoval owner notifications. Do not guess a new address. |
-| `TURNSTILE_SECRET` | The private secret matching site key `0x4AAAAAAFy2WEsCKuoqoOMl`, copied directly from that existing Cloudflare widget. |
+| `TURNSTILE_SECRET` | The private secret matching site key `0x4AAAAAAFy2ZmcJCPhgxNBL`, copied directly from that existing Cloudflare widget. |
 | `TURNSTILE_HOSTNAMES` | `reviewremoval.ca`. Use `reviewremoval.ca,www.reviewremoval.ca` only if the www hostname actually serves the widget and is also allowed by Cloudflare. |
 
 Do not add quotes, URL schemes, paths, wildcards or localhost to the hostname value. Action `quote_request` is fixed in the code; no `TURNSTILE_ACTION` property is needed. The public key is in the website markup; no `TURNSTILE_SITEKEY` server property is needed.

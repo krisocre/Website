@@ -11,7 +11,7 @@ Set these Script Properties in the new project:
 | `SPREADSHEET_ID` | ReviewRemoval destination spreadsheet ID, not the full URL. |
 | `SHEET_NAME` | Exact receiving tab name. |
 | `NOTIFICATION_EMAIL` | Existing ReviewRemoval owner-notification inbox. |
-| `TURNSTILE_SECRET` | Private secret matching existing key `0x4AAAAAAFy2WEsCKuoqoOMl`. |
+| `TURNSTILE_SECRET` | Private secret matching existing key `0x4AAAAAAFy2ZmcJCPhgxNBL`. |
 | `TURNSTILE_HOSTNAMES` | `reviewremoval.ca`, optionally the allowed and served `www.reviewremoval.ca`. |
 
 Run `checkReviewRemovalSetup` in the new editor first. It only reads configuration/headers and probes the configured secret; it writes no row or email. When you permit an isolated test deployment, use the private browser utility described in the guide to test fresh, invalid, wrong-action and replayed tokens, exactly one saved row and the normal owner notification. No live form changes are needed to test that candidate.
