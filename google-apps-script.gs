@@ -7,10 +7,21 @@
  *
  * Deploy as a web app that executes as the script owner. For reliable owner
  * notifications, set the NOTIFICATION_EMAIL script property to your inbox.
+ * Turnstile: set TURNSTILE_SECRET and TURNSTILE_HOSTNAMES in Script Properties.
+ * See TURNSTILE-SETUP.md before updating the shared web-app deployment.
  */
 function doPost(e) {
   try {
     var data = (e && e.parameter) || {};
+    // Gate every request before accessing Sheets or sending notifications.
+    // Never exempt a request using a submitted brand, URL, action or plan field.
+    if (!verifyTurnstile(data['cf-turnstile-response'])) {
+      return ContentService.createTextOutput(JSON.stringify({
+        result: 'error',
+        code: 'verification_failed',
+        error: 'Security verification failed. Please complete the check and try again.'
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
     var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
     var timestamp = new Date();
 
@@ -84,5 +95,37 @@ function doPost(e) {
       result: 'error',
       error: String(error)
     })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function verifyTurnstile(token) {
+  if (typeof token !== 'string' || !token.trim() || token.length > 2048) return false;
+  try {
+    var properties = PropertiesService.getScriptProperties();
+    var secret = properties.getProperty('TURNSTILE_SECRET');
+    var hostnames = (properties.getProperty('TURNSTILE_HOSTNAMES') || '')
+      .split(',').map(function (hostname) { return hostname.trim(); }).filter(Boolean);
+    // This is the production handler. Localhost and other brands are not allowed.
+    var productionHosts = ['reviewremoval.ca', 'www.reviewremoval.ca'];
+    if (!secret || !secret.trim() || !hostnames.length || hostnames.some(function (hostname) {
+      return productionHosts.indexOf(hostname) === -1;
+    })) return false;
+
+    var response = UrlFetchApp.fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'post',
+      contentType: 'application/x-www-form-urlencoded',
+      payload: {secret: secret, response: token},
+      muteHttpExceptions: true,
+      followRedirects: false
+      // Apps Script exposes no trustworthy client IP or per-request timeout option.
+      // Do not accept a browser-supplied IP or forward lead data to Cloudflare.
+    });
+    if (response.getResponseCode() !== 200) return false;
+    var result = JSON.parse(response.getContentText());
+    return result && result.success === true && result.action === 'quote_request' &&
+      hostnames.indexOf(result.hostname) !== -1;
+  } catch (_) {
+    // No token, secret, provider response or personal information in logs/errors.
+    return false;
   }
 }

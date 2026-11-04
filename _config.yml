@@ -22,4 +22,7 @@ exclude:
   - launch-check.cjs
   - google-focus-check.cjs
   - google-apps-script.gs
+  - TURNSTILE-SETUP.md
+  - turnstile-check.cjs
+  - turnstile-test-fixture.cjs
   - previews

@@ -1,6 +1,7 @@
 // Local HTTP/browser regression checks. All submission traffic is mocked.
 const fs=require('node:fs'),path=require('node:path'),http=require('node:http');
 const assert=require('node:assert/strict'),puppeteer=require('puppeteer');
+const {turnstileApiFixture,isTurnstileApi,completeSecurityCheck}=require('./turnstile-test-fixture.cjs');
 const root=__dirname,output=path.join(root,'.seo-private','homepage-cro');
 fs.mkdirSync(output,{recursive:true});
 // Rebuild against an in-memory filesystem: preserve the design without rewriting pages.
@@ -26,7 +27,7 @@ const server=http.createServer((req,res)=>{
   async function newPage(width=390){
    const page=await browser.newPage();await page.setViewport({width,height:width<=680?844:900});
    await page.setRequestInterception(true);
-   page.on('request',r=>{if(r.method()!=='GET'){posts.push(r.url());r.abort();}else if(r.url().startsWith(base)||r.url().startsWith('data:'))r.continue();else r.abort();});
+   page.on('request',r=>{if(r.method()!=='GET'){posts.push(r.url());r.abort();}else if(isTurnstileApi(r.url()))r.respond({status:200,contentType:'text/javascript',body:turnstileApiFixture});else if(r.url().startsWith(base)||r.url().startsWith('data:'))r.continue();else r.abort();});
    page.on('pageerror',e=>errors.push(e.message));return page;
   }
   const page=await newPage();
@@ -39,8 +40,9 @@ const server=http.createServer((req,res)=>{
    });
    assert.equal(layout.overflow,false,'Overflow at '+width);assert.ok(layout.ctaTop>=0&&layout.ctaBottom<layout.viewportHeight,'Primary CTA must be visible at '+width);assert.deepEqual(layout.brokenImages,[]);assert.equal(layout.animated,0,'No unrelated homepage animations');
    assert.ok(await page.$eval('.hero-secondary',e=>e.getBoundingClientRect().height>=44),'Pricing link has a 44px tap target');
-   const testimonial=await page.$eval('.hero-testimonial',e=>({name:e.querySelector('figcaption strong').textContent,quote:e.querySelector('blockquote').textContent,rating:e.querySelector('.testimonial-stars').getAttribute('aria-label')}));
-   assert.equal(testimonial.name,'Luke Hapher');assert.equal(testimonial.quote,'“The team took care of my bad review.”');assert.equal(testimonial.rating,'5 out of 5 stars');
+   const testimonial=await page.$eval('.hero-testimonial',e=>({name:e.querySelector('figcaption strong').textContent,quote:e.querySelector('blockquote').textContent}));
+   assert.equal(testimonial.name,'Luke Hapher');assert.equal(testimonial.quote,'“The team took care of my bad review.”');
+   assert.deepEqual(await page.$$eval('.reviewer-slide',e=>e.map(n=>n.dataset.reviewer)),['Luke Hapher','Michelle Carter','Daniel Chen']);
    assert.equal(await page.$eval('.testimonial-overall',e=>e.getAttribute('aria-label')),'Overall customer rating: 4.9 out of 5 from more than 5,000 ratings');
    const portrait=await page.$eval('.testimonial-avatar',e=>{const img=e.querySelector('img');return {loaded:img.complete&&img.naturalWidth===480&&img.naturalHeight===600,circle:getComputedStyle(e).borderRadius,width:e.getBoundingClientRect().width,height:e.getBoundingClientRect().height};});
    assert.equal(portrait.loaded,true,'Luke’s portrait is loaded');assert.equal(portrait.circle,'50%');assert.equal(portrait.width,portrait.height,'Portrait frame stays circular at every viewport');
@@ -65,6 +67,48 @@ const server=http.createServer((req,res)=>{
    if(width===390)await page.screenshot({path:path.join(output,'assessment-390.png')});
    results.push(layout);
   }
+  // Reviewer selection must update portrait, quote and accessible state without layout jumps.
+  await page.setViewport({width:390,height:844});await page.goto(base,{waitUntil:'load'});
+  const reviewHeight=await page.$eval('.hero-testimonial',e=>e.getBoundingClientRect().height);
+  async function expectReview(index,name){
+   await page.waitForFunction(index=>{const e=document.querySelector('.reviewer-window');return Math.abs(e.scrollLeft-e.clientWidth*index)<1;},{},index);
+   await page.waitForFunction(name=>document.querySelector('.reviewer-slide[aria-hidden="false"]')?.dataset.reviewer===name,{},name);
+   assert.equal(await page.$$eval('.reviewer-slide[aria-hidden="false"]',e=>e.length),1);
+   await page.$eval('.reviewer-slide[aria-hidden="false"] img',e=>e.decode());
+   assert.equal(await page.$eval('.hero-testimonial',e=>e.getBoundingClientRect().height),reviewHeight,'Changing reviewers must not shift the page');
+   assert.equal(await page.$eval('.testimonial-overall',e=>getComputedStyle(e).backgroundColor),'rgba(0, 0, 0, 0)','The rating shares the white card background');
+  }
+  await page.click('[data-reviewer-step="1"]');await expectReview(1,'Michelle Carter');
+  await page.screenshot({path:path.join(output,'review-michelle-390.png')});
+  await page.click('[data-reviewer-step="1"]');await expectReview(2,'Daniel Chen');
+  await page.screenshot({path:path.join(output,'review-daniel-390.png')});
+  await page.click('[data-reviewer-step="1"]');await expectReview(0,'Luke Hapher');
+  await page.click('[data-reviewer-step="-1"]');await expectReview(2,'Daniel Chen');
+  await page.click('.reviewer-dot[aria-label="Show review from Michelle Carter"]');await expectReview(1,'Michelle Carter');
+  await page.focus('.reviewer-window');await page.keyboard.press('Home');await expectReview(0,'Luke Hapher');
+  await page.keyboard.press('ArrowRight');await expectReview(1,'Michelle Carter');
+  await page.keyboard.press('End');await expectReview(2,'Daniel Chen');
+  await page.keyboard.press('Home');await expectReview(0,'Luke Hapher');
+  await page.$eval('.reviewer-window',e=>e.scrollIntoView({behavior:'instant',block:'center'}));
+  const swipeRect=await page.$eval('.reviewer-window',e=>{const r=e.getBoundingClientRect();return {left:r.left,right:r.right,y:r.top+r.height/2};});
+  const touch=await page.createCDPSession();
+  try{
+   await touch.send('Emulation.setTouchEmulationEnabled',{enabled:true,maxTouchPoints:1});
+   await touch.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:swipeRect.right-20,y:swipeRect.y}]});
+   for(let step=1;step<=8;step++){
+    await touch.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:swipeRect.right-20-(swipeRect.right-swipeRect.left-40)*step/8,y:swipeRect.y}]});
+    await new Promise(r=>setTimeout(r,40));
+   }
+   await touch.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+   await expectReview(1,'Michelle Carter');
+  }finally{await touch.send('Emulation.setTouchEmulationEnabled',{enabled:false});await touch.detach();}
+  await page.click('.reviewer-dot[aria-label="Show review from Daniel Chen"]');await expectReview(2,'Daniel Chen');
+  await page.setViewport({width:768,height:900});
+  await page.waitForFunction(()=>{const e=document.querySelector('.reviewer-window');return Math.abs(e.scrollLeft-e.clientWidth*2)<1;});
+  await page.emulateMediaFeatures([{name:'prefers-reduced-motion',value:'reduce'}]);
+  await page.click('.reviewer-dot[aria-label="Show review from Luke Hapher"]');
+  await page.waitForFunction(()=>document.querySelector('.reviewer-window').scrollLeft===0);
+  await page.emulateMediaFeatures([]);
   // The banner has no visible control; hover/focus and reduced motion keep links usable.
   await page.goto(base,{waitUntil:'load'});
   const tickerDelta=()=>page.$eval('.platform-track',async e=>{const before=e.getBoundingClientRect().left;await new Promise(r=>setTimeout(r,160));return e.getBoundingClientRect().left-before;});
@@ -90,6 +134,7 @@ const server=http.createServer((req,res)=>{
   await page.$eval('#formQuantity',e=>{e.value='51';e.dispatchEvent(new Event('change',{bubbles:true}));});
   assert.equal(await page.$eval('#priceQuantity',e=>e.value),'50');
   assert.equal(await page.$eval('form',f=>f.checkValidity()),false,'Empty request must be invalid');
+  await completeSecurityCheck(page);
   const body=await page.evaluate(()=>{
    const f=document.querySelector('form');f.querySelector('[name="full_name"]').value='Test Person';f.querySelector('[name="business_name"]').value='Test Canadian Business';f.querySelector('[name="email_address"]').value='test@example.com';f.querySelector('[name="business_url"]').value='https://example.com/review';
    document.querySelector('#formQuantity').value='3';document.querySelector('#formQuantity').dispatchEvent(new Event('change',{bubbles:true}));
@@ -102,6 +147,7 @@ const server=http.createServer((req,res)=>{
   await page.waitForSelector('#form-message.is-error');
   assert.equal(await page.$eval('.submit-button',e=>e.disabled),false);
   assert.equal(await page.$eval('[name="full_name"]',e=>e.value),'Test Person','Retry retains details');
+  await completeSecurityCheck(page);
   await page.evaluate(()=>{window.__mockMode='success';document.querySelector('form').requestSubmit();});
   await page.waitForSelector('#submission-success:not([hidden])');
   const attempts=await page.evaluate(()=>window.__attempts);assert.equal(attempts.length,2);
@@ -109,18 +155,21 @@ const server=http.createServer((req,res)=>{
   assert.equal(sent.get('review_links'),'https://example.com/specific-review');assert.match(sent.get('reason'),/Documented test concern/);assert.match(sent.get('reason'),/\[Submission acknowledgement\]/);assert.equal(sent.get('terms_version'),'2026-10-27');
   assert.match(sent.get('selected_plan'),/\$150 upfront/);assert.match(sent.get('selected_plan'),/\$525 if all removed/);
   await page.goto(base,{waitUntil:'load'});
+  await completeSecurityCheck(page);
   await page.evaluate(()=>{
    const f=document.querySelector('form');for(const [name,value] of Object.entries({full_name:'Test',business_name:'Test',email_address:'test@example.com',business_url:'https://example.com'}))f.elements[name].value=value;
    window.fetch=async()=>({ok:true,json:async()=>({result:'success',notification_sent:false})});f.requestSubmit();
   });
   await page.waitForSelector('#submission-success:not([hidden])');assert.match(await page.$eval('#success-copy',e=>e.textContent),/saved, but the notification email was not sent/);
   await page.setJavaScriptEnabled(false);await page.goto(base,{waitUntil:'load'});
+  assert.equal(await page.$eval('.reviewer-controls',e=>e.hidden),true,'No inert buttons without JavaScript');
+  assert.equal(await page.$$eval('.reviewer-slide',e=>e.length),3,'Reviews remain in static HTML');
   assert.equal(await page.$$eval('.platform-list',e=>e.length),1,'One list without JavaScript');
   assert.equal(await page.$$eval('.platform-list a',e=>e.length),8,'All platforms remain accessible without JavaScript');
-  assert.equal(await page.$eval('form',f=>f.method),'post');assert.equal(await page.$eval('form',f=>f.noValidate),false);assert.match(await page.$eval('noscript',n=>n.textContent),/confirm the scope and price/);
+  assert.equal(await page.$eval('form',f=>f.method),'post');assert.equal(await page.$eval('form',f=>f.noValidate),false);assert.match(await page.$eval('noscript',n=>n.textContent),/enable JavaScript to complete the security check/);
   assert.equal(await page.$$eval('title',n=>n.length),1);assert.equal(await page.$$eval('link[rel="canonical"]',n=>n.length),1);
   assert.deepEqual(errors,[]);assert.deepEqual(posts,[],'Never send a real POST');
   fs.writeFileSync(path.join(output,'layout-results.json'),JSON.stringify(results,null,2));
-  console.log('PASS: homepage at five widths; circular portrait; one moving eight-platform row without a pause button; hover, keyboard access and reduced motion; visible CTA; mobile form order; quote bounds/totals; mocked error/retry/success/notification failure; legal payload; native POST fallback; zero real submissions.');
+  console.log('PASS: five homepage widths; three-review slider with arrows, dots, touch swipe, keyboard, resize and stable height; loaded circular portraits; one moving platform banner; reduced motion; visible CTA; quote bounds/totals; mocked error/retry/success with Turnstile; legal payload and no-JS notice; zero real submissions.');
  }finally{if(browser)await browser.close();server.closeAllConnections();await new Promise(r=>server.close(r));}
 })().catch(e=>{console.error(e);process.exitCode=1;});

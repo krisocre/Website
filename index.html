@@ -8,7 +8,7 @@
   <title>Google Review Removal Service in Canada | ReviewRemoval</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="styles.css">
-  <script src="script.js?v=20261102-hero3" defer></script>
+  <script src="script.js?v=20261103-turnstile" defer></script>
 
 <link rel="stylesheet" href="legal-notice.css">
 <script src="submission-terms.js" defer></script>
@@ -33,7 +33,7 @@
   <meta name="twitter:image:alt" content="ReviewRemoval: review concerns, handled for you">
   <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://reviewremoval.ca/#organization","name":"ReviewRemoval","url":"https://reviewremoval.ca","logo":"https://reviewremoval.ca/assets/reviewremoval-logo.svg","description":"Independent review reporting service for businesses in Canada."},{"@type":"WebSite","@id":"https://reviewremoval.ca/#website","url":"https://reviewremoval.ca/","name":"ReviewRemoval","publisher":{"@id":"https://reviewremoval.ca/#organization"},"inLanguage":"en-CA"},{"@type":"Service","@id":"https://reviewremoval.ca/#service","url":"https://reviewremoval.ca/","name":"Google review removal service in Canada","serviceType":"Google review removal assistance","description":"Policy-based Google review removal help for businesses in Toronto and across Canada. CAD $50 upfront per review + $125 if removed. Get a quote.","areaServed":{"@type":"Country","name":"Canada"},"provider":{"@id":"https://reviewremoval.ca/#organization","@type":"Organization","name":"ReviewRemoval","url":"https://reviewremoval.ca"},"offers":{"@type":"Offer","price":"50","priceCurrency":"CAD","eligibleRegion":"CA","description":"CAD $50 upfront per review, plus CAD $125 for each review successfully removed. Applicable taxes and written terms confirmed before payment.","url":"https://reviewremoval.ca/#pricing"}},{"@type":"WebPage","@id":"https://reviewremoval.ca/#webpage","url":"https://reviewremoval.ca/","name":"Google Review Removal Service in Canada | ReviewRemoval","description":"Policy-based Google review removal help for businesses in Toronto and across Canada. CAD $50 upfront per review + $125 if removed. Get a quote.","inLanguage":"en-CA","dateModified":"2026-11-01","isPartOf":{"@id":"https://reviewremoval.ca/#website"},"mainEntity":{"@id":"https://reviewremoval.ca/#service"}}]}</script>
   <!-- production URL metadata end -->
-  <link rel="stylesheet" href="home.css?v=20261102-rating">
+  <link rel="stylesheet" href="home.css?v=20261102-reviewers">
 
   <!-- measurement bootstrap start -->
   <link rel="stylesheet" href="measurement.css">
@@ -62,12 +62,32 @@
           <div class="hero-actions"><a class="button button-accent" href="#quote">Get a free assessment <span aria-hidden="true">↓</span></a><a class="hero-secondary" href="#pricing">See pricing <span aria-hidden="true">↓</span></a></div>
           <p class="hero-reassurance"><svg viewBox="0 0 16 18" fill="none" aria-hidden="true"><path d="M4 7V5a4 4 0 0 1 8 0v2M2 7h12v10H2z" stroke="currentColor" stroke-width="1.4"/><path d="M8 11v2" stroke="currentColor" stroke-width="1.4"/></svg>No Google password needed for an initial assessment.</p>
         </div>
-        <figure class="hero-testimonial" aria-label="Customer testimonial">
-          <span class="testimonial-avatar"><img src="assets/frontmanreviewremoval.webp" alt="" width="480" height="600" loading="eager" decoding="async"></span>
-          <span class="testimonial-stars" role="img" aria-label="5 out of 5 stars">★★★★★</span>
-          <blockquote class="testimonial-quote"><p>“The team <em>took care</em> of my bad review.”</p></blockquote>
-          <figcaption class="testimonial-person">
-            <strong>Luke Hapher</strong><small>ReviewRemoval customer</small>
+        <div class="hero-testimonial" data-reviewer-slider role="region" aria-label="Customer testimonials">
+          <div class="reviewer-window" id="reviewer-window" tabindex="0" aria-label="Customer reviews. Use the left and right arrow keys to change reviews.">
+            <div class="reviewer-track">
+              <figure class="reviewer-slide" data-reviewer="Luke Hapher">
+                <span class="testimonial-avatar"><img src="assets/frontmanreviewremoval.webp" alt="" width="480" height="600" loading="eager" decoding="async"></span>
+                <blockquote class="testimonial-quote"><p>“The team <em>took care</em> of my bad review.”</p></blockquote>
+                <figcaption class="testimonial-person"><strong>Luke Hapher</strong><small>ReviewRemoval customer</small></figcaption>
+              </figure>
+              <figure class="reviewer-slide" data-reviewer="Michelle Carter">
+                <span class="testimonial-avatar"><img class="portrait-michelle" src="assets/michelle-carter.webp" alt="" width="480" height="600" loading="lazy" decoding="async"></span>
+                <blockquote class="testimonial-quote"><p>“They got my <em>bad review removed.</em>”</p></blockquote>
+                <figcaption class="testimonial-person"><strong>Michelle Carter</strong><small>ReviewRemoval customer</small></figcaption>
+              </figure>
+              <figure class="reviewer-slide" data-reviewer="Daniel Chen">
+                <span class="testimonial-avatar"><img class="portrait-daniel" src="assets/daniel-chen.webp" alt="" width="480" height="320" loading="lazy" decoding="async"></span>
+                <blockquote class="testimonial-quote"><p>“They took care of <em>removing my review.</em>”</p></blockquote>
+                <figcaption class="testimonial-person"><strong>Daniel Chen</strong><small>ReviewRemoval customer</small></figcaption>
+              </figure>
+            </div>
+          </div>
+          <div class="reviewer-controls" hidden>
+            <button class="reviewer-arrow" type="button" data-reviewer-step="-1" aria-label="Previous customer review" aria-controls="reviewer-window"><span aria-hidden="true">←</span></button>
+            <div class="reviewer-dots" role="group" aria-label="Choose a customer review"></div>
+            <button class="reviewer-arrow" type="button" data-reviewer-step="1" aria-label="Next customer review" aria-controls="reviewer-window"><span aria-hidden="true">→</span></button>
+          </div>
+          <span class="reviewer-status" role="status" aria-live="polite" aria-atomic="true"></span>
             <div class="testimonial-overall" role="group" aria-label="Overall customer rating: 4.9 out of 5 from more than 5,000 ratings">
               <span class="testimonial-score" aria-hidden="true">4.9<span>/5</span><small>Overall rating</small></span>
               <span class="testimonial-rating-label" aria-hidden="true">
@@ -82,8 +102,7 @@
                 <span class="testimonial-rating-count"><b>5,000+</b> ratings</span>
               </span>
             </div>
-          </figcaption>
-        </figure>
+        </div>
       </div>
     </section>
 
@@ -147,9 +166,10 @@
           <div class="review-count-row"><label for="formQuantity">Number of reviews <span>*</span></label><div class="quantity-control form-quantity"><button type="button" data-qty-step="-1" data-target="formQuantity" aria-label="Decrease review count">−</button><input id="formQuantity" name="review_count" type="number" min="1" max="50" value="1" inputmode="numeric" required><button type="button" data-qty-step="1" data-target="formQuantity" aria-label="Increase review count">+</button></div></div>
           <details class="assessment-extra"><summary>Add review links or context <small>Optional</small></summary><div><label>Specific review link(s)<textarea name="review_links" rows="2" placeholder="One link per line, if you have them."></textarea></label><label>Anything else we should know?<textarea name="reason" rows="3" placeholder="A short, factual explanation is enough."></textarea></label></div></details>
           <!-- submission legal notice start --><input type="hidden" name="terms_version" value="2026-10-27"><input type="hidden" name="terms_url" value="https://reviewremoval.ca/terms-of-service.html"><input type="hidden" name="terms_snapshot_url" value="https://reviewremoval.ca/legal-versions/policies-2026-10-27.json"><input type="hidden" name="privacy_version" value="2026-10-27"><input type="hidden" name="privacy_url" value="https://reviewremoval.ca/privacy-policy.html"><input type="hidden" name="terms_language" value="en-CA"><input type="hidden" name="terms_acknowledgement" value="By submitting, you agree to the Terms of Service and acknowledge the Privacy Policy. Removal is not guaranteed."><p class="submission-legal" id="submission-legal" data-version="2026-10-27">By submitting, you agree to the <a href="terms-of-service.html" target="_blank" rel="noopener">Terms of Service</a> and acknowledge the <a href="privacy-policy.html" target="_blank" rel="noopener">Privacy Policy</a>. Removal is not guaranteed.</p><!-- submission legal notice end -->
+          <div class="form-verification"><div id="assessment-verification" class="verification-widget" data-sitekey="0x4AAAAAAFy2a5sutqdFxytB" tabindex="-1" role="group" aria-label="Security check" aria-describedby="verification-status"></div><p id="verification-status" class="verification-status" role="status" aria-live="polite">A security check helps protect this form from spam.</p><button id="verification-retry" class="verification-retry" type="button" hidden>Retry security check</button></div>
           <button class="button button-accent submit-button" type="submit" aria-describedby="submission-legal assessment-help">Request my assessment <span aria-hidden="true">↓</span></button>
           <p class="form-help" id="assessment-help">No payment is taken here. We use your details to assess and reply. Please omit passwords and private customer records.</p>
-          <noscript><p class="native-form-note">You can send your request using this form. JavaScript is needed for live fee estimates; we confirm the scope and price before any paid work.</p></noscript>
+          <noscript><p class="native-form-note">Please enable JavaScript to complete the security check and send your request. We confirm the scope and price before any paid work.</p></noscript>
           <p class="form-message" id="form-message" role="status" aria-live="polite"></p>
         </form>
         <div class="submission-success" id="submission-success" role="status" aria-live="polite" tabindex="-1" hidden><span class="success-mark" aria-hidden="true">✓</span><h3>Request received</h3><p id="success-copy">We have your review details. We'll contact you at the email you provided with the next step.</p><p class="success-note" id="success-note"></p></div>

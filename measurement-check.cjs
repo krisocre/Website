@@ -1,5 +1,6 @@
 // Synthetic destination IDs below are test fixtures only. Every Google request is intercepted.
 const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),assert=require('node:assert/strict'),puppeteer=require('puppeteer');
+const {turnstileApiFixture,isTurnstileApi,completeSecurityCheck}=require('./turnstile-test-fixture.cjs');
 const root=__dirname;
 const server=http.createServer((req,res)=>{
  if(req.method!=='GET'){res.writeHead(405).end();return;}
@@ -18,6 +19,7 @@ const server=http.createServer((req,res)=>{
    await page.setRequestInterception(true);page.on('pageerror',e=>errors.push(e.message));
    page.on('request',r=>{
     if(r.method()!=='GET'){externalPosts.push(r.url());r.abort();return;}
+    if(isTurnstileApi(r.url())){r.respond({status:200,contentType:'text/javascript',body:turnstileApiFixture});return;}
     if(r.url().includes('googletagmanager.com/gtag/js')){google.push(r.url());r.respond({status:200,contentType:'text/javascript',body:'/* intercepted test loader: no network collection */'});return;}
     if(r.url().startsWith(base)&&r.url().endsWith('/measurement-config.js')){r.respond({status:200,contentType:'text/javascript',body:'window.ReviewRemovalMeasurementConfig='+JSON.stringify(config)+';'});return;}
     if(r.url().startsWith(base))r.continue();else r.abort();
@@ -32,6 +34,7 @@ const server=http.createServer((req,res)=>{
   async function events(page){return (await commands(page)).filter(v=>v[0]==='event');}
   async function choose(page,choice){await page.click('#measurement-preferences [data-choice="'+choice+'"]');}
   async function fillAndSubmit(page,result='success'){
+   await completeSecurityCheck(page);
    await page.evaluate(result=>{
     const f=document.querySelector('#assessment-form');
     const values={full_name:'PRIVATE_PERSON',business_name:'PRIVATE_BUSINESS',email_address:'private.person@example.com',business_url:'https://example.com/PRIVATE_PROFILE',review_links:'https://example.com/PRIVATE_REVIEW',reason:'PRIVATE_REVIEW_TEXT'};

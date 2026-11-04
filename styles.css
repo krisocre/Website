@@ -121,7 +121,7 @@ h2{font-size:clamp(37px,3.5vw,50px)}
 .quote-heading h2{max-width:570px;margin-bottom:0}
 .quote-heading>p{max-width:440px;margin:0 0 3px;color:#c9d8d3;line-height:1.7}
 .quote-grid{display:grid;grid-template-columns:1.1fr .75fr;gap:30px;align-items:start}
-.quote-form{background:#fff;color:var(--ink);padding:30px 32px 29px}
+.quote-form{min-width:0;background:#fff;color:var(--ink);padding:30px 32px 29px}
 .form-title{display:flex;gap:15px;align-items:start;margin-bottom:26px;padding-bottom:18px;border-bottom:1px solid #d7e0dc}
 .form-title>span{display:grid;place-items:center;width:33px;height:33px;flex:0 0 33px;background:var(--navy);color:#fff;font:700 13px Georgia,serif}
 .form-title h3{margin:0 0 2px;font-size:24px}
@@ -145,6 +145,12 @@ h2{font-size:clamp(37px,3.5vw,50px)}
 .form-message{margin:8px 0 0;color:#7a8985;font-size:11px;line-height:1.5}
 .form-message.is-error{color:#ad3d2c}
 .form-message.is-success{color:#217253}
+.form-verification{margin:16px 0 8px;min-width:0}
+.verification-widget{min-height:65px;outline-offset:4px}
+.verification-status{margin:6px 0 0;font-size:12px;line-height:1.5;color:#536963}
+.verification-retry{min-height:44px;padding:8px 0;border:0;background:transparent;color:var(--ink);font-size:13px;text-decoration:underline;text-underline-offset:3px}
+.verification-retry[hidden]{display:none}
+@media(max-width:430px){.verification-widget{min-height:140px}}
 .quote-form [aria-invalid="true"]{border-color:#ad3d2c!important}
 .submission-success{background:#fff;color:var(--ink);padding:42px 38px;min-height:350px}
 .submission-success[hidden]{display:none}

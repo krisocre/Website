@@ -2,6 +2,8 @@
 
 The homepage and the Facebook, Yelp, Trustpilot, Tripadvisor, Booking.com, Glassdoor, and Indeed service pages post URL-encoded form data to the supplied Google Apps Script deployment. They send `selected_plan`, `full_name`, `business_name`, `email_address`, `business_url`, `review_count`, `review_links`, `reason`, `contact_method`, and `contact_detail`. The `selected_plan` value identifies the platform, quantity, and price.
 
+**Turnstile integration (2026-11-03):** forms now also send `cf-turnstile-response`. The local backend requires server-side verification before saving anything. Follow [TURNSTILE-SETUP.md](TURNSTILE-SETUP.md) before deploying it: the existing URL is shared with ReviewsBoost, and the new protected handler must not replace that shared version while ReviewsBoost remains unprotected. The secret belongs in Apps Script's Script Properties, never the website.
+
 The live integration test on 2026-09-21 reached the deployment and received `Failed to send email: no recipient`. In the supplied handler, `sheet.appendRow(...)` runs before `MailApp.sendEmail(...)`, so the clearly labelled TEST row should be in the spreadsheet, but the owner notification was not sent.
 
 To restore owner notifications:

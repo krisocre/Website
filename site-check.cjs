@@ -1,6 +1,7 @@
 const path = require('node:path');
 const fs = require('node:fs');
 const puppeteer = require('C:/Users/alkhi/node_modules/puppeteer');
+const {turnstileApiFixture,isTurnstileApi,completeSecurityCheck}=require('./turnstile-test-fixture.cjs');
 
 const root = __dirname;
 const previewRoot=path.resolve(root,process.env.SITE_CHECK_PREVIEWS||'previews');
@@ -41,7 +42,9 @@ for (const name of ['google-moderation-2019-2025.png', 'trustpilot-fake-reviews-
       const page = await browser.newPage();
       await page.setRequestInterception(true);
       page.on('request', request => {
-        if (request.url().startsWith('https://www.googletagmanager.com/gtag/js?')) request.abort();
+        if (request.method() !== 'GET') request.abort();
+        else if (isTurnstileApi(request.url())) request.respond({status:200,contentType:'text/javascript',body:turnstileApiFixture});
+        else if (request.url().startsWith('https://www.googletagmanager.com/gtag/js?')) request.abort();
         else request.continue();
       });
       page.on('pageerror', err => errors.push(`${name}: ${err.message}`));
@@ -139,6 +142,7 @@ for (const name of ['google-moderation-2019-2025.png', 'trustpilot-fake-reviews-
         await page.evaluate(() => { document.querySelector('#priceQuantity').value = '3'; document.querySelector('#priceQuantity').dispatchEvent(new Event('input', {bubbles:true})); });
         const quote = await page.evaluate(() => ({count: document.querySelector('#formQuantity').value, start: document.querySelector('[data-quote="start"]').textContent, success: document.querySelector('[data-quote="success"]').textContent, plan: document.querySelector('#selectedPlan').value}));
         if (quote.count !== '3' || quote.start !== '$150' || quote.success !== '$375' || !quote.plan.toLowerCase().includes(platform)) errors.push(`${name}: quote mismatch ${JSON.stringify(quote)}`);
+        await completeSecurityCheck(page);
         await page.evaluate(() => {
           window.__submitted = null;
           window.fetch = async (endpoint, options) => { window.__submitted = {endpoint, body: options.body.toString()}; return {ok: true, json: async () => ({result: 'success'})}; };

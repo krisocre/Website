@@ -30,6 +30,68 @@ if (platformList) {
   platformBanner.classList.add('is-ready');
 }
 
+const reviewerCard = document.querySelector('[data-reviewer-slider]');
+if (reviewerCard) {
+  const viewport = reviewerCard.querySelector('.reviewer-window');
+  const slides = [...reviewerCard.querySelectorAll('.reviewer-slide')];
+  const controls = reviewerCard.querySelector('.reviewer-controls');
+  const dots = reviewerCard.querySelector('.reviewer-dots');
+  const status = reviewerCard.querySelector('.reviewer-status');
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let current = 0;
+  let frame = 0;
+
+  function selectSlide(index, announce = true) {
+    current = index;
+    slides.forEach((slide, i) => {
+      slide.setAttribute('aria-hidden', String(i !== current));
+      slide.inert = i !== current;
+      dots.children[i]?.setAttribute('aria-current', String(i === current));
+    });
+    if (announce) status.textContent = `${current + 1} of ${slides.length}: ${slides[current].dataset.reviewer}`;
+  }
+  function showSlide(index) {
+    const next = (index + slides.length) % slides.length;
+    viewport.scrollTo({left: next * viewport.clientWidth, behavior: reducedMotion.matches ? 'instant' : 'smooth'});
+  }
+
+  if (slides.length > 1) {
+    reviewerCard.setAttribute('aria-roledescription', 'carousel');
+    slides.forEach((slide, index) => {
+      slide.setAttribute('role', 'group');
+      slide.setAttribute('aria-roledescription', 'slide');
+      slide.setAttribute('aria-label', `${index + 1} of ${slides.length}: ${slide.dataset.reviewer}`);
+      const dot = document.createElement('button');
+      dot.type = 'button';
+      dot.className = 'reviewer-dot';
+      dot.setAttribute('aria-label', `Show review from ${slide.dataset.reviewer}`);
+      dot.setAttribute('aria-controls', viewport.id);
+      dot.addEventListener('click', () => showSlide(index));
+      dots.append(dot);
+    });
+    controls.hidden = false;
+    selectSlide(0, false);
+    controls.querySelectorAll('[data-reviewer-step]').forEach(button => {
+      button.addEventListener('click', () => showSlide(current + Number(button.dataset.reviewerStep)));
+    });
+    viewport.addEventListener('keydown', event => {
+      if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+      event.preventDefault();
+      showSlide(event.key === 'Home' ? 0 : event.key === 'End' ? slides.length - 1 : current + (event.key === 'ArrowRight' ? 1 : -1));
+    });
+    viewport.addEventListener('scroll', () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const index = Math.max(0, Math.min(slides.length - 1, Math.round(viewport.scrollLeft / viewport.clientWidth)));
+        if (index !== current) selectSlide(index);
+      });
+    }, {passive: true});
+    new ResizeObserver(() => {
+      viewport.scrollTo({left: current * viewport.clientWidth, behavior: 'instant'});
+    }).observe(viewport);
+  }
+}
+
 const quantityInputs = [...document.querySelectorAll('#priceQuantity, #formQuantity')];
 const platformName = document.body.dataset.platform || 'Google';
 const reviewNoun = document.body.dataset.reviewNoun || 'review';
@@ -69,6 +131,123 @@ const successPanel = document.querySelector('#submission-success');
 const endpoint = 'https://script.google.com/macros/s/AKfycby4mQu0BJFu8Jmbw_zZPzrBb9TF_YRw4j0Ayu3PFvwgicSN5vtzynX0ASet2utzxtlnMw/exec';
 let submitting = false;
 
+// Load only on pages with a quote form, when the visitor approaches or uses it.
+// The server independently verifies the token; this UI is not a security boundary.
+const assessmentVerification = form ? setupAssessmentVerification() : null;
+
+function setupAssessmentVerification() {
+  const container = document.querySelector('#assessment-verification');
+  const status = document.querySelector('#verification-status');
+  const retry = document.querySelector('#verification-retry');
+  let widgetId = null;
+  let token = '';
+  let loader = null;
+  let loadTimer = 0;
+  let size = '';
+
+  function showStatus(text, failed = false) {
+    status.textContent = text;
+    retry.hidden = !failed;
+  }
+  function failed() {
+    token = '';
+    showStatus('The security check could not finish. Please retry the check.', true);
+  }
+  function render() {
+    if (widgetId !== null || !window.turnstile) return;
+    size = container.clientWidth < 300 ? 'compact' : 'flexible';
+    container.style.minHeight = size === 'compact' ? '140px' : '65px';
+    try {
+      widgetId = window.turnstile.render(container, {
+        sitekey: container.dataset.sitekey,
+        action: 'quote_request',
+        theme: 'light',
+        size,
+        callback(value) {
+          token = value;
+          showStatus('Security check complete.');
+        },
+        'expired-callback'() {
+          token = '';
+          showStatus('Security check expired. Please retry the check.', true);
+        },
+        'error-callback'() { failed(); return true; },
+        'timeout-callback': failed,
+        'unsupported-callback': failed
+      });
+    } catch (_) { failed(); }
+  }
+  function load() {
+    if (!container || !status || !retry) return;
+    if (window.turnstile) { render(); return; }
+    if (loader) return;
+    showStatus('Checking your browser securely…');
+    loader = document.createElement('script');
+    loader.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+    loader.async = true;
+    loader.defer = true;
+    loader.onload = () => { clearTimeout(loadTimer); render(); };
+    loader.onerror = () => {
+      clearTimeout(loadTimer);
+      loader.remove();
+      loader = null;
+      failed();
+    };
+    loadTimer = window.setTimeout(failed, 15000);
+    document.head.append(loader);
+  }
+  function reset() {
+    token = '';
+    if (widgetId !== null && window.turnstile) {
+      showStatus('Checking your browser securely…');
+      // A visitor can rotate their phone while the submission is in flight.
+      if (!form.hidden && (container.clientWidth < 300 ? 'compact' : 'flexible') !== size) {
+        window.turnstile.remove(widgetId);
+        widgetId = null;
+        render();
+        return;
+      }
+      try { window.turnstile.reset(widgetId); } catch (_) { failed(); }
+    } else { load(); }
+  }
+  if (container && status && retry) {
+    retry.addEventListener('click', () => {
+      if (submitting) return;
+      if (loader && !window.turnstile) {
+        clearTimeout(loadTimer);
+        loader.remove();
+        loader = null;
+      }
+      reset();
+    });
+    form.addEventListener('focusin', load, {once: true});
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver(entries => {
+        if (entries.some(entry => entry.isIntersecting)) { load(); observer.disconnect(); }
+      }, {rootMargin: '300px'});
+      observer.observe(form);
+    } else { load(); }
+    new ResizeObserver(() => {
+      const nextSize = container.clientWidth < 300 ? 'compact' : 'flexible';
+      if (widgetId === null || nextSize === size || submitting) return;
+      token = '';
+      window.turnstile.remove(widgetId);
+      widgetId = null;
+      render();
+    }).observe(container);
+  }
+  return {
+    getToken: () => token,
+    reset,
+    prompt() {
+      load();
+      container?.focus();
+      message.className = 'form-message is-error';
+      message.textContent = 'Please complete the security check before sending your request.';
+    }
+  };
+}
+
 form?.addEventListener('submit', async event => {
   event.preventDefault();
   if (submitting) return;
@@ -83,7 +262,10 @@ form?.addEventListener('submit', async event => {
     return;
   }
 
+  const verificationToken = assessmentVerification.getToken();
+  if (!verificationToken) { assessmentVerification.prompt(); return; }
   const payload = new FormData(form);
+  payload.set('cf-turnstile-response', verificationToken);
   window.SubmissionTerms?.prepare(payload);
   payload.set('contact_detail', String(payload.get('email_address') || ''));
   payload.set('review_count', String(clamp(payload.get('review_count'))));
@@ -107,6 +289,7 @@ form?.addEventListener('submit', async event => {
     });
     if (!response.ok) throw new Error('unconfirmed');
     const result = await response.json();
+    if (result.code === 'verification_failed') throw new Error('verification_failed');
     const notificationFailed = (result.result === 'success' && result.notification_sent === false) ||
       (result.result === 'error' && /failed to send email:\s*no recipient/i.test(result.error || ''));
     if (result.result !== 'success' && !notificationFailed) throw new Error('unconfirmed');
@@ -127,12 +310,16 @@ form?.addEventListener('submit', async event => {
     }
   } catch (error) {
     message.className = 'form-message is-error';
-    message.textContent = 'We could not confirm your request. Your details are still here; please wait a few minutes before trying again.';
+    message.textContent = error.message === 'verification_failed'
+      ? 'The security check was not accepted. Your details are still here; complete the new check and try again.'
+      : 'We could not confirm your request. Your details are still here; please wait a few minutes before trying again.';
     submitButton.disabled = false;
     submitButton.innerHTML = originalButton;
     submitting = false;
   } finally {
     window.clearTimeout(timer);
+    // Tokens are single-use, including when a request fails after verification.
+    assessmentVerification.reset();
   }
 });
 
