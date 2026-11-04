@@ -65,6 +65,8 @@ The function reads properties and headers and sends a dummy response to Siteveri
 
 Fix any missing setting, inaccessible sheet, mismatched header or secret/network error first. This probe cannot prove the secret matches the frontend key; a real token does. Do not click Run on `doPost`, which expects an HTTP POST event.
 
+If the tab name appears identical but the check says it was not found, run `diagnoseReviewRemovalSheet` from the editor. Its log identifies the spreadsheet actually opened and prints the configured/available tab names in quotes to expose extra spaces. Open the logged spreadsheet URL to confirm `SPREADSHEET_ID` selects the intended file. This diagnostic reads no lead rows or Turnstile secret, writes nothing and sends no email.
+
 If your restriction includes isolated test deployments, stop here. A deployed URL cannot be tested before it exists. No deployment or cutover has been performed by the agent.
 
 ## 5. When permitted, create an isolated candidate endpoint

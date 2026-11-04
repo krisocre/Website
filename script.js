@@ -37,7 +37,6 @@ if (reviewerCard) {
   const controls = reviewerCard.querySelector('.reviewer-controls');
   const dots = reviewerCard.querySelector('.reviewer-dots');
   const status = reviewerCard.querySelector('.reviewer-status');
-  const rotation = reviewerCard.querySelector('.reviewer-rotation');
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   let current = 0;
   let frame = 0;
@@ -50,8 +49,6 @@ if (reviewerCard) {
     window.clearTimeout(timer);
     timer = 0;
     const running = autoPlay && !hovered && visible && !document.hidden;
-    rotation.textContent = autoPlay ? 'Pause' : 'Play';
-    rotation.setAttribute('aria-label', autoPlay ? 'Pause automatic testimonials' : 'Start automatic testimonials');
     status.setAttribute('aria-live', running ? 'off' : 'polite');
     if (running) timer = window.setTimeout(() => {
       showSlide(current + 1);
@@ -94,11 +91,8 @@ if (reviewerCard) {
     });
     controls.hidden = false;
     selectSlide(0, false);
-    rotation.addEventListener('click', () => { autoPlay = !autoPlay; updateRotation(); });
-    reviewerCard.addEventListener('focusin', event => {
-      // A pointer click on Pause must not turn into Play when it receives focus.
-      if (event.target !== rotation || rotation.matches(':focus-visible')) pauseRotation();
-    });
+    // Once a visitor focuses or selects a review, leave navigation in their hands.
+    reviewerCard.addEventListener('focusin', pauseRotation);
     reviewerCard.addEventListener('mouseenter', () => { hovered = true; updateRotation(); });
     reviewerCard.addEventListener('mouseleave', () => { hovered = false; updateRotation(); });
     viewport.addEventListener('pointerdown', pauseRotation, {passive: true});

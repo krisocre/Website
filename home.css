@@ -40,14 +40,14 @@ html:has(> body.home-page){scroll-padding-top:20px}
 .home-page .reviewer-controls{order:1;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px}
 .home-page .reviewer-controls[hidden]{display:none}
 .home-page .reviewer-dot{display:grid;place-items:center;width:36px;height:36px;padding:0;border:0;border-radius:50%;background:transparent;color:#19323a}
-.home-page .reviewer-rotation{min-width:44px;min-height:36px;padding:6px 8px;border:0;border-radius:4px;background:transparent;color:#60706c;font:400 11px/1.4 'Segoe UI',Arial,sans-serif;text-decoration:underline;text-underline-offset:3px}
-.home-page .reviewer-rotation:hover,.home-page .reviewer-dot:hover{background:#f4f5f1}
+.home-page .reviewer-dot:hover{background:#f4f5f1}
 .home-page .reviewer-dots{display:flex;align-items:center}
 .home-page .reviewer-dot::before{content:'';width:6px;height:6px;border-radius:50%;background:#bdc7c0}
 .home-page .reviewer-dot[aria-current="true"]::before{width:8px;height:8px;background:#19323a}
 .home-page .reviewer-status{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-.home-page .testimonial-quote{width:100%;margin:0 0 19px;padding:0;border:0}
-.home-page .testimonial-quote p{margin:0;font:400 clamp(25px,2.1vw,28px)/1.4 Georgia,serif;letter-spacing:-.02em;text-wrap:balance}
+.home-page .testimonial-quote{display:grid;align-items:center;flex:1;width:100%;margin:0 0 22px;padding:0;border:0}
+.home-page .testimonial-quote p{margin:0;font:400 var(--quote-size,clamp(25px,2.1vw,28px))/1.4 Georgia,serif;letter-spacing:-.02em;text-wrap:balance}
+.home-page .testimonial-quote--long{--quote-size:clamp(21px,1.8vw,23px)}
 .home-page .testimonial-quote em{color:#a94e31;font-weight:400}
 .home-page .testimonial-person{display:block;width:100%;margin:auto 0 0}
 .home-page .testimonial-person>strong{display:block;color:#19323a;font-size:14px;font-weight:700;letter-spacing:0}
@@ -214,7 +214,7 @@ html:has(> body.home-page){scroll-padding-top:20px}
   .home-page .hero-testimonial{margin-top:56px;padding:0 22px 22px}
   .home-page .testimonial-avatar{width:112px;height:112px;margin-top:0}
   .home-page .reviewer-window{margin-top:-56px}
-  .home-page .testimonial-quote p{font-size:25px}
+  .home-page .testimonial-quote p{font-size:var(--quote-size,25px)}
   .home-page .testimonial-overall{gap:13px;padding:16px 0 0}
   .home-page .testimonial-rating-label{padding-left:13px}
   .home-page .platform-banner{padding-inline:18px;gap:12px}
@@ -247,7 +247,7 @@ html:has(> body.home-page){scroll-padding-top:20px}
   .home-page .hero-testimonial{width:100%;max-width:410px;margin-top:52px;padding:0 25px 22px;box-shadow:0 8px 24px #19323a08}
   .home-page .testimonial-avatar{width:112px;height:112px;margin-top:0;margin-bottom:13px}
   .home-page .testimonial-quote{margin:0 0 18px}
-  .home-page .testimonial-quote p{font-size:26px}
+  .home-page .testimonial-quote p{font-size:var(--quote-size,26px)}
   .home-page .testimonial-overall{margin-top:12px;padding:16px 0 0;gap:17px}
   .home-page .testimonial-rating-label{padding-left:17px}
   .home-page .pricing-section{padding:43px 0 46px}
@@ -329,7 +329,7 @@ html:has(> body.home-page){scroll-padding-top:20px}
   .home-page .review-count-row>label{font-size:12px}
   .home-page .form-quantity{flex-basis:136px}
   .home-page .hero-testimonial{padding-inline:20px}
-  .home-page .testimonial-quote p{font-size:24px}
+  .home-page .testimonial-quote p{font-size:var(--quote-size,24px)}
   .home-page .testimonial-overall{gap:11px;padding:15px 0 0}
   .home-page .testimonial-rating-label{padding-left:11px}
 }

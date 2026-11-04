@@ -52,7 +52,7 @@ const server=http.createServer((req,res)=>{
    assert.equal(layout.overflow,false,'Overflow at '+width);assert.ok(layout.ctaTop>=0&&layout.ctaBottom<layout.viewportHeight,'Primary CTA must be visible at '+width);assert.deepEqual(layout.brokenImages,[]);assert.equal(layout.animated,0,'No unrelated homepage animations');
    assert.ok(await page.$eval('.hero-secondary',e=>e.getBoundingClientRect().height>=44),'Pricing link has a 44px tap target');
    const testimonial=await page.$eval('.hero-testimonial',e=>({name:e.querySelector('figcaption strong').textContent,quote:e.querySelector('blockquote').textContent}));
-   assert.equal(testimonial.name,'Luke Hapher');assert.equal(testimonial.quote,'“A great team to work with. They took care of my bad review.”');
+   assert.equal(testimonial.name,'Luke Hapher');assert.equal(testimonial.quote,'“A great team to have on your side.”');
    assert.deepEqual(await page.$$eval('.reviewer-slide',e=>e.map(n=>n.dataset.reviewer)),['Luke Hapher','Michelle Carter','Daniel Chen']);
    assert.equal(await page.$eval('.testimonial-overall',e=>e.getAttribute('aria-label')),'Overall customer rating: 4.9 out of 5 from more than 5,000 ratings');
    const portrait=await page.$eval('.testimonial-avatar',e=>{const img=e.querySelector('img');return {loaded:img.complete&&img.naturalWidth===480&&img.naturalHeight===600,circle:getComputedStyle(e).borderRadius,width:e.getBoundingClientRect().width,height:e.getBoundingClientRect().height};});
@@ -90,6 +90,7 @@ const server=http.createServer((req,res)=>{
    assert.equal(await page.$eval('.testimonial-overall',e=>getComputedStyle(e).backgroundColor),'rgba(0, 0, 0, 0)','The rating shares the white card background');
   }
   assert.equal(await page.$$eval('[data-reviewer-step],.reviewer-arrow',e=>e.length),0,'Side arrows were removed');
+  assert.equal(await page.$('.reviewer-rotation'),null,'No pause/play button');
   await page.click('.reviewer-dot[aria-label="Show review from Michelle Carter"]');await expectReview(1,'Michelle Carter');
   await page.screenshot({path:path.join(output,'review-michelle-390.png')});
   await page.click('.reviewer-dot[aria-label="Show review from Daniel Chen"]');await expectReview(2,'Daniel Chen');
@@ -137,10 +138,6 @@ const server=http.createServer((req,res)=>{
   await tick(5000);await automaticReview('Luke Hapher');
   await automatic.hover('.hero-testimonial');await stopped();await tick(10000);assert.equal(await active(),'Luke Hapher','Hover pauses rotation');
   await automatic.mouse.move(0,0);await rotating();
-  await automatic.click('.reviewer-rotation');await automatic.mouse.move(0,0);await stopped();
-  await tick(10000);assert.equal(await active(),'Luke Hapher','Pause control stops rotation');
-  assert.equal(await automatic.$eval('.reviewer-rotation',e=>e.textContent),'Play');
-  await automatic.click('.reviewer-rotation');await automatic.mouse.move(0,0);await rotating();
   await tick(5000);await automaticReview('Michelle Carter');
   await automatic.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,value:true});document.dispatchEvent(new Event('visibilitychange'));});
   await stopped();await tick(10000);assert.equal(await active(),'Michelle Carter','Hidden tabs do not advance');
@@ -150,13 +147,16 @@ const server=http.createServer((req,res)=>{
   await automatic.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));await rotating();
   await automatic.focus('.reviewer-window');await stopped();
   await automatic.$eval('.reviewer-window',e=>e.blur());await tick(10000);
-  assert.equal(await active(),'Michelle Carter','Keyboard focus pauses until explicit restart');
+  assert.equal(await active(),'Michelle Carter','Keyboard interaction keeps automatic rotation stopped');
   assert.equal(await automatic.$eval('.reviewer-status',e=>e.getAttribute('aria-live')),'polite');
-  await automatic.click('.reviewer-rotation');await automatic.mouse.move(0,0);await rotating();
+  await automatic.click('.reviewer-dot[aria-label="Show review from Daniel Chen"]');await automaticReview('Daniel Chen');
+  await automatic.mouse.move(0,0);await stopped();await tick(10000);
+  assert.equal(await active(),'Daniel Chen','Dots remain usable and manual selection stops automatic rotation');
+  await automatic.goto(base,{waitUntil:'load'});await rotating();
   await automatic.emulateMediaFeatures([{name:'prefers-reduced-motion',value:'reduce'}]);await stopped();
-  await tick(10000);assert.equal(await active(),'Michelle Carter','Reduced motion stops automatic rotation');
+  await tick(10000);assert.equal(await active(),'Luke Hapher','Reduced motion stops automatic rotation');
   await automatic.goto(base,{waitUntil:'load'});await stopped();
-  assert.equal(await automatic.$eval('.reviewer-rotation',e=>e.textContent),'Play','Reduced motion disables initial autoplay');
+  await tick(10000);assert.equal(await active(),'Luke Hapher','Reduced motion disables initial autoplay');
   await automatic.close();
   // The banner has no visible control; hover/focus and reduced motion keep links usable.
   await page.goto(base,{waitUntil:'load'});
@@ -219,6 +219,6 @@ const server=http.createServer((req,res)=>{
   assert.equal(await page.$$eval('title',n=>n.length),1);assert.equal(await page.$$eval('link[rel="canonical"]',n=>n.length),1);
   assert.deepEqual(errors,[]);assert.deepEqual(posts,[],'Never send a real POST');
   fs.writeFileSync(path.join(output,'layout-results.json'),JSON.stringify(results,null,2));
-  console.log('PASS: five homepage widths; refreshed quotes; five-second automatic reviewer rotation; no side arrows; dots, swipe, keyboard, resize and stable height; pause/play, hover/focus/hidden/offscreen pauses and reduced motion; one platform banner; working quote forms with mocked Turnstile; legal payload and no-JS notice; zero real submissions.');
+  console.log('PASS: five homepage widths; distinct quotes; five-second automatic reviewer rotation; no side arrows or pause/play button; dots, swipe, keyboard, resize and stable height; hover/focus/hidden/offscreen pauses and reduced motion; one platform banner; working quote forms with mocked Turnstile; legal payload and no-JS notice; zero real submissions.');
  }finally{if(browser)await browser.close();server.closeAllConnections();await new Promise(r=>server.close(r));}
 })().catch(e=>{console.error(e);process.exitCode=1;});

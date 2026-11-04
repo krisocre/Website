@@ -183,3 +183,19 @@ function checkReviewRemovalSetup() {
   console.log(JSON.stringify(summary));
   return summary;
 }
+
+// Run in the Apps Script editor if a tab appears to match but cannot be found.
+// Reads only the destination properties and spreadsheet/tab metadata, not leads.
+function diagnoseReviewRemovalSheet() {
+  var properties = PropertiesService.getScriptProperties();
+  var spreadsheet = SpreadsheetApp.openById(properties.getProperty('SPREADSHEET_ID'));
+  var result = {
+    spreadsheet_url: spreadsheet.getUrl(),
+    configured_tab: properties.getProperty('SHEET_NAME'),
+    actual_tabs: spreadsheet.getSheets().map(function (sheet) { return sheet.getName(); })
+  };
+  console.log('Opened spreadsheet: ' + result.spreadsheet_url);
+  console.log('Configured tab: ' + JSON.stringify(result.configured_tab));
+  console.log('Actual tabs: ' + JSON.stringify(result.actual_tabs));
+  return result;
+}
