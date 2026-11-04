@@ -1,16 +1,23 @@
-# ReviewRemoval quote form
+# ReviewRemoval quote forms — isolated backend setup
 
-The homepage and the Facebook, Yelp, Trustpilot, Tripadvisor, Booking.com, Glassdoor, and Indeed service pages post URL-encoded form data to the supplied Google Apps Script deployment. They send `selected_plan`, `full_name`, `business_name`, `email_address`, `business_url`, `review_count`, `review_links`, `reason`, `contact_method`, and `contact_detail`. The `selected_plan` value identifies the platform, quantity, and price.
+The homepage and Facebook, Yelp, Trustpilot, Tripadvisor, Booking.com, Glassdoor and Indeed forms use `script.js` to send the existing selected plan, name, business, email, profile URL, quantity, review links, reason, contact preference and legal acknowledgement. Turnstile adds `cf-turnstile-response`.
 
-**Turnstile integration (2026-11-03):** forms now also send `cf-turnstile-response`. The local backend requires server-side verification before saving anything. Follow [TURNSTILE-SETUP.md](TURNSTILE-SETUP.md) before deploying it: the existing URL is shared with ReviewsBoost, and the new protected handler must not replace that shared version while ReviewsBoost remains unprotected. The secret belongs in Apps Script's Script Properties, never the website.
+**Do not update the current shared Apps Script deployment.** ReviewsBoost still uses it. Paste the complete [google-apps-script.gs](google-apps-script.gs) into a **new standalone ReviewRemoval project**. Follow [TURNSTILE-SETUP.md](TURNSTILE-SETUP.md) for the exact procedure, including the deployment/testing order.
 
-The live integration test on 2026-09-21 reached the deployment and received `Failed to send email: no recipient`. In the supplied handler, `sheet.appendRow(...)` runs before `MailApp.sendEmail(...)`, so the clearly labelled TEST row should be in the spreadsheet, but the owner notification was not sent.
+Set these Script Properties in the new project:
 
-To restore owner notifications:
+| Property | Value |
+| --- | --- |
+| `SPREADSHEET_ID` | ReviewRemoval destination spreadsheet ID, not the full URL. |
+| `SHEET_NAME` | Exact receiving tab name. |
+| `NOTIFICATION_EMAIL` | Existing ReviewRemoval owner-notification inbox. |
+| `TURNSTILE_SECRET` | Private secret matching existing key `0x4AAAAAAFy2WEsCKuoqoOMl`. |
+| `TURNSTILE_HOSTNAMES` | `reviewremoval.ca`, optionally the allowed and served `www.reviewremoval.ca`. |
 
-1. In the Apps Script project bound to the receiving spreadsheet, replace the current `doPost` with [google-apps-script.gs](google-apps-script.gs).
-2. Set the script property `NOTIFICATION_EMAIL` to the inbox that should receive new requests. The updated code also falls back to `Session.getEffectiveUser().getEmail()` when the web app executes as its owner.
-3. Update the **existing** web app deployment to a new version so the current `/exec` URL remains valid. Ensure it executes as the script owner and accepts public form submissions.
-4. Confirm the sheet header order shown at the top of `google-apps-script.gs` and submit one test request after redeployment.
+Run `checkReviewRemovalSetup` in the new editor first. It only reads configuration/headers and probes the configured secret; it writes no row or email. When you permit an isolated test deployment, use the private browser utility described in the guide to test fresh, invalid, wrong-action and replayed tokens, exactly one saved row and the normal owner notification. No live form changes are needed to test that candidate.
 
-The same deployment URL is also used by the reference ReviewsBoost site, so updating this deployment changes its form handler too. The replacement handler keeps the field names and column order used there.
+The handler resolves its spreadsheet with `openById` and the configured tab, then retains the original twelve columns, field fallbacks, formula protection, owner-email template and success JSON. A saved request whose email fails still returns success with `notification_sent: false`, as before; check the sheet before retrying an uncertain request.
+
+The existing submission URLs remain untouched. After the candidate passes and the website change is approved, update ReviewRemoval's `const endpoint` in `script.js` and the native homepage `action` in `index.html` together. The seven platform forms use the shared JS handler. Keep the Google Ads configuration, consent behavior and confirmed-success hook unchanged. No ReviewsBoost code or endpoint needs editing.
+
+Local files do not configure private properties, create/deploy an Apps Script project, verify live delivery or publish a website. Automated requests are mocked.

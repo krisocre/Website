@@ -2,5 +2,5 @@
 window.ReviewRemovalMeasurementConfig = Object.freeze({
   ga4MeasurementId: null,
   googleAdsId: 'AW-18449308865',
-  googleAdsLeadConversionLabel: null
+  googleAdsLeadConversionLabel: 'HqdzCIv5z4gdEMG5qN1E'
 });

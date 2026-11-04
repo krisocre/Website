@@ -21,7 +21,7 @@ const server=http.createServer((req,res)=>{
     if(r.method()!=='GET'){externalPosts.push(r.url());r.abort();return;}
     if(isTurnstileApi(r.url())){r.respond({status:200,contentType:'text/javascript',body:turnstileApiFixture});return;}
     if(r.url().includes('googletagmanager.com/gtag/js')){google.push(r.url());r.respond({status:200,contentType:'text/javascript',body:'/* intercepted test loader: no network collection */'});return;}
-    if(r.url().startsWith(base)&&r.url().endsWith('/measurement-config.js')){r.respond({status:200,contentType:'text/javascript',body:'window.ReviewRemovalMeasurementConfig='+JSON.stringify(config)+';'});return;}
+    if(config!==null&&r.url().startsWith(base)&&r.url().endsWith('/measurement-config.js')){r.respond({status:200,contentType:'text/javascript',body:'window.ReviewRemovalMeasurementConfig='+JSON.stringify(config)+';'});return;}
     if(r.url().startsWith(base))r.continue();else r.abort();
    });
    if(gpc)await page.evaluateOnNewDocument(()=>Object.defineProperty(navigator,'globalPrivacyControl',{get:()=>true}));
@@ -55,6 +55,28 @@ const server=http.createServer((req,res)=>{
   await fillAndSubmit(page);assert.equal((await events(page)).length,0,'No denied lead backfill');
   await page.click('.measurement-settings');await choose(page,'accept');
   assert.equal((await events(page)).filter(e=>e[1]==='generate_lead'||e[1]==='conversion').length,0);
+  await test.context.close();
+  // Actual checked-in Ads destination: confirmed lead only, no real Google requests.
+  test=await open({config:null});page=test.page;start=google.length;
+  assert.equal((await page.evaluate(()=>window.ReviewRemovalMeasurement.status())).adsLeadConfigured,true);
+  assert.equal((await page.evaluate(()=>window.ReviewRemovalMeasurement.status())).ga4Configured,false);
+  assert.equal((await events(page)).filter(e=>e[1]==='conversion').length,0);
+  await choose(page,'accept');
+  await page.waitForFunction(()=>document.querySelector('#reviewremoval-google-tag'));
+  assert.equal(google.length-start,1);
+  await page.click('.hero-actions .button');
+  assert.equal((await events(page)).filter(e=>e[1]==='conversion').length,0,'Quote CTA is not a completed lead');
+  await fillAndSubmit(page,'network');
+  assert.equal((await events(page)).filter(e=>e[1]==='conversion').length,0,'Failed submission is not a lead');
+  await fillAndSubmit(page);
+  await page.evaluate(()=>window.ReviewRemovalMeasurement.confirmedLead(document.querySelector('form')));
+  const realConversions=(await events(page)).filter(e=>e[1]==='conversion');
+  assert.equal(realConversions.length,1);
+  assert.equal(realConversions[0][2].send_to,'AW-18449308865/HqdzCIv5z4gdEMG5qN1E');
+  assert.equal(realConversions[0][2].value,1);assert.equal(realConversions[0][2].currency,'CAD');
+  assert.ok(realConversions[0][2].transaction_id);
+  assert.ok(!/PRIVATE_|private\.person|example\.com/.test(JSON.stringify(realConversions)),'No form data sent to the real Ads destination');
+  assert.equal((await events(page)).filter(e=>e[1]==='generate_lead'||e[1]==='page_view').length,0,'Unconfigured GA4 remains disabled');
   await test.context.close();
   // Both routes: one loader, manual page view, no duplicate lead or form start.
   test=await open();page=test.page;start=google.length;await choose(page,'accept');

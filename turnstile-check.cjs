@@ -5,32 +5,43 @@ const {turnstileApiFixture, isTurnstileApi, completeSecurityCheck} = require('./
 const root = __dirname;
 const source = fs.readFileSync(path.join(root, 'google-apps-script.gs'), 'utf8');
 let cases = 0;
-function backend({properties, provider, responseCode = 200, malformed = false, mailFailure = false} = {}) {
+function backend({properties, provider, responseCode = 200, malformed = false, mailFailure = false, missingSheet = false, badHeaders = false} = {}) {
   const calls = {verify: [], sheets: 0, rows: [], mail: 0};
   const used = new Set();
   const context = {
     PropertiesService: {getScriptProperties: () => ({getProperty: name => (properties || {
-      TURNSTILE_SECRET: 'LOCAL_TEST_SECRET', TURNSTILE_HOSTNAMES: 'reviewremoval.ca,www.reviewremoval.ca'
+      TURNSTILE_SECRET: 'LOCAL_TEST_SECRET', TURNSTILE_HOSTNAMES: 'reviewremoval.ca,www.reviewremoval.ca',
+      SPREADSHEET_ID: 'LOCAL_SHEET_ID', SHEET_NAME: 'Leads', NOTIFICATION_EMAIL: 'test@example.invalid'
     })[name] || null})},
     UrlFetchApp: {fetch(url, options) {
       assert.equal(url, 'https://challenges.cloudflare.com/turnstile/v0/siteverify');
       assert.equal(options.method, 'post'); assert.equal(options.followRedirects, false);
       assert.deepEqual(Object.keys(options.payload).sort(), ['response', 'secret']);
       calls.verify.push(options);
-      const result = provider ? provider() : used.has(options.payload.response)
+      const result = provider ? provider() : options.payload.response === 'XXXX.DUMMY.TOKEN.XXXX'
+        ? {success: false, 'error-codes': ['invalid-input-response']} : used.has(options.payload.response)
         ? {success: false, 'error-codes': ['timeout-or-duplicate']}
         : {success: true, action: 'quote_request', hostname: 'reviewremoval.ca'};
       used.add(options.payload.response);
       return {getResponseCode: () => responseCode, getContentText: () => malformed ? 'bad json' : JSON.stringify(result)};
     }},
-    SpreadsheetApp: {getActiveSpreadsheet() { calls.sheets++; return {getActiveSheet: () => ({appendRow: row => calls.rows.push(row)})}; }},
+    SpreadsheetApp: {openById(id) {
+      calls.sheets++; assert.equal(id, 'LOCAL_SHEET_ID');
+      return {getSheetByName(name) {
+        assert.equal(name, 'Leads');
+        return missingSheet ? null : {
+          appendRow: row => calls.rows.push(row),
+          getRange: () => ({getValues: () => [badHeaders ? [] : ['Timestamp','Selected Plan','Full Name','Business Name','Email','Phone','Preferred Contact','Contact Detail','Profile URL','Review Count','Review Links','Reason']]})
+        };
+      }};
+    }},
     Session: {getEffectiveUser: () => ({getEmail: () => 'test@example.invalid'})},
     MailApp: {sendEmail() { calls.mail++; if (mailFailure) throw Error('local mail test'); }},
     ContentService: {MimeType: {JSON: 'json'}, createTextOutput: text => ({setMimeType: () => JSON.parse(text)})},
-    console: {error() {}}
+    console: {error() {}, log() {}}
   };
   vm.createContext(context); vm.runInContext(source, context);
-  return {calls, post: parameter => context.doPost({parameter})};
+  return {calls, post: parameter => context.doPost({parameter}), check: () => context.checkReviewRemovalSetup()};
 }
 const payload = {'cf-turnstile-response': 'LOCAL_TOKEN', full_name: '=formula', email_address: 'private@example.invalid', reason: 'private review text', selected_plan: 'Existing plan', review_count: '2'};
 function reject(options, data = payload) {
@@ -63,6 +74,22 @@ assert.equal(app.calls.rows.length, 1); assert.equal(app.calls.mail, 1); cases +
 const notification = backend({mailFailure: true});
 assert.equal(notification.post(payload).notification_sent, false);
 assert.equal(notification.calls.rows.length, 1); cases++;
+const configured = {TURNSTILE_SECRET:'LOCAL_TEST_SECRET',TURNSTILE_HOSTNAMES:'reviewremoval.ca',SPREADSHEET_ID:'LOCAL_SHEET_ID',SHEET_NAME:'Leads',NOTIFICATION_EMAIL:'test@example.invalid'};
+for (const name of ['SPREADSHEET_ID','SHEET_NAME']) {
+  const broken = backend({properties:{...configured,[name]:''}});
+  assert.equal(broken.post(payload).result,'error');
+  assert.equal(broken.calls.sheets,0);assert.equal(broken.calls.rows.length,0);assert.equal(broken.calls.mail,0);cases++;
+}
+const absentTab = backend({missingSheet:true});
+assert.equal(absentTab.post(payload).result,'error');assert.equal(absentTab.calls.rows.length,0);assert.equal(absentTab.calls.mail,0);cases++;
+const setup = backend();assert.equal(setup.check().configuration,'passed');
+assert.equal(setup.calls.rows.length,0);assert.equal(setup.calls.mail,0);cases++;
+for (const name of Object.keys(configured)) {
+  const broken = backend({properties:{...configured,[name]:''}});
+  assert.throws(()=>broken.check(),new RegExp(name));assert.equal(broken.calls.rows.length,0);assert.equal(broken.calls.mail,0);cases++;
+}
+assert.throws(()=>backend({badHeaders:true}).check(),/12 headers/);cases++;
+assert.throws(()=>backend({provider:()=>({success:false,'error-codes':['invalid-input-secret']})}).check(),/secret check failed/);cases++;
 console.log(`PASS: ${cases} backend cases; missing/invalid/expired/replayed tokens, action/hostname/config checks, provider failures, zero writes on rejection, existing lead handling.`);
 
 const server = http.createServer((req, res) => {
@@ -106,7 +133,7 @@ const server = http.createServer((req, res) => {
     });
     assert.equal(await page.evaluate(() => window.__sent.length), 0, 'No token means no POST');
     await completeSecurityCheck(page);
-    assert.equal(await page.evaluate(() => window.__turnstileFixture.sitekey), '0x4AAAAAAFy2a5sutqdFxytB');
+    assert.equal(await page.evaluate(() => window.__turnstileFixture.sitekey), '0x4AAAAAAFy2WEsCKuoqoOMl');
     assert.equal(await page.evaluate(() => window.__turnstileFixture.action), 'quote_request');
     assert.equal(await page.$$eval('input[name="cf-turnstile-response"]', nodes => nodes.length), 1);
     await page.evaluate(() => { window.__turnstileFixture.expire(); document.querySelector('form').requestSubmit(); });

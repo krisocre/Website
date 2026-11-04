@@ -119,7 +119,10 @@
       initializeDestinations();
       var id = window.crypto && window.crypto.randomUUID ? window.crypto.randomUUID() : window.crypto && window.crypto.getRandomValues ?
         Array.from(window.crypto.getRandomValues(new Uint32Array(4))).map(function (n) { return n.toString(16); }).join('-') : null;
-      if (id) window.gtag('event', 'conversion', Object.assign(baseParameters(), { send_to: ads + '/' + label, transaction_id: id }));
+      // CAD $1 is the nominal lead value in the supplied Ads snippet, not revenue.
+      if (id) window.gtag('event', 'conversion', Object.assign(baseParameters(), {
+        send_to: ads + '/' + label, value: 1, currency: 'CAD', transaction_id: id
+      }));
     }
   }
   function locationFor(link) {

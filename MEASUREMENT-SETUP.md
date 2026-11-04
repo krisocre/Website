@@ -1,13 +1,15 @@
-# ReviewRemoval conversion measurement — November 1, 2026
+# ReviewRemoval conversion measurement — November 3, 2026
 
 ## Current audit and configuration
 
 - Existing Google Ads destination: **AW-18449308865**, retained.
 - No GA4 Measurement ID or Google Tag Manager container was found in published
   source. Loading `gtag.js` from googletagmanager.com is not itself a GTM container.
-- No manual Google Ads lead-conversion label was supplied or found. An AW ID
-  alone cannot identify the intended conversion action.
-- No existing consent manager or confirmed-lead event was found.
+- Supplied Google Ads action: **Submit lead form**, with destination
+  **AW-18449308865/HqdzCIv5z4gdEMG5qN1E**. Its event snippet was provided on
+  November 3, 2026 and is now configured in the existing measurement module.
+- Existing consent controls and the confirmed-lead hook are retained. No second
+  Google tag, GTM container or submit-button click conversion was added.
 - There are currently no `mailto:` or `tel:` links on the published pages.
 - Cloudflare's live hosting response injects a RUM beacon independently of the
   repository. It is not a GA4/GTM install and is not managed by this module.
@@ -18,17 +20,18 @@
 window.ReviewRemovalMeasurementConfig = Object.freeze({
   ga4MeasurementId: null,
   googleAdsId: 'AW-18449308865',
-  googleAdsLeadConversionLabel: null
+  googleAdsLeadConversionLabel: 'HqdzCIv5z4gdEMG5qN1E'
 });
 ```
 
-The null values deliberately disable those outbound routes. They are not
-production placeholders. No Analytics account, Ads action or credentials were
-invented, and no account settings were changed.
+The null GA4 value deliberately disables that route. It is not a production
+placeholder. The Ads account and conversion label come from the supplied tag;
+no account settings were changed.
 
 With the current configuration, the existing Ads base destination loads only
-after advertising consent. GA4 events and direct Ads lead conversions are
-prepared but **not sent** until the actual missing identifiers are configured.
+after advertising consent. Native Ads lead conversions are enabled for confirmed
+submissions after that consent. GA4 events remain disabled until a real web-stream
+Measurement ID is supplied.
 After analytics consent, a small in-memory verification log records safe event
 signals even when GA4 is unconfigured; it is not a remote analytics service.
 
@@ -88,7 +91,10 @@ change is required for the implemented browser hook.
 
 Event parameters are built from an allowlist: a published canonical page path,
 generic site title, page category, known platform enum, fixed CTA location,
-constant form ID or contact-method enum. The code never serializes FormData into
+constant form ID or contact-method enum. Ads conversions also include the supplied
+snippet's fixed `value: 1` and `currency: 'CAD'`, plus a random transaction ID.
+This is a nominal lead value, not a payment, quote amount or removal result.
+The code never serializes FormData into
 analytics, reads a link's displayed text for analytics, or forwards contact
 destinations, selected-plan text, prices, review count, review text, email, name,
 business name or profile URLs. No enquiry amount is reported as revenue.
@@ -120,19 +126,18 @@ analytics is anonymous or exempt from applicable privacy requirements.
    version any necessary policy update without rewriting archived releases.
 2. Replace only `ga4MeasurementId: null` with the real public G- ID. Never put
    passwords, API tokens or service-account credentials in browser files.
-3. For native Ads conversion tracking, select or create a **manual website lead
-   conversion action** in account AW-18449308865. Obtain its actual conversion
-   label from Tag setup. Auto-created/GA4-imported actions may not provide one.
-   Leave the field null if there is no appropriate manual action.
-4. Set that real label in `googleAdsLeadConversionLabel`. Do not append a made-up
-   label or use an unrelated action. The code retains the existing account ID
-   and uses one Google loader for both destinations.
+3. The supplied **Submit lead form** action in account AW-18449308865 is already
+   configured using label `HqdzCIv5z4gdEMG5qN1E`. Check that this is the intended
+   ReviewRemoval action in Google Ads; no new account or action is needed.
+4. `googleAdsLeadConversionLabel` contains that real label. The existing account
+   ID is retained and one Google loader serves both configured destinations.
 5. Keep automatic/enhanced user-provided-data collection and enhanced conversions
    disabled unless separately reviewed and intentionally implemented with valid
    consent. This implementation does not send or hash user-provided data.
 6. Set the confirmed lead action's count to **One** as appropriate for lead
-   acquisition. Configure its value in Ads using genuine business valuation;
-   do not substitute the removal quote or claim an enquiry is revenue.
+   acquisition. The event sends CAD $1, matching the supplied snippet. Review this
+   nominal lead valuation in Ads before using value-based bidding; no removal
+   quote or payment amount is sent.
 7. Choose exactly one primary Ads lead route: the native conversion label **or**
    a linked GA4 generate_lead import. Do not make both primary for the same lead.
    If retaining both for comparison, keep the duplicate route secondary and
@@ -153,7 +158,8 @@ events deliberately; do not layer duplicate GA4/Ads tags on top of this route.
 
 ## Files and local verification
 
-- `measurement-config.js`: existing Ads ID and disabled missing destinations.
+- `measurement-config.js`: existing Ads ID, supplied lead conversion label and
+  disabled GA4 destination.
 - `measurement.js`, `measurement.css`: consent controls and safe event routes.
 - `script.js`: the explicit-success lead hook; the submission integration is
   otherwise unchanged.
@@ -189,6 +195,9 @@ check builds and checks repeatability in a temporary directory.
       lead conversion; a later confirmed retry produces one.
 - [ ] Explicit saved success, including notification_sent:false, produces one
       generate_lead and at most one configured native Ads conversion.
+- [ ] With the current Ads-only configuration, Tag Assistant shows one conversion
+      to `AW-18449308865/HqdzCIv5z4gdEMG5qN1E`, value `1`, currency `CAD` and a random
+      transaction ID after confirmed success. No GA4 event is sent without a G- ID.
 - [ ] Inspect every event parameter: no names, email, review text, profile URLs,
       contact destinations, free-text fields or visitor query/hash.
 - [ ] Unknown query/hash visits suppress optional collection and retain their

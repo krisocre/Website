@@ -26,6 +26,17 @@ const server=http.createServer((req,res)=>{
   const errors=[],posts=[];
   async function newPage(width=390){
    const page=await browser.newPage();await page.setViewport({width,height:width<=680?844:900});
+   // Control only the carousel's 5-second clock; form/provider timers remain real.
+   await page.evaluateOnNewDocument(()=>{
+    const nativeSet=window.setTimeout.bind(window),nativeClear=window.clearTimeout.bind(window),jobs=new Map();
+    let now=0,id=-1;
+    window.setTimeout=(callback,delay,...args)=>{
+     if(delay!==5000)return nativeSet(callback,delay,...args);
+     const key=id--;jobs.set(key,{due:now+delay,run:()=>callback(...args)});return key;
+    };
+    window.clearTimeout=key=>{if(!jobs.delete(key))nativeClear(key);};
+    window.__reviewerClock={pending:()=>jobs.size,tick(ms){now+=ms;for(const [key,job]of [...jobs])if(job.due<=now){jobs.delete(key);job.run();}}};
+   });
    await page.setRequestInterception(true);
    page.on('request',r=>{if(r.method()!=='GET'){posts.push(r.url());r.abort();}else if(isTurnstileApi(r.url()))r.respond({status:200,contentType:'text/javascript',body:turnstileApiFixture});else if(r.url().startsWith(base)||r.url().startsWith('data:'))r.continue();else r.abort();});
    page.on('pageerror',e=>errors.push(e.message));return page;
@@ -41,7 +52,7 @@ const server=http.createServer((req,res)=>{
    assert.equal(layout.overflow,false,'Overflow at '+width);assert.ok(layout.ctaTop>=0&&layout.ctaBottom<layout.viewportHeight,'Primary CTA must be visible at '+width);assert.deepEqual(layout.brokenImages,[]);assert.equal(layout.animated,0,'No unrelated homepage animations');
    assert.ok(await page.$eval('.hero-secondary',e=>e.getBoundingClientRect().height>=44),'Pricing link has a 44px tap target');
    const testimonial=await page.$eval('.hero-testimonial',e=>({name:e.querySelector('figcaption strong').textContent,quote:e.querySelector('blockquote').textContent}));
-   assert.equal(testimonial.name,'Luke Hapher');assert.equal(testimonial.quote,'“The team took care of my bad review.”');
+   assert.equal(testimonial.name,'Luke Hapher');assert.equal(testimonial.quote,'“A great team to work with. They took care of my bad review.”');
    assert.deepEqual(await page.$$eval('.reviewer-slide',e=>e.map(n=>n.dataset.reviewer)),['Luke Hapher','Michelle Carter','Daniel Chen']);
    assert.equal(await page.$eval('.testimonial-overall',e=>e.getAttribute('aria-label')),'Overall customer rating: 4.9 out of 5 from more than 5,000 ratings');
    const portrait=await page.$eval('.testimonial-avatar',e=>{const img=e.querySelector('img');return {loaded:img.complete&&img.naturalWidth===480&&img.naturalHeight===600,circle:getComputedStyle(e).borderRadius,width:e.getBoundingClientRect().width,height:e.getBoundingClientRect().height};});
@@ -78,12 +89,13 @@ const server=http.createServer((req,res)=>{
    assert.equal(await page.$eval('.hero-testimonial',e=>e.getBoundingClientRect().height),reviewHeight,'Changing reviewers must not shift the page');
    assert.equal(await page.$eval('.testimonial-overall',e=>getComputedStyle(e).backgroundColor),'rgba(0, 0, 0, 0)','The rating shares the white card background');
   }
-  await page.click('[data-reviewer-step="1"]');await expectReview(1,'Michelle Carter');
+  assert.equal(await page.$$eval('[data-reviewer-step],.reviewer-arrow',e=>e.length),0,'Side arrows were removed');
+  await page.click('.reviewer-dot[aria-label="Show review from Michelle Carter"]');await expectReview(1,'Michelle Carter');
   await page.screenshot({path:path.join(output,'review-michelle-390.png')});
-  await page.click('[data-reviewer-step="1"]');await expectReview(2,'Daniel Chen');
+  await page.click('.reviewer-dot[aria-label="Show review from Daniel Chen"]');await expectReview(2,'Daniel Chen');
   await page.screenshot({path:path.join(output,'review-daniel-390.png')});
-  await page.click('[data-reviewer-step="1"]');await expectReview(0,'Luke Hapher');
-  await page.click('[data-reviewer-step="-1"]');await expectReview(2,'Daniel Chen');
+  await page.click('.reviewer-dot[aria-label="Show review from Luke Hapher"]');await expectReview(0,'Luke Hapher');
+  await page.click('.reviewer-dot[aria-label="Show review from Daniel Chen"]');await expectReview(2,'Daniel Chen');
   await page.click('.reviewer-dot[aria-label="Show review from Michelle Carter"]');await expectReview(1,'Michelle Carter');
   await page.focus('.reviewer-window');await page.keyboard.press('Home');await expectReview(0,'Luke Hapher');
   await page.keyboard.press('ArrowRight');await expectReview(1,'Michelle Carter');
@@ -109,6 +121,43 @@ const server=http.createServer((req,res)=>{
   await page.click('.reviewer-dot[aria-label="Show review from Luke Hapher"]');
   await page.waitForFunction(()=>document.querySelector('.reviewer-window').scrollLeft===0);
   await page.emulateMediaFeatures([]);
+  // Actual timer callbacks run at the requested 5-second interval without sleeps.
+  const automatic=await newPage(1440);
+  await automatic.goto(base,{waitUntil:'load'});
+  const tick=ms=>automatic.evaluate(ms=>window.__reviewerClock.tick(ms),ms);
+  const active=()=>automatic.$eval('.reviewer-slide[aria-hidden="false"]',e=>e.dataset.reviewer);
+  const rotating=()=>automatic.waitForFunction(()=>window.__reviewerClock.pending()===1);
+  const stopped=()=>automatic.waitForFunction(()=>window.__reviewerClock.pending()===0);
+  async function automaticReview(name){await automatic.waitForFunction(name=>document.querySelector('.reviewer-slide[aria-hidden="false"]')?.dataset.reviewer===name,{},name);}
+  await rotating();assert.equal(await active(),'Luke Hapher');
+  assert.equal(await automatic.$eval('.reviewer-status',e=>e.getAttribute('aria-live')),'off');
+  await tick(4999);assert.equal(await active(),'Luke Hapher','No early rotation');
+  await tick(1);await automaticReview('Michelle Carter');
+  await tick(5000);await automaticReview('Daniel Chen');
+  await tick(5000);await automaticReview('Luke Hapher');
+  await automatic.hover('.hero-testimonial');await stopped();await tick(10000);assert.equal(await active(),'Luke Hapher','Hover pauses rotation');
+  await automatic.mouse.move(0,0);await rotating();
+  await automatic.click('.reviewer-rotation');await automatic.mouse.move(0,0);await stopped();
+  await tick(10000);assert.equal(await active(),'Luke Hapher','Pause control stops rotation');
+  assert.equal(await automatic.$eval('.reviewer-rotation',e=>e.textContent),'Play');
+  await automatic.click('.reviewer-rotation');await automatic.mouse.move(0,0);await rotating();
+  await tick(5000);await automaticReview('Michelle Carter');
+  await automatic.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,value:true});document.dispatchEvent(new Event('visibilitychange'));});
+  await stopped();await tick(10000);assert.equal(await active(),'Michelle Carter','Hidden tabs do not advance');
+  await automatic.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,value:false});document.dispatchEvent(new Event('visibilitychange'));});await rotating();
+  await automatic.$eval('#quote',e=>e.scrollIntoView({behavior:'instant',block:'start'}));
+  await stopped();await tick(10000);assert.equal(await active(),'Michelle Carter','Offscreen cards do not advance');
+  await automatic.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));await rotating();
+  await automatic.focus('.reviewer-window');await stopped();
+  await automatic.$eval('.reviewer-window',e=>e.blur());await tick(10000);
+  assert.equal(await active(),'Michelle Carter','Keyboard focus pauses until explicit restart');
+  assert.equal(await automatic.$eval('.reviewer-status',e=>e.getAttribute('aria-live')),'polite');
+  await automatic.click('.reviewer-rotation');await automatic.mouse.move(0,0);await rotating();
+  await automatic.emulateMediaFeatures([{name:'prefers-reduced-motion',value:'reduce'}]);await stopped();
+  await tick(10000);assert.equal(await active(),'Michelle Carter','Reduced motion stops automatic rotation');
+  await automatic.goto(base,{waitUntil:'load'});await stopped();
+  assert.equal(await automatic.$eval('.reviewer-rotation',e=>e.textContent),'Play','Reduced motion disables initial autoplay');
+  await automatic.close();
   // The banner has no visible control; hover/focus and reduced motion keep links usable.
   await page.goto(base,{waitUntil:'load'});
   const tickerDelta=()=>page.$eval('.platform-track',async e=>{const before=e.getBoundingClientRect().left;await new Promise(r=>setTimeout(r,160));return e.getBoundingClientRect().left-before;});
@@ -170,6 +219,6 @@ const server=http.createServer((req,res)=>{
   assert.equal(await page.$$eval('title',n=>n.length),1);assert.equal(await page.$$eval('link[rel="canonical"]',n=>n.length),1);
   assert.deepEqual(errors,[]);assert.deepEqual(posts,[],'Never send a real POST');
   fs.writeFileSync(path.join(output,'layout-results.json'),JSON.stringify(results,null,2));
-  console.log('PASS: five homepage widths; three-review slider with arrows, dots, touch swipe, keyboard, resize and stable height; loaded circular portraits; one moving platform banner; reduced motion; visible CTA; quote bounds/totals; mocked error/retry/success with Turnstile; legal payload and no-JS notice; zero real submissions.');
+  console.log('PASS: five homepage widths; refreshed quotes; five-second automatic reviewer rotation; no side arrows; dots, swipe, keyboard, resize and stable height; pause/play, hover/focus/hidden/offscreen pauses and reduced motion; one platform banner; working quote forms with mocked Turnstile; legal payload and no-JS notice; zero real submissions.');
  }finally{if(browser)await browser.close();server.closeAllConnections();await new Promise(r=>server.close(r));}
 })().catch(e=>{console.error(e);process.exitCode=1;});

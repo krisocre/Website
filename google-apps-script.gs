@@ -5,10 +5,10 @@
  * Preferred Contact | Contact Detail | Profile URL | Review Count |
  * Review Links | Reason
  *
- * Deploy as a web app that executes as the script owner. For reliable owner
- * notifications, set the NOTIFICATION_EMAIL script property to your inbox.
- * Turnstile: set TURNSTILE_SECRET and TURNSTILE_HOSTNAMES in Script Properties.
- * See TURNSTILE-SETUP.md before updating the shared web-app deployment.
+ * Paste the entire file into Code.gs in a NEW, standalone ReviewRemoval project.
+ * Script Properties: SPREADSHEET_ID, SHEET_NAME, NOTIFICATION_EMAIL,
+ * TURNSTILE_SECRET, TURNSTILE_HOSTNAMES. See TURNSTILE-SETUP.md.
+ * Do not paste into or update the existing ReviewsBoost/shared deployment.
  */
 function doPost(e) {
   try {
@@ -22,7 +22,14 @@ function doPost(e) {
         error: 'Security verification failed. Please complete the check and try again.'
       })).setMimeType(ContentService.MimeType.JSON);
     }
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    // Standalone web apps do not have an active spreadsheet. Resolve this
+    // project's destination explicitly, without touching the shared deployment.
+    var storage = PropertiesService.getScriptProperties();
+    var spreadsheetId = storage.getProperty('SPREADSHEET_ID');
+    var sheetName = storage.getProperty('SHEET_NAME');
+    if (!spreadsheetId || !sheetName) throw new Error('The form storage is not configured.');
+    var sheet = SpreadsheetApp.openById(spreadsheetId).getSheetByName(sheetName);
+    if (!sheet) throw new Error('The configured submissions tab was not found.');
     var timestamp = new Date();
 
     var selectedPlan = data.selected_plan || 'N/A';
@@ -128,4 +135,51 @@ function verifyTurnstile(token) {
     // No token, secret, provider response or personal information in logs/errors.
     return false;
   }
+}
+
+/**
+ * Run manually in the new project's editor before creating a test deployment.
+ * Reads configuration and headers; sends one dummy token to Cloudflare.
+ * Does not write a row, send an email, expose the secret or accept a lead.
+ * This is a configuration check, not proof of a real-token success or replay test.
+ */
+function checkReviewRemovalSetup() {
+  var properties = PropertiesService.getScriptProperties();
+  ['SPREADSHEET_ID', 'SHEET_NAME', 'NOTIFICATION_EMAIL', 'TURNSTILE_SECRET', 'TURNSTILE_HOSTNAMES']
+    .forEach(function (name) {
+      var value = properties.getProperty(name);
+      if (!value || !value.trim()) throw new Error('Missing Script Property: ' + name);
+    });
+  var hostnames = properties.getProperty('TURNSTILE_HOSTNAMES').split(',')
+    .map(function (hostname) { return hostname.trim(); }).filter(Boolean);
+  if (!hostnames.length || hostnames.some(function (hostname) {
+    return ['reviewremoval.ca', 'www.reviewremoval.ca'].indexOf(hostname) === -1;
+  })) throw new Error('TURNSTILE_HOSTNAMES must contain only ReviewRemoval production hostnames.');
+
+  var sheet = SpreadsheetApp.openById(properties.getProperty('SPREADSHEET_ID'))
+    .getSheetByName(properties.getProperty('SHEET_NAME'));
+  if (!sheet) throw new Error('The configured submissions tab was not found.');
+  var expected = ['Timestamp', 'Selected Plan', 'Full Name', 'Business Name', 'Email', 'Phone',
+    'Preferred Contact', 'Contact Detail', 'Profile URL', 'Review Count', 'Review Links', 'Reason'];
+  var headers = sheet.getRange(1, 1, 1, expected.length).getValues()[0];
+  if (expected.some(function (header, index) { return headers[index] !== header; })) {
+    throw new Error('Row 1 must match the 12 headers in TURNSTILE-SETUP.md, in order.');
+  }
+  var validSecret = false;
+  try {
+    var response = UrlFetchApp.fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'post', contentType: 'application/x-www-form-urlencoded',
+      payload: {secret: properties.getProperty('TURNSTILE_SECRET'), response: 'XXXX.DUMMY.TOKEN.XXXX'},
+      muteHttpExceptions: true, followRedirects: false
+    });
+    var result = response.getResponseCode() === 200 ? JSON.parse(response.getContentText()) : {};
+    var errors = result['error-codes'] || [];
+    validSecret = result.success === false && errors.indexOf('invalid-input-response') !== -1 &&
+      errors.indexOf('invalid-input-secret') === -1;
+  } catch (_) { /* Only the generic diagnostic below is returned. */ }
+  if (!validSecret) throw new Error('The secret check failed. Verify the matching production secret and Cloudflare connectivity.');
+  var summary = {configuration: 'passed', spreadsheet_headers: 'matched', secret_probe: 'passed',
+    real_token_validation: 'pending', email_delivery: 'not tested'};
+  console.log(JSON.stringify(summary));
+  return summary;
 }

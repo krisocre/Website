@@ -1,88 +1,114 @@
-# ReviewRemoval Turnstile integration
+# ReviewRemoval: separate Apps Script project and Turnstile setup
 
-Status: implemented locally; production secret storage, deployment isolation and real-token validation are pending. Nothing has been deployed automatically.
+Prepared November 3, 2026. Code and local tests are prepared; no project, widget, deployment or live endpoint has been created or changed. Real-token validation and the website cutover remain pending.
 
-## Existing widget and request contract
+## Existing widget and protected request
 
-- Project: `C:\Users\alkhi\ReviewStars` / `https://reviewremoval.ca/`.
-- Existing site key: `0x4AAAAAAFy2a5sutqdFxytB` (the replacement supplied on November 3, 2026). No widget was created or changed.
-- Protected surfaces: homepage plus Facebook, Yelp, Trustpilot, Tripadvisor, Booking.com, Glassdoor and Indeed assessment forms.
-- Stable action: `quote_request` on every assessment form, checked independently in the backend.
-- Browser sends `cf-turnstile-response` to the existing Apps Script handler. Only that handler calls `https://challenges.cloudflare.com/turnstile/v0/siteverify`.
-- Gate: a nonblank string token of at most 2,048 characters, configured secret, exact production hostname and action, and `success === true`. Rejection occurs before any spreadsheet access or notification.
-- Script Properties: `TURNSTILE_SECRET` and `TURNSTILE_HOSTNAMES`; the existing `NOTIFICATION_EMAIL` property remains unchanged.
-- Allowed production hostname settings: `reviewremoval.ca`, optionally `reviewremoval.ca,www.reviewremoval.ca` if both actually serve the form and are allowed by the widget. No localhost, other brands or wildcard matching.
-- No client-supplied IP, brand, submitted action, plan or page URL can bypass validation. Lead contents are not sent to Cloudflare or added to analytics. The token is not stored in the spreadsheet or notification email.
+Use existing site key **`0x4AAAAAAFy2WEsCKuoqoOMl`**. The frontend submits `cf-turnstile-response`; the handler requires Siteverify `success === true`, action **`quote_request`**, and the exact configured ReviewRemoval hostname before accessing the spreadsheet or sending mail. No submitted brand/plan/page value can bypass verification. Preserve the existing widget mode and clearance setting.
 
-## Resolve the shared backend before activation
-
-Both this project and `C:\Users\alkhi\BarberShopRevolution\WebsiteRv\form-submission.js` currently use the same Apps Script `/exec` endpoint, ending in `AKfycby4mQu0BJFu8Jmbw_zZPzrBb9TF_YRw4j0Ayu3PFvwgicSN5vtzynX0ASet2utzxtlnMw/exec`.
-
-**Do not replace the shared deployment with this protected handler yet.** ReviewsBoost does not send this widget's token and would be rejected. Do not solve this by allowing missing tokens for a submitted brand or plan: that would be a public bypass.
-
-Recommended activation path within the existing Apps Script project:
-
-1. Keep the existing shared deployment pinned to its current immutable version for ReviewsBoost.
-2. In Apps Script, prepare a separate web-app deployment of the code in `google-apps-script.gs`, with its own `/exec` URL, executing as the script owner and accepting public requests. This is another deployment of the existing backend, not a new Worker or proxy.
-3. Configure the Script Properties below and authorize `UrlFetchApp` network access when Google requests it. Preserve the existing spreadsheet and notification settings.
-4. Provide the new public `/exec` URL so the form action in all eight pages, the platform-page generator and the `endpoint` in `script.js` can be updated together. No secret is needed in chat. The new URL is a documented necessity to keep the brands' form behavior independent.
-5. Release the frontend and isolated backend together only after the real verification checks below. Do not publish only the frontend and assume the existing shared backend is protected.
-
-If the shared endpoint is no longer used by ReviewsBoost in production, verify that first; otherwise keep the deployments separate. Do not automatically change ReviewsBoost as part of this project.
-
-## Store the matching secret privately
-
-The existing-widget flow was fetched from [Cloudflare Turnstile Spin](https://developers.cloudflare.com/turnstile/spin/prompt.md). Apps Script's Script Properties are the existing secret destination. No approved Wrangler executable, account manifest or supported secret-manager CLI for this Apps Script destination was available; therefore no secret-bearing getter or secret write was attempted.
-
-1. Open the existing widget in the Cloudflare dashboard and confirm its site key matches `0x4AAAAAAFy2a5sutqdFxytB` and its allowed hostnames include the production hostname(s) above. Keep the existing widget mode and clearance setting.
-2. Copy its matching **secret key** directly into Google Apps Script: **Project Settings → Script Properties → Add script property**, name `TURNSTILE_SECRET`. Never put it into HTML, JavaScript, Git, screenshots, logs, command arguments or chat.
-3. Add `TURNSTILE_HOSTNAMES` with `reviewremoval.ca` (add `www.reviewremoval.ca` only when applicable).
-4. Keep `NOTIFICATION_EMAIL` as configured for existing notifications.
-
-Cloudflare's existing-widget flow requires an explicitly approved absolute Wrangler path/version and destination manifest before automatic secret retrieval. It also says: “If no supported destination exists, stop before retrieving the secret and ask the user to store it through their platform's normal secret-management flow.” This integration follows that manual storage branch; no replacement widget or extra infrastructure is needed.
-
-## Local behavior and checks
-
-The widget is rendered explicitly only when the form approaches the viewport or receives focus. It keeps its widget ID and resets after every completed submission attempt so retries obtain fresh tokens. Expiration, network failure and provider rejection retain the visitor's details; a retry control is available. The widget uses compact mode when the form is narrower than 300 px. No Turnstile resources are loaded on pages without a form. JavaScript is required for the security check; the no-JavaScript notice explains that.
-
-Existing success handling and conversion measurement remain in place; verification failures never count as leads. The privacy policy discloses the security check separately from optional analytics consent.
-
-Run:
+The current ReviewRemoval and ReviewsBoost source uses this shared endpoint:
 
 ```text
-node turnstile-check.cjs
-node homepage-check.cjs
-node measurement-check.cjs
-node launch-check.cjs
-node seo-audit.cjs
+https://script.google.com/macros/s/AKfycby4mQu0BJFu8Jmbw_zZPzrBb9TF_YRw4j0Ayu3PFvwgicSN5vtzynX0ASet2utzxtlnMw/exec
 ```
 
-`turnstile-test-fixture.cjs` mocks Cloudflare for automated browser regressions. Backend tests run the actual `.gs` source with stubbed Google services and Siteverify responses. No real tokens, secrets, customer submissions, spreadsheet writes or emails are used by these tests. Mocked replay rejection proves the code honors Siteverify's decision; it is not proof of production deployment or widget configuration.
+**Do not update that deployment, its project, its properties or the ReviewsBoost repository.** Use a new standalone ReviewRemoval project with independent properties. A real endpoint can only be tested after an isolated candidate deployment exists. If no deployment at all is permitted yet, stop after the editor configuration check: full HTTP/token/replay validation remains pending. No website release is needed to test a separate candidate.
 
-## Files changed for this integration
+## 1. Select the spreadsheet and tab
 
-| Files | Purpose |
+Use the existing ReviewRemoval destination to retain where leads are saved, or create a separate private spreadsheet named **ReviewRemoval Requests**, with a tab named **Leads**. Do not rename, clear or overwrite a ReviewsBoost tab. The Google account deploying the new project needs edit access to this spreadsheet.
+
+Copy the spreadsheet ID from its URL, between `/spreadsheets/d/` and `/edit`. This is not the full URL, Script ID, deployment ID or `gid` tab number. Note the exact receiving tab name.
+
+For a new sheet, paste this tab-separated header row into A1. For an existing destination, check the headers without overwriting lead records:
+
+```text
+Timestamp	Selected Plan	Full Name	Business Name	Email	Phone	Preferred Contact	Contact Detail	Profile URL	Review Count	Review Links	Reason
+```
+
+## 2. Create the separate Apps Script project
+
+1. Open [Google Apps Script](https://script.google.com/) using the same Google account that currently sends the ReviewRemoval owner notifications, to retain the sender identity.
+2. Click **New project**. Name it **ReviewRemoval Forms — Turnstile**. Do not open the shared project's deployment settings.
+3. Open the default `Code.gs`, remove the sample `myFunction`, and paste **the entire contents of [google-apps-script.gs](google-apps-script.gs)**. It includes `doPost`, `verifyTurnstile` and `checkReviewRemovalSetup`.
+4. Save. No extra library, trigger, Worker or proxy is required.
+
+The handler now uses `SpreadsheetApp.openById(...).getSheetByName(...)` for the standalone project. It retains the existing twelve-column order, field fallbacks, formula protection, owner-notification template and JSON success contract. No customer autoresponder or new analytics route was added.
+
+## 3. Add exactly these Script Properties
+
+In the **new project**: **Project Settings** (gear) → **Script Properties** → **Add script property**. For subsequent additions Google may show **Edit script properties** first. Add all five entries, then click **Save script properties**.
+
+| Exact property name | Value |
 | --- | --- |
-| `index.html`, `remove-facebook-reviews.html`, `remove-yelp-reviews.html`, `remove-trustpilot-reviews.html`, `remove-tripadvisor-reviews.html`, `remove-booking-com-reviews.html`, `remove-glassdoor-reviews.html`, `remove-indeed-reviews.html` | One widget container with the replacement public key, accessible verification status/retry, and an accurate JavaScript-required notice per form. Homepage script cache version updated. |
-| `script.js` | Lazy explicit rendering, token lifecycle, client submission gate, server verification error handling and responsive widget sizing. Existing endpoint, fee calculations and success/measurement calls retained. |
-| `styles.css` | Compact security-status styling and form min-width fix to prevent overflow when resizing from desktop to a small phone. |
-| `google-apps-script.gs` | Fail-closed Siteverify gate before the original spreadsheet/email handler. Reads only server-side Script Properties. |
-| `build-platform-pages.cjs` | Preserve the widget and no-JavaScript notice when regenerating the seven service pages. |
-| `privacy-policy.html`, `build-legal-pages.cjs` | Disclose Cloudflare security processing separately from optional measurement, including on rebuild. |
-| `turnstile-check.cjs`, `turnstile-test-fixture.cjs` | Backend rejection/side-effect tests and isolated browser lifecycle/resize tests. |
-| `homepage-check.cjs`, `measurement-check.cjs`, `site-check.cjs` | Mock the widget while retaining existing visual, submission, consent and conversion regression checks. |
-| `FORM-SETUP.md`, `TURNSTILE-SETUP.md`, `_config.yml` | Document the private secret destination and shared-backend activation issue; exclude new test/setup files from the published static site. |
+| `SPREADSHEET_ID` | ReviewRemoval destination spreadsheet ID from step 1. |
+| `SHEET_NAME` | Exact receiving tab name; `Leads` if you used the suggested new tab. |
+| `NOTIFICATION_EMAIL` | The same inbox that should receive the existing ReviewRemoval owner notifications. Do not guess a new address. |
+| `TURNSTILE_SECRET` | The private secret matching site key `0x4AAAAAAFy2WEsCKuoqoOMl`, copied directly from that existing Cloudflare widget. |
+| `TURNSTILE_HOSTNAMES` | `reviewremoval.ca`. Use `reviewremoval.ca,www.reviewremoval.ca` only if the www hostname actually serves the widget and is also allowed by Cloudflare. |
 
-The reviewer carousel, portraits and `home.css` changes already in the working tree were preserved. ReviewsBoost files, pricing, canonical URLs, SEO metadata, analytics IDs and the current submission URL were not changed by this integration.
+Do not add quotes, URL schemes, paths, wildcards or localhost to the hostname value. Action `quote_request` is fixed in the code; no `TURNSTILE_ACTION` property is needed. The public key is in the website markup; no `TURNSTILE_SITEKEY` server property is needed.
 
-## Required production validation (pending)
+Store the matching secret directly in the new project's Script Properties. Never paste it into chat, frontend code, Git, screenshots, the browser console or a URL. Properties are scoped to their project; the shared project's values are not copied automatically. Check the widget's allowed hostnames without creating a replacement widget.
 
-- With the matching secret configured and the isolated endpoint installed, obtain a fresh real token on the allowed production hostname. Submit one clearly labelled test enquiry and confirm exactly one spreadsheet row and the usual notification behavior.
-- Replay that same token against the protected endpoint: expect `{ "result": "error", "code": "verification_failed" }`, no extra row and no email. Apps Script ContentService returns JSON application errors rather than configurable HTTP 403 responses; the frontend checks the response body.
-- Submit with no token and an invalid token: both must fail without side effects.
-- Confirm the verified hostname and action match production. Localhost and another widget's action must not pass. Never log the full Siteverify result or token to inspect this.
-- After a failed attempt, verify a new token allows a retry while the visitor's details remain present.
-- Confirm `generate_lead`/configured Ads lead events occur only on actual backend success and respect the existing consent settings.
-- Confirm ReviewsBoost still submits through its original deployment.
+The [Turnstile Spin existing-widget flow](https://developers.cloudflare.com/turnstile/spin/prompt.md) was fetched. Its manual-storage instruction is to “ask the user to store it through their platform's normal secret-management flow.” No supported secret-manager CLI for this Apps Script destination was available, so no secret-bearing getter/write was attempted. The platform-native procedure above needs neither a Cloudflare API token nor another widget.
 
-Cloudflare tokens expire after five minutes and are single-use. See [server-side validation](https://developers.cloudflare.com/turnstile/get-started/server-side-validation/), [widget configuration](https://developers.cloudflare.com/turnstile/get-started/client-side-rendering/widget-configurations/) and [testing guidance](https://developers.cloudflare.com/turnstile/troubleshooting/testing/). The secret and a real deployed backend are necessary before calling this end-to-end complete.
+## 4. Check configuration before any deployment
+
+In the new editor's function dropdown select **checkReviewRemovalSetup**, then **Run**. Authorize this new project under the deploying account when Google asks for spreadsheet, notification-mail and external-request permissions.
+
+The function reads properties and headers and sends a dummy response to Siteverify to probe the production secret. It writes no lead, sends no email and logs no token/secret. Expected execution-log summary:
+
+```json
+{"configuration":"passed","spreadsheet_headers":"matched","secret_probe":"passed","real_token_validation":"pending","email_delivery":"not tested"}
+```
+
+Fix any missing setting, inaccessible sheet, mismatched header or secret/network error first. This probe cannot prove the secret matches the frontend key; a real token does. Do not click Run on `doPost`, which expects an HTTP POST event.
+
+If your restriction includes isolated test deployments, stop here. A deployed URL cannot be tested before it exists. No deployment or cutover has been performed by the agent.
+
+## 5. When permitted, create an isolated candidate endpoint
+
+These manual steps apply only to the **new** project; neither website changes:
+
+1. **Deploy → New deployment → Select type → Web app**.
+2. Description: **ReviewRemoval — isolated verification candidate**.
+3. **Execute as:** **Me**, the account with spreadsheet and mail permissions.
+4. **Who has access:** **Anyone**, so the existing credential-free form transport can be tested. This does not make the spreadsheet public. If Workspace policy prevents anonymous access, resolve that restriction rather than requiring customers to sign in.
+5. Only when you permit this test deployment, create it and copy its **Web app URL ending in `/exec`**. Confirm that it differs from the shared URL above. Keep the tested version pinned.
+
+Do not install it in either website yet. Google's **Deploy → Test deployments** creates an editor-only `/dev` URL that runs the latest saved code; it does not validate anonymous public form access. Opening this POST-only `/exec` endpoint directly may show `doGet` not found. That GET result is not a submission test.
+
+## 6. Test the candidate without a site release
+
+The owner-operated utility is the local file **`.seo-private/turnstile-standalone-2026-11-03/test-new-endpoint.js`**. It is ignored by Git and not published.
+
+1. Open **https://reviewremoval.ca/** in a real browser. Open DevTools → Console, review the local utility, then paste its contents. Chrome may require enabling pasting; do that only for code you have reviewed. Do not add localhost to the production widget or weaken hostname validation.
+2. At the prompt enter only the new candidate `/exec` URL. The utility refuses the shared endpoint and `/dev` URLs. Never enter a secret.
+3. Complete the security checks in the temporary test panel. The utility checks missing and invalid tokens, then a valid token with the wrong action; all must return `result: error` and `code: verification_failed`.
+4. It sends **one real, clearly labelled TURNSTILE TEST enquiry** with a fresh `quote_request` token, then replays the same token. The first must return `result: success` and `notification_sent: true`; the replay must be rejected. It does not call the site's form handler or conversion hook.
+5. Manually confirm exactly **one new test row and one corresponding owner email** in the selected destination/inbox. Check column order. An accepted MailApp call is not proof of inbox delivery.
+6. If any request is unconfirmed, check the test label in the sheet before rerunning. Do not use `no-cors` or automatically retry: a row may already have been saved. An HTTP 200 alone is not application success; the browser must read the JSON after Google's ContentService redirect.
+
+Tokens remain only in the utility's temporary closure, are never printed, and the panel/widget is removed afterward. Existing form actions, form values and Ads tracking remain untouched. Missing/invalid/wrong-action/replay requests must add no rows and send no emails. Local mocked tests have not performed this real deployment check.
+
+## 7. Cut over only after testing and a deliberate release
+
+Provide the **new public `/exec` URL** and the test results; no secret needs to be shared. Current active code has the old endpoint literal in two places:
+
+- `script.js`: `const endpoint`, shared by all eight assessment forms.
+- `index.html`: the homepage form's native `action`.
+
+Update those together only after successful candidate validation, refreshing the script cache version. The seven platform forms already require JavaScript and use that shared frontend handler; their current HTML has no separate action URL. `build-platform-pages.cjs` already has the new key/markup and contains no endpoint literal. Never fall back to the old endpoint on verification failure.
+
+Keep all existing input names, email templates/recipient, terms records and the confirmed-success measurement hook. Preserve Ads destination **AW-18449308865/HqdzCIv5z4gdEMG5qN1E**, its nominal CAD $1 lead value and consent behavior. The browser-console backend test intentionally sends no Ads conversion. A later controlled site-form check verifies the full flow and tracking after the approved release.
+
+ReviewsBoost keeps its existing code, endpoint and deployment throughout. Local test success does not authorize a deployment or endpoint switch; no live cutover has been performed.
+
+## Local files and verification
+
+Changed: `google-apps-script.gs` for explicit destination/diagnostic; eight form HTML pages plus `build-platform-pages.cjs` for the latest public key; `turnstile-check.cjs` for the key and standalone-configuration tests; `FORM-SETUP.md` and this guide for the isolated procedure. The private utility is not published. Existing Google Ads files and submission URLs were preserved.
+
+Run `node turnstile-check.cjs`, `node homepage-check.cjs`, `node measurement-check.cjs`, `node launch-check.cjs`, `node seo-audit.cjs`. These use mocked submissions/provider responses and cannot establish production secret storage, actual delivery or real-token replay rejection.
+
+References: [Cloudflare server validation](https://developers.cloudflare.com/turnstile/get-started/server-side-validation/), [Apps Script web apps](https://developers.google.com/apps-script/guides/web), [Script Properties](https://developers.google.com/apps-script/guides/properties), [openById](https://developers.google.com/apps-script/reference/spreadsheet/spreadsheet-app#openById(String)), [ContentService redirects](https://developers.google.com/apps-script/guides/content#redirects).

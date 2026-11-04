@@ -37,9 +37,31 @@ if (reviewerCard) {
   const controls = reviewerCard.querySelector('.reviewer-controls');
   const dots = reviewerCard.querySelector('.reviewer-dots');
   const status = reviewerCard.querySelector('.reviewer-status');
+  const rotation = reviewerCard.querySelector('.reviewer-rotation');
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   let current = 0;
   let frame = 0;
+  let timer = 0;
+  let autoPlay = !reducedMotion.matches;
+  let hovered = false;
+  let visible = false;
+
+  function updateRotation() {
+    window.clearTimeout(timer);
+    timer = 0;
+    const running = autoPlay && !hovered && visible && !document.hidden;
+    rotation.textContent = autoPlay ? 'Pause' : 'Play';
+    rotation.setAttribute('aria-label', autoPlay ? 'Pause automatic testimonials' : 'Start automatic testimonials');
+    status.setAttribute('aria-live', running ? 'off' : 'polite');
+    if (running) timer = window.setTimeout(() => {
+      showSlide(current + 1);
+      updateRotation();
+    }, 5000);
+  }
+  function pauseRotation() {
+    autoPlay = false;
+    updateRotation();
+  }
 
   function selectSlide(index, announce = true) {
     current = index;
@@ -52,7 +74,8 @@ if (reviewerCard) {
   }
   function showSlide(index) {
     const next = (index + slides.length) % slides.length;
-    viewport.scrollTo({left: next * viewport.clientWidth, behavior: reducedMotion.matches ? 'instant' : 'smooth'});
+    const wrap = current === slides.length - 1 && next === 0;
+    viewport.scrollTo({left: next * viewport.clientWidth, behavior: reducedMotion.matches || wrap ? 'instant' : 'smooth'});
   }
 
   if (slides.length > 1) {
@@ -66,17 +89,34 @@ if (reviewerCard) {
       dot.className = 'reviewer-dot';
       dot.setAttribute('aria-label', `Show review from ${slide.dataset.reviewer}`);
       dot.setAttribute('aria-controls', viewport.id);
-      dot.addEventListener('click', () => showSlide(index));
+      dot.addEventListener('click', () => { pauseRotation(); showSlide(index); });
       dots.append(dot);
     });
     controls.hidden = false;
     selectSlide(0, false);
-    controls.querySelectorAll('[data-reviewer-step]').forEach(button => {
-      button.addEventListener('click', () => showSlide(current + Number(button.dataset.reviewerStep)));
+    rotation.addEventListener('click', () => { autoPlay = !autoPlay; updateRotation(); });
+    reviewerCard.addEventListener('focusin', event => {
+      // A pointer click on Pause must not turn into Play when it receives focus.
+      if (event.target !== rotation || rotation.matches(':focus-visible')) pauseRotation();
     });
+    reviewerCard.addEventListener('mouseenter', () => { hovered = true; updateRotation(); });
+    reviewerCard.addEventListener('mouseleave', () => { hovered = false; updateRotation(); });
+    viewport.addEventListener('pointerdown', pauseRotation, {passive: true});
+    document.addEventListener('visibilitychange', updateRotation);
+    reducedMotion.addEventListener('change', () => {
+      if (reducedMotion.matches) pauseRotation();
+      else updateRotation();
+    });
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(entries => {
+        visible = entries[0].intersectionRatio >= 0.2;
+        updateRotation();
+      }, {threshold: 0.2}).observe(reviewerCard);
+    } else { visible = true; updateRotation(); }
     viewport.addEventListener('keydown', event => {
       if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
       event.preventDefault();
+      pauseRotation();
       showSlide(event.key === 'Home' ? 0 : event.key === 'End' ? slides.length - 1 : current + (event.key === 'ArrowRight' ? 1 : -1));
     });
     viewport.addEventListener('scroll', () => {
