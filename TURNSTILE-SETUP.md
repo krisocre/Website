@@ -1,6 +1,20 @@
 # ReviewRemoval: separate Apps Script project and Turnstile setup
 
-Prepared November 3, 2026. Code and local tests are prepared; no project, widget, deployment or live endpoint has been created or changed. Real-token validation and the website cutover remain pending.
+Prepared November 3, 2026; validation status updated November 4. The owner created a separate ReviewRemoval Apps Script deployment and confirmed `checkReviewRemovalSetup` passed. No replacement widget was created. Fresh-token validation and the website cutover remain pending.
+
+## Current candidate and validation status — November 4, 2026
+
+Owner-supplied ReviewRemoval-only candidate:
+
+```text
+https://script.google.com/macros/s/AKfycbzK_hATDZaXApgEUITdZ1kgF6VirBLCpcK1q3tmiFoWhG2AZpy_B6uOy5CFjTejVo8T/exec
+```
+
+- All eight form pages and the page generator already use the requested existing public key `0x4AAAAAAFy2ZmcJCPhgxNBL`.
+- Live requests to this candidate with a missing token and an invalid token both returned `result: error`, `code: verification_failed`. The same rejection checks also passed through the real ReviewRemoval browser origin.
+- The fresh real widget check timed out in an isolated browser before any valid-token submission. Wrong-action, accepted-token, replay and actual row/email checks remain pending; do not infer them from mocked tests or the editor probe.
+- The private owner-operated utility now uses this site key and prefills this candidate URL. Run it from the normal browser on reviewremoval.ca, then confirm one labelled test row and owner email.
+- No production form endpoint was changed. ReviewsBoost retains the original shared deployment. Do not switch ReviewRemoval until the real-token checks pass.
 
 ## Existing widget and protected request
 

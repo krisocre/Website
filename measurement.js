@@ -27,7 +27,12 @@
     var url = new URL(window.location.href);
     if (pagePath === '/404.html') return false;
     var allowed = ['gclid','dclid','gbraid','wbraid','gad_source','gad_campaignid'];
-    for (var entry of url.searchParams) if (!allowed.includes(entry[0]) || !/^[A-Za-z0-9_-]{1,256}$/.test(entry[1])) return false;
+    for (var entry of url.searchParams) {
+      // Tag Assistant adds these debug flags. They never grant consent or become event data.
+      if (entry[0] === '_dbg' && entry[1] === '1') continue;
+      if (entry[0] === 'gtm_debug' && /^\d{10,16}$/.test(entry[1])) continue;
+      if (!allowed.includes(entry[0]) || !/^[A-Za-z0-9_-]{1,256}$/.test(entry[1])) return false;
+    }
     if (url.hash && (!/^#[A-Za-z][A-Za-z0-9_-]{0,80}$/.test(url.hash) || !document.getElementById(url.hash.slice(1)))) return false;
     return canonicalSafe;
   }

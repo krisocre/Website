@@ -1,6 +1,10 @@
-# ReviewRemoval conversion measurement — November 3, 2026
+# ReviewRemoval conversion measurement — updated November 4, 2026
 
 ## Current audit and configuration
+
+November 4 troubleshooting: the two supplied Google Ads emails are byte-for-byte identical, including destination `AW-18449308865/HqdzCIv5z4gdEMG5qN1E`, CAD $1 value and the Submit lead form action. The live ReviewRemoval configuration already matches. Two campaigns using this same lead action do not require two tags; verify each campaign includes the intended conversion goal in Google Ads. ReviewsBoost's public configuration is currently disabled and must not inherit this brand's identifiers without confirming the intended site/account mapping.
+
+A published-site browser check reproduced a Tag Assistant connection problem: plain and valid auto-tagged visits could initialize the Ads destination after consent, but `_dbg=1` and numeric `gtm_debug` debug URLs could not. The local URL guard now permits those narrowly validated debug values. Consent, unsafe-query suppression, canonical event URLs and confirmed-submission-only conversion behavior are unchanged. The check intercepted Google requests; it did not submit a real lead, send a conversion or prove account attribution. Publish the updated `measurement.js` and refresh its hosting cache before testing the change on the live site; nothing was deployed automatically.
 
 - Existing Google Ads destination: **AW-18449308865**, retained.
 - No GA4 Measurement ID or Google Tag Manager container was found in published
@@ -103,7 +107,8 @@ Page location uses the published canonical URL with no visitor query/hash;
 page_referrer is empty. Unknown query parameters, arbitrary fragments and 404s
 disable optional Google collection, leaving the actual address and essential
 form process untouched. Valid-format Google advertising click parameters
-(`gclid`, `dclid`, `gbraid`, `wbraid`, `gad_source`, `gad_campaignid`) and actual
+(`gclid`, `dclid`, `gbraid`, `wbraid`, `gad_source`, `gad_campaignid`), Tag Assistant's
+`_dbg=1` or a 10–16 digit `gtm_debug` timestamp, and actual
 published in-page anchors are eligible. **UTM-tagged or other non-allowlisted
 visits are intentionally suppressed** rather than risk leaking URL contents.
 Review this privacy/attribution trade-off before adding campaign parameters;
@@ -147,11 +152,13 @@ analytics is anonymous or exempt from applicable privacy requirements.
 8. Test with Tag Assistant, GA4 Realtime/DebugView and the actual Ads action before
    declaring account reporting operational. The local tests stub destinations;
    they cannot verify account ownership, connected-tag settings or attribution.
-   In Tag Assistant, turn off **Include debug signal in the URL** for this
-   strict URL policy, use its Chrome extension, make the consent choice, then
-   retry the connection if needed. Unknown debug query parameters are otherwise
-   suppressed along with other non-allowlisted queries. Google documents that
-   option in its [Tag Assistant connection guidance](https://support.google.com/tagassistant/answer/10039345?hl=en).
+   In Tag Assistant, open the homepage, scroll to **Cookie choices** and grant
+   advertising measurement for your test browser, then retry the connection if
+   needed. The supported `_dbg=1` and numeric `gtm_debug` values no longer prevent
+   initialization. Unknown query parameters remain blocked. If the debugger uses
+   a different value, disable **Include debug signal in the URL** or use the
+   Chrome extension; do not weaken the URL filter broadly. Google documents these
+   options in its [Tag Assistant connection guidance](https://support.google.com/tagassistant/answer/10039345?hl=en).
 
 No GTM container is required. If GTM is introduced later, migrate ownership of
 events deliberately; do not layer duplicate GA4/Ads tags on top of this route.

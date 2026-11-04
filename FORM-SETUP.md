@@ -4,6 +4,8 @@ The homepage and Facebook, Yelp, Trustpilot, Tripadvisor, Booking.com, Glassdoor
 
 **Do not update the current shared Apps Script deployment.** ReviewsBoost still uses it. Paste the complete [google-apps-script.gs](google-apps-script.gs) into a **new standalone ReviewRemoval project**. Follow [TURNSTILE-SETUP.md](TURNSTILE-SETUP.md) for the exact procedure, including the deployment/testing order.
 
+November 4 status: the owner has created the separate candidate deployment recorded in `TURNSTILE-SETUP.md` and confirmed its editor setup check passed. Live missing/invalid-token rejection passed. Fresh-token, replay and row/email checks remain pending after the isolated browser's security check timed out. The website still uses the original URL until those checks pass.
+
 Set these Script Properties in the new project:
 
 | Property | Value |

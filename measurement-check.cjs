@@ -137,6 +137,24 @@ const server=http.createServer((req,res)=>{
   }
   await page.click('.measurement-language');assert.equal(await page.$eval('#measurement-preferences',e=>e.lang),'en-CA');await test.context.close();
   // URL leakage guard, without changing the original address or the form integration.
+  for(const query of ['?_dbg=1','?gtm_debug=1770000000000','?gclid=LOCAL_TEST_AUTOTAG&_dbg=1#quote']){
+   test=await open({config:null,query});page=test.page;start=google.length;
+   assert.equal((await page.evaluate(()=>window.ReviewRemovalMeasurement.status())).urlEligible,true);
+   assert.equal((await commands(page)).filter(c=>c[0]==='config').length,0,'Debug flags never grant consent');
+   await choose(page,'accept');await page.waitForFunction(()=>document.querySelector('#reviewremoval-google-tag'));
+   assert.equal(google.length-start,1,'Tag Assistant can load exactly one tag after consent');
+   await fillAndSubmit(page);
+   const conversions=(await events(page)).filter(e=>e[1]==='conversion');
+   assert.equal(conversions.length,1);assert.equal(conversions[0][2].send_to,'AW-18449308865/HqdzCIv5z4gdEMG5qN1E');
+   assert.equal(conversions[0][2].page_location,'https://reviewremoval.ca/');
+   assert.ok(!/gtm_debug|_dbg|LOCAL_TEST_AUTOTAG|PRIVATE_/.test(JSON.stringify(conversions)),'No debug/query/form contents in event parameters');
+   await test.context.close();
+  }
+  for(const query of ['?_dbg=PRIVATE_VALUE','?gtm_debug=PRIVATE_VALUE','?_dbg=1&email=PRIVATE_EMAIL','?_dbg=1&_dbg=PRIVATE_VALUE']){
+   test=await open({config:null,query});page=test.page;start=google.length;await choose(page,'accept');await fillAndSubmit(page);
+   assert.equal(google.length,start);assert.equal((await events(page)).length,0,'Debug flags do not bypass the private URL guard');
+   await test.context.close();
+  }
   test=await open({query:'?email_address=PRIVATE_EMAIL#PRIVATE_HASH'});page=test.page;start=google.length;await choose(page,'accept');await fillAndSubmit(page);
   assert.equal(google.length,start);assert.equal((await events(page)).length,0);assert.ok(page.url().includes('PRIVATE_EMAIL'));await test.context.close();
   // Browser storage failure does not prevent a confirmed assessment request.
