@@ -1,6 +1,6 @@
 # ReviewRemoval: separate Apps Script project and Turnstile setup
 
-Prepared November 3, 2026; validation status updated November 4. The owner created a separate ReviewRemoval Apps Script deployment and confirmed `checkReviewRemovalSetup` passed. No replacement widget was created. Fresh-token validation and the website cutover remain pending.
+Prepared November 3, 2026; validation status updated November 4. The owner created a separate ReviewRemoval Apps Script deployment and confirmed `checkReviewRemovalSetup` passed. A normal-browser test accepted a fresh token but also created a duplicate row on replay. A backend replay fix is prepared locally; updating the candidate version and retesting are required before the website cutover.
 
 ## Current candidate and validation status — November 4, 2026
 
@@ -12,9 +12,20 @@ https://script.google.com/macros/s/AKfycbzK_hATDZaXApgEUITdZ1kgF6VirBLCpcK1q3tmi
 
 - All eight form pages and the page generator already use the requested existing public key `0x4AAAAAAFy2ZmcJCPhgxNBL`.
 - Live requests to this candidate with a missing token and an invalid token both returned `result: error`, `code: verification_failed`. The same rejection checks also passed through the real ReviewRemoval browser origin.
-- The fresh real widget check timed out in an isolated browser before any valid-token submission. Wrong-action, accepted-token, replay and actual row/email checks remain pending; do not infer them from mocked tests or the editor probe.
-- The private owner-operated utility now uses this site key and prefills this candidate URL. Run it from the normal browser on reviewremoval.ca, then confirm one labelled test row and owner email.
+- The owner's normal-browser test passed missing-token, invalid-token, wrong-action and fresh-token checks, but failed replay rejection. The sheet contains two rows two seconds apart with the identical `TURNSTILE TEST 2026-11-04T18:27:08.024Z` reference. This proves a duplicate submission, rather than just an unexpected console warning. The underlying reason for the repeated acceptance has not been established.
+- `google-apps-script.gs` now adds a durable, locked replay check after Siteverify and before any sheet/mail work. It stores only a SHA-256 token hash and six-minute expiry in this project's Script Properties. Cloudflare's success/action/hostname checks remain required. Expired runtime markers are cleaned automatically; no additional manual Script Properties are needed.
+- The private test utility now sends each request with a unique non-secret URL identifier and `cache: no-store`, and reports only safe result fields. The new diagnostic distinguishes a replay accepted as success from an unrelated backend error; it does not print tokens or complete response bodies.
 - No production form endpoint was changed. ReviewsBoost retains the original shared deployment. Do not switch ReviewRemoval until the real-token checks pass.
+
+### Apply the replay fix to the separate candidate
+
+1. In the **separate ReviewRemoval** Apps Script project, replace all of `Code.gs` with the current [google-apps-script.gs](google-apps-script.gs). Save. Keep the five existing configuration properties and their values.
+2. Run `checkReviewRemovalSetup` again.
+3. **Deploy → Manage deployments → select the new ReviewRemoval candidate → pencil/Edit → Version: New version → Deploy**. Saving the editor alone does not update a pinned `/exec` deployment. Retain this candidate's existing URL; never edit the old shared/ReviewsBoost deployment.
+4. Refresh reviewremoval.ca and run the current private `test-new-endpoint.js` utility. Confirm its prefilled candidate URL and complete the challenges.
+5. Require every check to pass, including **Replay of same token**. This run must add exactly one new labelled row and one owner notification. Two old rows from the previous run do not count toward the new run's total; identify each run by its test reference.
+
+Local verification: 46 backend cases plus browser token-lifecycle checks pass, including duplicate rejection even if Siteverify unexpectedly reports success twice, independent execution contexts, a request arriving during another claim, persistence/lock failure, expiry cleanup, and unchanged lead handling. The private test utility's success/failure diagnostics also pass intercepted-request checks. These do not replace the new candidate's real-token/replay test. No deployment was performed by the agent.
 
 ## Existing widget and protected request
 
@@ -47,7 +58,7 @@ Timestamp	Selected Plan	Full Name	Business Name	Email	Phone	Preferred Contact	Co
 3. Open the default `Code.gs`, remove the sample `myFunction`, and paste **the entire contents of [google-apps-script.gs](google-apps-script.gs)**. It includes `doPost`, `verifyTurnstile` and `checkReviewRemovalSetup`.
 4. Save. No extra library, trigger, Worker or proxy is required.
 
-The handler now uses `SpreadsheetApp.openById(...).getSheetByName(...)` for the standalone project. It retains the existing twelve-column order, field fallbacks, formula protection, owner-notification template and JSON success contract. No customer autoresponder or new analytics route was added.
+The handler uses `SpreadsheetApp.openById(...).getSheetByName(...)` for the standalone project. It retains the existing twelve-column order, field fallbacks, formula protection, owner-notification template and JSON success contract. A verified token must also be claimed once under a script lock before lead processing. No customer autoresponder or new analytics route was added.
 
 ## 3. Add exactly these Script Properties
 

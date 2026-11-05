@@ -26,6 +26,10 @@ html:has(> body.home-page){scroll-padding-top:20px}
 .home-page .hero-actions .button{min-height:55px;padding:16px 22px;border-radius:5px;box-shadow:none}
 .home-page .hero-secondary{display:inline-flex;align-items:center;gap:10px;min-height:44px;color:#19323a;font-size:14px;text-underline-offset:5px}
 .home-page .hero-secondary:hover{color:#8c3e27}
+.home-page .hero-start-note{display:flex;align-items:center;gap:9px;margin:19px 0 0;color:#4d6064;font-size:13px;line-height:1.5}
+.home-page .hero-start-note svg{width:17px;height:17px;flex:0 0 auto;color:#a94e31}
+.home-page .hero-start-note strong{color:#19323a;font-weight:700}
+.home-page .hero-start-note+.hero-reassurance{margin-top:9px}
 .home-page .hero-reassurance{display:flex;align-items:center;gap:9px;margin:20px 0 0;color:#53645f;font-size:12px;line-height:1.5}
 .home-page .hero-reassurance svg{width:15px;height:17px;flex:0 0 auto}
 .home-page .hero-testimonial{display:flex;flex-direction:column;justify-self:center;width:100%;max-width:426px;min-width:0;margin:66px 0 0;padding:0 32px 24px;background:#fff;color:#19323a;border:1px solid #e2e5df;border-radius:13px;box-shadow:0 12px 36px #19323a0a;text-align:center}
@@ -53,11 +57,11 @@ html:has(> body.home-page){scroll-padding-top:20px}
 .home-page .testimonial-person>strong{display:block;color:#19323a;font-size:14px;font-weight:700;letter-spacing:0}
 .home-page .testimonial-person>small{display:block;color:#60706c;font-size:12px;margin-top:3px}
 .home-page .testimonial-overall{order:2;display:grid;justify-items:center;gap:5px;margin-top:10px;padding:15px 0 0;background:transparent;border:0;border-top:1px solid #e7ebe5;border-radius:0;text-align:center}
-.home-page .testimonial-rating-line{display:flex;align-items:center;justify-content:center;gap:11px}
-.home-page .testimonial-score{font:700 16px/1.3 'Segoe UI',Arial,sans-serif;letter-spacing:-.025em;font-variant-numeric:tabular-nums;white-space:nowrap}
+.home-page .testimonial-rating-line{display:flex;align-items:center;justify-content:center;gap:12px}
+.home-page .testimonial-score{font:700 20px/1.25 'Segoe UI',Arial,sans-serif;letter-spacing:-.025em;font-variant-numeric:tabular-nums;white-space:nowrap}
 .home-page .testimonial-score>span{margin-left:2px;font:inherit;color:inherit;letter-spacing:inherit}
-.home-page .testimonial-rating-stars{display:block;width:98px;height:18px}
-.home-page .testimonial-rating-count{margin:0;color:#60706c;font:400 12px/1.5 'Segoe UI',Arial,sans-serif;white-space:nowrap}
+.home-page .testimonial-rating-stars{display:block;width:108px;height:20px}
+.home-page .testimonial-rating-count{margin:0;color:#60706c;font:400 14px/1.5 'Segoe UI',Arial,sans-serif;white-space:nowrap}
 .home-page .testimonial-rating-count b{color:#445951;font-weight:700;font-variant-numeric:tabular-nums}
 .home-page .pricing-section{padding:65px 0;background:var(--cream)}
 .home-page .pricing-grid{grid-template-columns:1fr .87fr;gap:88px;align-items:center}

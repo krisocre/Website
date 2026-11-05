@@ -15,7 +15,8 @@ function doPost(e) {
     var data = (e && e.parameter) || {};
     // Gate every request before accessing Sheets or sending notifications.
     // Never exempt a request using a submitted brand, URL, action or plan field.
-    if (!verifyTurnstile(data['cf-turnstile-response'])) {
+    if (!verifyTurnstile(data['cf-turnstile-response']) ||
+        !claimVerifiedTurnstileToken(data['cf-turnstile-response'])) {
       return ContentService.createTextOutput(JSON.stringify({
         result: 'error',
         code: 'verification_failed',
@@ -134,6 +135,39 @@ function verifyTurnstile(token) {
   } catch (_) {
     // No token, secret, provider response or personal information in logs/errors.
     return false;
+  }
+}
+
+// Additional application-level replay protection. Persist only a SHA-256 hash
+// and expiry, never the raw token or form fields. Script properties are durable;
+// a shared script lock makes the check-and-record atomic across web requests.
+function claimVerifiedTurnstileToken(token) {
+  var lock;
+  var acquired = false;
+  try {
+    var digest = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, token, Utilities.Charset.UTF_8);
+    var hash = digest.map(function (byte) { return ('0' + ((byte + 256) % 256).toString(16)).slice(-2); }).join('');
+    var marker = 'TURNSTILE_USED_' + hash;
+    lock = LockService.getScriptLock();
+    acquired = lock.tryLock(10000);
+    if (!acquired) return false;
+    var storage = PropertiesService.getScriptProperties();
+    var now = Date.now();
+    if (Number(storage.getProperty(marker)) > now) return false;
+    var properties = storage.getProperties();
+    Object.keys(properties).forEach(function (name) {
+      if (/^TURNSTILE_USED_[a-f0-9]{64}$/.test(name) && !(Number(properties[name]) > now)) {
+        storage.deleteProperty(name);
+      }
+    });
+    // Six minutes exceeds Turnstile's five-minute token validity window.
+    storage.setProperty(marker, String(now + 6 * 60 * 1000));
+    return true;
+  } catch (_) {
+    // Refuse the submission if locking or persistence fails; never log tokens.
+    return false;
+  } finally {
+    if (acquired) lock.releaseLock();
   }
 }
 

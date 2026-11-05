@@ -4,7 +4,7 @@ The homepage and Facebook, Yelp, Trustpilot, Tripadvisor, Booking.com, Glassdoor
 
 **Do not update the current shared Apps Script deployment.** ReviewsBoost still uses it. Paste the complete [google-apps-script.gs](google-apps-script.gs) into a **new standalone ReviewRemoval project**. Follow [TURNSTILE-SETUP.md](TURNSTILE-SETUP.md) for the exact procedure, including the deployment/testing order.
 
-November 4 status: the owner has created the separate candidate deployment recorded in `TURNSTILE-SETUP.md` and confirmed its editor setup check passed. Live missing/invalid-token rejection passed. Fresh-token, replay and row/email checks remain pending after the isolated browser's security check timed out. The website still uses the original URL until those checks pass.
+November 4 status: the owner created the separate candidate recorded in `TURNSTILE-SETUP.md` and its setup check passed. The browser accepted a fresh token but replaying it created a duplicate row. The local handler now claims a hash of each verified token atomically under a script lock before saving or emailing. Apply the full updated `google-apps-script.gs` to the separate project's Code.gs, save, and update that candidate through Manage deployments → Edit → New version → Deploy. Keep the five existing settings; runtime replay markers are automatic. Rerun the updated private test utility and require all checks, exactly one new row and one notification for that run. The website remains on the original URL until the candidate passes.
 
 Set these Script Properties in the new project:
 

@@ -10,20 +10,47 @@ const root = __dirname;
 const source = fs.readFileSync(path.join(root, 'google-apps-script.gs'), 'utf8');
 let cases = 0;
 
-function backend({ properties, provider, responseCode = 200, malformed = false, mailFailure = false, missingSheet = false, badHeaders = false } = {}) {
-    const calls = { verify: [], sheets: 0, rows: [], mail: 0 };
+function backend({ properties, provider, responseCode = 200, malformed = false, mailFailure = false, missingSheet = false, badHeaders = false, sharedState, lockUnavailable = false, propertyFailure = false, onClaim, clock = {now: Date.now()} } = {}) {
+    const calls = { verify: [], sheets: 0, rows: [], mail: 0, claims: [], releases: 0 };
     const used = new Set();
+    const state = sharedState || {properties: {...(properties || {
+        TURNSTILE_SECRET: 'LOCAL_TEST_SECRET', TURNSTILE_HOSTNAMES: 'reviewremoval.ca,www.reviewremoval.ca',
+        SPREADSHEET_ID: 'LOCAL_SHEET_ID', SHEET_NAME: 'Leads', NOTIFICATION_EMAIL: 'test@example.invalid'
+    })}, locked: false};
     const context = {
+        Date: class extends Date { static now() { return clock.now; } },
         PropertiesService: {
             getScriptProperties: () => ({
-                getProperty: name => (properties || {
-                    TURNSTILE_SECRET: 'LOCAL_TEST_SECRET',
-                    TURNSTILE_HOSTNAMES: 'reviewremoval.ca,www.reviewremoval.ca',
-                    SPREADSHEET_ID: 'LOCAL_SHEET_ID',
-                    SHEET_NAME: 'Leads',
-                    NOTIFICATION_EMAIL: 'test@example.invalid'
-                })[name] || null
+                getProperty: name => state.properties[name] || null,
+                getProperties: () => ({...state.properties}),
+                setProperty(name, value) {
+                    assert.equal(state.locked, true, 'Replay markers must be written under the shared lock');
+                    assert.match(name, /^TURNSTILE_USED_[a-f0-9]{64}$/);
+                    if (propertyFailure) throw Error('local property failure');
+                    if (onClaim) onClaim();
+                    state.properties[name] = value; calls.claims.push({name, value});
+                },
+                deleteProperty(name) {
+                    assert.equal(state.locked, true);
+                    assert.match(name, /^TURNSTILE_USED_[a-f0-9]{64}$/);
+                    delete state.properties[name];
+                }
             })
+        },
+        LockService: {getScriptLock: () => ({
+            tryLock(timeout) {
+                assert.equal(timeout, 10000);
+                if (lockUnavailable || state.locked) return false;
+                state.locked = true; return true;
+            },
+            releaseLock() {assert.equal(state.locked, true); state.locked = false; calls.releases++;}
+        })},
+        Utilities: {
+            DigestAlgorithm: {SHA_256: 'SHA_256'}, Charset: {UTF_8: 'UTF_8'},
+            computeDigest(algorithm, token, encoding) {
+                assert.equal(algorithm, 'SHA_256'); assert.equal(encoding, 'UTF_8');
+                return [...require('node:crypto').createHash('sha256').update(token).digest()].map(byte=>byte>127?byte-256:byte);
+            }
         },
         UrlFetchApp: {
             fetch(url, options) {
@@ -62,7 +89,7 @@ function backend({ properties, provider, responseCode = 200, malformed = false, 
     };
     vm.createContext(context);
     vm.runInContext(source, context);
-    return { calls, post: parameter => context.doPost({ parameter }), check: () => context.checkReviewRemovalSetup() };
+    return { calls, state, post: parameter => context.doPost({ parameter }), check: () => context.checkReviewRemovalSetup() };
 }
 const payload = { 'cf-turnstile-response': 'LOCAL_TOKEN', full_name: '=formula', email_address: 'private@example.invalid', reason: 'private review text', selected_plan: 'Existing plan', review_count: '2' };
 
@@ -96,6 +123,42 @@ assert.equal(app.post(payload).code, 'verification_failed', 'Provider replay rej
 assert.equal(app.calls.rows.length, 1);
 assert.equal(app.calls.mail, 1);
 cases += 2;
+// Even an unexpected second provider success must not save or notify twice.
+const providerAlwaysAccepts = () => ({success:true, action:'quote_request', hostname:'reviewremoval.ca'});
+const guarded = backend({provider: providerAlwaysAccepts});
+assert.equal(guarded.post(payload).result,'success');
+assert.equal(guarded.post(payload).code,'verification_failed');
+assert.equal(guarded.calls.rows.length,1); assert.equal(guarded.calls.mail,1);
+assert.equal(guarded.calls.claims.length,1); assert.equal(guarded.calls.releases,2);
+assert.equal(JSON.stringify(guarded.calls.claims).includes('LOCAL_TOKEN'),false,'Never persist raw tokens');
+const otherExecution = backend({provider:providerAlwaysAccepts, sharedState:guarded.state});
+assert.equal(otherExecution.post({...payload, full_name:'Different posted fields'}).code,'verification_failed');
+assert.equal(otherExecution.calls.rows.length,0,'Replay protection persists across execution contexts');
+assert.equal(otherExecution.calls.mail,0);
+assert.equal(otherExecution.post({...payload,'cf-turnstile-response':'ANOTHER_TOKEN'}).result,'success','A fresh verified token can submit');
+cases += 3;
+reject({provider:providerAlwaysAccepts, lockUnavailable:true});
+const persistenceFailure=reject({provider:providerAlwaysAccepts, propertyFailure:true});
+assert.equal(persistenceFailure.state.locked,false,'Release the lock after a failed write');
+// A second request arriving inside the first claim cannot pass the held lock.
+let concurrent;
+const firstExecution=backend({provider:providerAlwaysAccepts,onClaim(){assert.equal(concurrent.post(payload).code,'verification_failed');}});
+concurrent=backend({provider:providerAlwaysAccepts,sharedState:firstExecution.state});
+assert.equal(firstExecution.post(payload).result,'success');
+assert.equal(firstExecution.calls.rows.length,1); assert.equal(concurrent.calls.rows.length,0);
+cases++;
+// Expired markers are pruned without changing secrets or configuration.
+const markerClock={now:Date.now()};
+const pruning=backend({provider:providerAlwaysAccepts,clock:markerClock});
+pruning.state.properties.TURNSTILE_USED_KEEP_SETTING='not a runtime hash marker';
+assert.equal(pruning.post(payload).result,'success');
+const expiredMarker=pruning.calls.claims[0].name;
+markerClock.now+=6*60*1000+1;
+assert.equal(pruning.post({...payload,'cf-turnstile-response':'FRESH_AFTER_EXPIRY'}).result,'success');
+assert.equal(pruning.state.properties[expiredMarker],undefined);
+assert.equal(pruning.state.properties.TURNSTILE_SECRET,'LOCAL_TEST_SECRET');
+assert.equal(pruning.state.properties.TURNSTILE_USED_KEEP_SETTING,'not a runtime hash marker');
+cases++;
 const notification = backend({ mailFailure: true });
 assert.equal(notification.post(payload).notification_sent, false);
 assert.equal(notification.calls.rows.length, 1);
