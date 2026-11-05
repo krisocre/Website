@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "Cite Google for source counts and ReviewRemoval for this compilation and derived analysis."
+type: dataset
+title: "Google Maps notice timing: source-cell audit and median-composition analysis"
+authors:
+  - name: "ReviewRemoval"
+version: 1.0.0
+date-released: 2026-11-05
+url: https://reviewremoval.ca/blog/google-review-removal-time-data.html
+license: CC-BY-4.0

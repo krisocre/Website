@@ -11,7 +11,7 @@ const pages = [
   'blog/index.html', 'blog/google-review-moderation-2019-2025.html', 'blog/trustpilot-fake-reviews-by-star-rating.html', 'blog/canadian-tourism-google-reviews-2023.html', 'blog/review-removal-questions-answered.html', 'blog/review-report-evidence-checklist.html', 'blog/yelp-reviews-disappear-reappear-data.html', 'blog/tripadvisor-fake-review-statistics-removal-rates.html', 'blog/trustpilot-appeal-outcomes-2025.html', 'blog/google-review-removal-rating-impact-study.html',
   ...require('./google-guides.cjs').map(guide => guide.file),
   'blog/google-review-removal-denominator-audit.html', 'blog/google-review-risk-score-denominator-study.html',
-  'blog/google-review-removal-appeals-data.html'
+  'blog/google-review-removal-appeals-data.html', 'blog/google-review-removal-time-data.html'
 ];
 const errors = [];
 const titles = new Set();
@@ -136,10 +136,15 @@ for (const name of ['google-moderation-2019-2025.png', 'trustpilot-fake-reviews-
         if (name === 'blog/canadian-tourism-google-reviews-2023.html' && width === 1440) await page.screenshot({path: path.join(previewRoot, 'canada-study-desktop.png'), fullPage: true});
       }
       if (name.startsWith('remove-') && !require('./google-guides.cjs').some(guide => guide.file === name)) {
+        const discontinued=!!require('./apply-service-positioning.cjs').discontinued[name];
         const platform = await page.$eval('body', el => el.dataset.platform.toLowerCase());
         const sectionIds = await page.$$eval('main > section', els => els.slice(0,3).map(el => el.id || el.className));
-        if (sectionIds[1] !== 'pricing' || sectionIds[2] !== 'quote') errors.push(`${name}: section order ${sectionIds}`);
-        await page.evaluate(() => { document.querySelector('#priceQuantity').value = '3'; document.querySelector('#priceQuantity').dispatchEvent(new Event('input', {bubbles:true})); });
+        if (!discontinued && (sectionIds[1] !== 'pricing' || sectionIds[2] !== 'quote')) errors.push(`${name}: section order ${sectionIds}`);
+        if(discontinued){
+          if(!await page.$('main #legacy-request'))errors.push(`${name}: missing discontinued-service notice and previous-request route`);
+          await page.$eval('#legacy-request details',el=>{el.open=true;});
+        }
+        await page.evaluate(() => { const count=document.querySelector('#priceQuantity')||document.querySelector('#formQuantity');count.value = '3';count.dispatchEvent(new Event('input', {bubbles:true})); });
         const quote = await page.evaluate(() => ({count: document.querySelector('#formQuantity').value, start: document.querySelector('[data-quote="start"]').textContent, success: document.querySelector('[data-quote="success"]').textContent, plan: document.querySelector('#selectedPlan').value}));
         if (quote.count !== '3' || quote.start !== '$150' || quote.success !== '$375' || !quote.plan.toLowerCase().includes(platform)) errors.push(`${name}: quote mismatch ${JSON.stringify(quote)}`);
         await completeSecurityCheck(page);

@@ -1,0 +1,98 @@
+{
+  "@context": "http://www.w3.org/ns/csvw",
+  "url": "https://reviewremoval.ca/blog/data/google-notice-median-examples.csv",
+  "dc:title": "Google Maps notice timing: source-cell audit and median-composition analysis — google-notice-median-examples.csv",
+  "dc:license": "https://creativecommons.org/licenses/by/4.0/",
+  "tableSchema": {
+    "columns": [
+      {
+        "name": "scenario",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "scenario"
+      },
+      {
+        "name": "record_type",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "record type"
+      },
+      {
+        "name": "total_cases",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "total cases"
+      },
+      {
+        "name": "one_hour_cases",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "one hour cases"
+      },
+      {
+        "name": "slower_cases",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "slower cases"
+      },
+      {
+        "name": "slower_group_hours",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "slower group hours"
+      },
+      {
+        "name": "median_hours",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "median hours"
+      },
+      {
+        "name": "mean_hours",
+        "datatype": "number",
+        "null": [
+          ""
+        ],
+        "dc:description": "mean hours"
+      },
+      {
+        "name": "p95_nearest_rank_hours",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "Constructed-example 95th percentile at sorted rank ceil(0.95 × N), not an observed Google percentile."
+      },
+      {
+        "name": "slower_share_pct",
+        "datatype": "number",
+        "null": [
+          ""
+        ],
+        "dc:description": "slower share pct"
+      },
+      {
+        "name": "assumptions",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "assumptions"
+      }
+    ]
+  }
+}

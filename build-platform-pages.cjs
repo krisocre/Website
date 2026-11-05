@@ -1,5 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
+const {applyPositioning,metadataFor}=require('./apply-service-positioning.cjs');
 
 const root = __dirname;
 const platforms = [{
@@ -165,7 +166,7 @@ const platforms = [{
     }
 ];
 
-const allPlatforms = [{ name: 'Google', slug: null, type: 'Business Profile reviews', mark: 'G', accent: '#bf6344' }, ...platforms];
+const allPlatforms = [{ name: 'Google', slug: null, type: 'Business Profile reviews', mark: 'G', accent: '#bf6344' }, ...platforms].filter(p=>p.name==='Google'||p.name==='Yelp');
 const esc = value => String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
 const url = p => p.slug ? `remove-${p.slug}-reviews.html` : 'index.html';
 const cards = current => allPlatforms.filter(p => p.name !== current).map((p, i) => `<a class="related-card" href="${url(p)}" style="--platform-accent:${p.accent}"><span class="related-no">0${i+1}</span><span class="related-mark">${esc(p.mark)}</span><span><strong>${esc(p.name)}</strong><small>${esc(p.type)}</small></span><span class="related-arrow" aria-hidden="true">↗</span></a>`).join('\n');
@@ -214,9 +215,9 @@ function page(p) { return `${head(`${p.name} Review Removal Canada`, `${p.name} 
 </body>
 </html>\n`; }
 
-for (const p of platforms) fs.writeFileSync(path.join(root, url(p)), page(p), 'utf8');
+for (const p of platforms) fs.writeFileSync(path.join(root, url(p)), applyPositioning(url(p),page(p)), 'utf8');
 
-const directory = `${head('Review Removal Services Canada | Eight Platforms | ReviewRemoval', 'Review removal support across Canada for Google, Facebook, Yelp, Trustpilot, Tripadvisor, Booking.com, Glassdoor and Indeed. CAD $50 upfront per review, plus $125 if removed.')}
+const directory = `${head(metadataFor('platforms.html').title.replace(/ \| ReviewRemoval$/,''), metadataFor('platforms.html').description)}
 <body class="platform-directory">
   ${header('platforms')}
   <main id="main"><section class="directory-hero" id="top"><div class="wrap directory-hero-grid"><div><p class="eyebrow eyebrow-light"><span></span> Review concerns, handled for you</p><h1>Review removal services in Canada.<br><em>Your next step is simple.</em></h1><p>Find the platform where the review appears. From Toronto and Ontario to businesses across Canada, our team assesses the details, prepares the report and guides the case from there.</p><a class="button button-accent" href="#choose-platform">Choose a platform <span aria-hidden="true">↓</span></a></div><div class="directory-aside"><span>HOW WE WORK</span><p>Send the link.<br>We look into it.<br>We handle the work.</p><small>For Canadian businesses dealing with reviews across the places customers and candidates look first.</small></div></div></section>
@@ -227,5 +228,5 @@ const directory = `${head('Review Removal Services Canada | Eight Platforms | Re
   </main>
   <footer class="site-footer"><div class="wrap footer-main"><div><a class="footer-brand" href="index.html">Review<span>Removal</span></a><p>Review removal service for businesses in Toronto, Ontario and across Canada.</p></div><div class="footer-nav"><a href="index.html">Home</a><a href="#choose-platform">Platforms</a><a href="blog/index.html">Blog</a><a href="about.html">About</a><a href="#pricing">Pricing</a></div><div class="footer-note"><strong>Put it in our hands.</strong><p>ReviewRemoval is an independent service. Each platform makes its own moderation decisions under its policies.</p></div></div><div class="wrap footer-bottom"><span>© 2026 ReviewRemoval</span><span>Independent reputation services</span><a href="#top">Back to top ↑</a></div></footer>
 </body></html>\n`;
-fs.writeFileSync(path.join(root, 'platforms.html'), directory, 'utf8');
+fs.writeFileSync(path.join(root, 'platforms.html'), applyPositioning('platforms.html',directory), 'utf8');
 console.log('Built platforms.html and', platforms.map(url).join(', '));

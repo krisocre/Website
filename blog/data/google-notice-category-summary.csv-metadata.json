@@ -1,0 +1,130 @@
+{
+  "@context": "http://www.w3.org/ns/csvw",
+  "url": "https://reviewremoval.ca/blog/data/google-notice-category-summary.csv",
+  "dc:title": "Google Maps notice timing: source-cell audit and median-composition analysis — google-notice-category-summary.csv",
+  "dc:license": "https://creativecommons.org/licenses/by/4.0/",
+  "tableSchema": {
+    "columns": [
+      {
+        "name": "record_id",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "record id"
+      },
+      {
+        "name": "source_id",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "source id"
+      },
+      {
+        "name": "period_start",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "period start"
+      },
+      {
+        "name": "period_end",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "period end"
+      },
+      {
+        "name": "hierarchy_level",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "total, category or subcategory; these levels overlap and must not be added together."
+      },
+      {
+        "name": "category_id",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "category id"
+      },
+      {
+        "name": "label",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "label"
+      },
+      {
+        "name": "notices",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "Published legal-notice receipts; not business owners, reviews, or the denominator of the median."
+      },
+      {
+        "name": "items",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "items"
+      },
+      {
+        "name": "reported_median_hours",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "Publisher-reported median processing duration including decisions not to act; hours, not days or a Canadian removal SLA."
+      },
+      {
+        "name": "trusted_notices",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "trusted notices"
+      },
+      {
+        "name": "trusted_reported_median_hours",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "trusted reported median hours"
+      },
+      {
+        "name": "source_csv_row",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "source csv row"
+      },
+      {
+        "name": "source_url",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "source url"
+      },
+      {
+        "name": "receipt_share_pct",
+        "datatype": "number",
+        "null": [
+          ""
+        ],
+        "dc:description": "100 × category receipts / total receipts. This is not the distribution of cases used to compute the reported median."
+      }
+    ]
+  }
+}

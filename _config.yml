@@ -1,10 +1,14 @@
 exclude:
+  - apply-service-positioning.cjs
+  - service-positioning-check.cjs
+  - SERVICE-POSITIONING-SEO-REPORT.md
   - LEGAL-SETUP.md
   - build-legal-pages.cjs
   - legal-settings.json
   - BLOG-RESEARCH-NOTES.md
   - GOOGLE-RISK-RESEARCH-NOTES.md
   - GOOGLE-MAPS-APPEALS-RESEARCH-NOTES.md
+  - GOOGLE-NOTICE-TIMING-RESEARCH-NOTES.md
   - FORM-SETUP.md
   - GOOGLE-SEARCH-IMPROVEMENTS.md
   - LAUNCH-DOMAIN-CHECKLIST.md

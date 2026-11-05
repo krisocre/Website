@@ -1,0 +1,114 @@
+{
+  "@context": "http://www.w3.org/ns/csvw",
+  "url": "https://reviewremoval.ca/blog/data/google-notice-source-cells.csv",
+  "dc:title": "Google Maps notice timing: source-cell audit and median-composition analysis — google-notice-source-cells.csv",
+  "dc:license": "https://creativecommons.org/licenses/by/4.0/",
+  "tableSchema": {
+    "columns": [
+      {
+        "name": "record_id",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "record id"
+      },
+      {
+        "name": "source_id",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "source id"
+      },
+      {
+        "name": "hierarchy_level",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "total, category or subcategory; these levels overlap and must not be added together."
+      },
+      {
+        "name": "parent_category",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "parent category"
+      },
+      {
+        "name": "category_id",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "category id"
+      },
+      {
+        "name": "other_label",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "other label"
+      },
+      {
+        "name": "metric",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "metric"
+      },
+      {
+        "name": "value",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "Published integer or empty/null, never an imputed zero."
+      },
+      {
+        "name": "value_status",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "reported_integer, empty_field or omitted_trailing_field in the original CSV record."
+      },
+      {
+        "name": "unit",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "unit"
+      },
+      {
+        "name": "source_csv_row",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "source csv row"
+      },
+      {
+        "name": "source_csv_column",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "source csv column"
+      },
+      {
+        "name": "source_url",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "source url"
+      }
+    ]
+  }
+}

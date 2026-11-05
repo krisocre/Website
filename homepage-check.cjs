@@ -51,7 +51,7 @@ const server=http.createServer((req,res)=>{
    });
    assert.equal(layout.overflow,false,'Overflow at '+width);assert.ok(layout.ctaTop>=0&&layout.ctaBottom<layout.viewportHeight,'Primary CTA must be visible at '+width);assert.deepEqual(layout.brokenImages,[]);assert.equal(layout.animated,0,'No unrelated homepage animations');
    assert.ok(await page.$eval('.hero-secondary',e=>e.getBoundingClientRect().height>=44),'Pricing link has a 44px tap target');
-   const testimonial=await page.$eval('.hero-testimonial',e=>({name:e.querySelector('figcaption strong').textContent,quote:e.querySelector('blockquote').textContent}));
+   const testimonial=await page.$eval('.hero-testimonial',e=>({name:e.querySelector('figcaption strong').textContent.trim(),quote:e.querySelector('blockquote').textContent.trim()}));
    assert.equal(testimonial.name,'Luke Hapher');assert.equal(testimonial.quote,'“A great team to have on your side.”');
    assert.deepEqual(await page.$$eval('.reviewer-slide',e=>e.map(n=>n.dataset.reviewer)),['Luke Hapher','Michelle Carter','Daniel Chen']);
    assert.equal(await page.$eval('.testimonial-overall',e=>e.getAttribute('aria-label')),'Overall customer rating: 4.9 out of 5 from more than 5,000 ratings');

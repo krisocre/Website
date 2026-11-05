@@ -1,6 +1,7 @@
 // Run after the original builders and build-google-guides.cjs, before set-live-domain.cjs.
 const fs=require('node:fs');
 const path=require('node:path');
+const {metadataFor,applyPositioning}=require('./apply-service-positioning.cjs');
 const guides=require('./google-guides.cjs');
 const {guideSection}=require('./build-google-guides.cjs');
 const root=__dirname;
@@ -16,7 +17,10 @@ function addSection(html,prefix,marker,context){
   if(!html.includes(css))html=html.replace('</head>',css+'\n</head>');return html;
 }
 change('index.html',html=>{
-  html=metadata(html,'Google Review Removal Service in Canada | ReviewRemoval','Policy-based Google review removal help for businesses in Toronto and across Canada. CAD $50 upfront per review + $125 if removed. Get a quote.');
+  // The current homepage is approved: future SEO builds must preserve its entire body.
+  if(/\bclass="[^"]*\bhome-page\b/.test(html))return applyPositioning('index.html',html);
+  const homeMetadata=metadataFor('index.html');
+  html=metadata(html,homeMetadata.title,homeMetadata.description);
   if(!html.includes('class="home-page"')){
     html=html.replace('Google review removal,<br><em>handled for you.</em>','Google review removal<br><em>across Canada.</em>');
     html=html.replace('Send us the review. We assess it, prepare the report and manage the follow-through.','Send us the Google review. Our team assesses the case, prepares the report and handles the follow-through.');

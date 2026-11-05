@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url><loc>https://reviewremoval.ca/</loc><lastmod>2026-11-01</lastmod></url>
-  <url><loc>https://reviewremoval.ca/platforms.html</loc></url>
-  <url><loc>https://reviewremoval.ca/review-removal-canada.html</loc><lastmod>2026-10-27</lastmod></url>
-  <url><loc>https://reviewremoval.ca/about.html</loc></url>
+  <url><loc>https://reviewremoval.ca/platforms.html</loc><lastmod>2026-11-05</lastmod></url>
+  <url><loc>https://reviewremoval.ca/review-removal-canada.html</loc><lastmod>2026-11-05</lastmod></url>
+  <url><loc>https://reviewremoval.ca/about.html</loc><lastmod>2026-11-05</lastmod></url>
   <url><loc>https://reviewremoval.ca/terms-of-service.html</loc></url>
   <url><loc>https://reviewremoval.ca/privacy-policy.html</loc></url>
   <url><loc>https://reviewremoval.ca/editorial-policy.html</loc><lastmod>2026-10-27</lastmod></url>
-  <url><loc>https://reviewremoval.ca/remove-facebook-reviews.html</loc></url>
-  <url><loc>https://reviewremoval.ca/remove-yelp-reviews.html</loc></url>
-  <url><loc>https://reviewremoval.ca/remove-trustpilot-reviews.html</loc></url>
-  <url><loc>https://reviewremoval.ca/remove-tripadvisor-reviews.html</loc></url>
-  <url><loc>https://reviewremoval.ca/remove-booking-com-reviews.html</loc></url>
-  <url><loc>https://reviewremoval.ca/remove-glassdoor-reviews.html</loc></url>
-  <url><loc>https://reviewremoval.ca/remove-indeed-reviews.html</loc></url>
-  <url><loc>https://reviewremoval.ca/blog/index.html</loc><lastmod>2026-11-02</lastmod></url>
+  <url><loc>https://reviewremoval.ca/remove-facebook-reviews.html</loc><lastmod>2026-11-05</lastmod></url>
+  <url><loc>https://reviewremoval.ca/remove-yelp-reviews.html</loc><lastmod>2026-11-05</lastmod></url>
+  <url><loc>https://reviewremoval.ca/remove-trustpilot-reviews.html</loc><lastmod>2026-11-05</lastmod></url>
+  <url><loc>https://reviewremoval.ca/remove-tripadvisor-reviews.html</loc><lastmod>2026-11-05</lastmod></url>
+  <url><loc>https://reviewremoval.ca/remove-booking-com-reviews.html</loc><lastmod>2026-11-05</lastmod></url>
+  <url><loc>https://reviewremoval.ca/remove-glassdoor-reviews.html</loc><lastmod>2026-11-05</lastmod></url>
+  <url><loc>https://reviewremoval.ca/remove-indeed-reviews.html</loc><lastmod>2026-11-05</lastmod></url>
+  <url><loc>https://reviewremoval.ca/blog/index.html</loc><lastmod>2026-11-05</lastmod></url>
   <url><loc>https://reviewremoval.ca/blog/google-review-moderation-2019-2025.html</loc><lastmod>2026-09-21</lastmod></url>
   <url><loc>https://reviewremoval.ca/blog/trustpilot-fake-reviews-by-star-rating.html</loc><lastmod>2026-09-21</lastmod></url>
   <url><loc>https://reviewremoval.ca/blog/canadian-tourism-google-reviews-2023.html</loc><lastmod>2026-09-26</lastmod></url>
@@ -32,4 +32,5 @@
   <url><loc>https://reviewremoval.ca/blog/google-review-removal-denominator-audit.html</loc><lastmod>2026-10-24</lastmod><image:image><image:loc>https://reviewremoval.ca/blog/assets/google-removal-reasons-denominators.svg</image:loc></image:image><image:image><image:loc>https://reviewremoval.ca/blog/assets/google-removal-metric-changes.svg</image:loc></image:image><image:image><image:loc>https://reviewremoval.ca/blog/assets/google-removal-source-corrections.svg</image:loc></image:image></url>
   <url><loc>https://reviewremoval.ca/blog/google-review-risk-score-denominator-study.html</loc><lastmod>2026-10-27</lastmod><image:image><image:loc>https://reviewremoval.ca/blog/assets/google-risk-deleted-share.svg</image:loc></image:image><image:image><image:loc>https://reviewremoval.ca/blog/assets/google-risk-identification-bounds.svg</image:loc></image:image><image:image><image:loc>https://reviewremoval.ca/blog/assets/google-risk-same-subset.svg</image:loc></image:image></url>
   <url><loc>https://reviewremoval.ca/blog/google-review-removal-appeals-data.html</loc><lastmod>2026-11-02</lastmod><image:image><image:loc>https://reviewremoval.ca/blog/assets/google-maps-appeals-direction.svg</image:loc></image:image><image:image><image:loc>https://reviewremoval.ca/blog/assets/google-maps-appeals-receipt-share.svg</image:loc></image:image><image:image><image:loc>https://reviewremoval.ca/blog/assets/google-maps-appeals-median-hours.svg</image:loc></image:image></url>
+  <url><loc>https://reviewremoval.ca/blog/google-review-removal-time-data.html</loc><lastmod>2026-11-05</lastmod><image:image><image:loc>https://reviewremoval.ca/blog/assets/google-notice-category-medians.svg</image:loc></image:image><image:image><image:loc>https://reviewremoval.ca/blog/assets/google-notice-receipt-mix.svg</image:loc></image:image><image:image><image:loc>https://reviewremoval.ca/blog/assets/google-notice-median-tail-examples.svg</image:loc></image:image></url>
 </urlset>

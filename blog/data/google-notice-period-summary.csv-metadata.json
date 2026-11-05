@@ -1,0 +1,82 @@
+{
+  "@context": "http://www.w3.org/ns/csvw",
+  "url": "https://reviewremoval.ca/blog/data/google-notice-period-summary.csv",
+  "dc:title": "Google Maps notice timing: source-cell audit and median-composition analysis — google-notice-period-summary.csv",
+  "dc:license": "https://creativecommons.org/licenses/by/4.0/",
+  "tableSchema": {
+    "columns": [
+      {
+        "name": "source_id",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "source id"
+      },
+      {
+        "name": "notices",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "Published legal-notice receipts; not business owners, reviews, or the denominator of the median."
+      },
+      {
+        "name": "items",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "items"
+      },
+      {
+        "name": "overall_reported_median_hours",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "overall reported median hours"
+      },
+      {
+        "name": "speech_category_notices",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "speech category notices"
+      },
+      {
+        "name": "speech_category_receipt_share_pct",
+        "datatype": "number",
+        "null": [
+          ""
+        ],
+        "dc:description": "speech category receipt share pct"
+      },
+      {
+        "name": "speech_category_reported_median_hours",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "speech category reported median hours"
+      },
+      {
+        "name": "published_parent_categories",
+        "datatype": "integer",
+        "null": [
+          ""
+        ],
+        "dc:description": "published parent categories"
+      },
+      {
+        "name": "interpretation",
+        "datatype": "string",
+        "null": [
+          ""
+        ],
+        "dc:description": "interpretation"
+      }
+    ]
+  }
+}
