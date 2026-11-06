@@ -1,12 +1,26 @@
-# ReviewRemoval quote forms — isolated backend setup
+# ReviewRemoval quote forms - verified standalone backend
 
-The homepage and Facebook, Yelp, Trustpilot, Tripadvisor, Booking.com, Glassdoor and Indeed forms use `script.js` to send the existing selected plan, name, business, email, profile URL, quantity, review links, reason, contact preference and legal acknowledgement. Turnstile adds `cf-turnstile-response`.
+Updated November 6, 2026. The owner reported all six real backend checks passing: missing token, invalid token and wrong action rejected; a fresh real token accepted; owner notification accepted; replay of the same token rejected. The setup check also reported matching headers and a valid secret probe.
 
-**Do not update the current shared Apps Script deployment.** ReviewsBoost still uses it. Paste the complete [google-apps-script.gs](google-apps-script.gs) into a **new standalone ReviewRemoval project**. Follow [TURNSTILE-SETUP.md](TURNSTILE-SETUP.md) for the exact procedure, including the deployment/testing order.
+## Active source configuration
 
-November 4 status: the owner created the separate candidate recorded in `TURNSTILE-SETUP.md` and its setup check passed. The browser accepted a fresh token but replaying it created a duplicate row. The local handler now claims a hash of each verified token atomically under a script lock before saving or emailing. Apply the full updated `google-apps-script.gs` to the separate project's Code.gs, save, and update that candidate through Manage deployments → Edit → New version → Deploy. Keep the five existing settings; runtime replay markers are automatic. Rerun the updated private test utility and require all checks, exactly one new row and one notification for that run. The website remains on the original URL until the candidate passes.
+ReviewRemoval now targets its separate tested Apps Script deployment:
 
-Set these Script Properties in the new project:
+```text
+https://script.google.com/macros/s/AKfycbzK_hATDZaXApgEUITdZ1kgF6VirBLCpcK1q3tmiFoWhG2AZpy_B6uOy5CFjTejVo8T/exec
+```
+
+- `script.js` sends all eight existing assessment forms to that endpoint. The homepage's native `action` agrees.
+- All eight form pages request `script.js?v=20261106-turnstile-endpoint`; the platform-page generator retains the same version.
+- Existing widget: `0x4AAAAAAFy2ZmcJCPhgxNBL`. Each request includes `cf-turnstile-response`; the backend requires Siteverify success, action `quote_request` and an approved ReviewRemoval hostname before saving or emailing. No fallback to the shared endpoint.
+- Existing field names, optional profile/review links, pricing, terms records, owner notifications and confirmed-success Google Ads conversion hook remain unchanged.
+- ReviewsBoost keeps its original endpoint and deployment. Do not edit that project or its properties for this integration.
+
+The website changes are local only. No website deployment, push or Apps Script deployment was performed by the agent. Until these frontend files are deliberately published, the live website may still use the old endpoint. Publish the updated runtime and all eight form HTML pages together, then verify the submission's Network request uses the separate URL above.
+
+## Existing Script Properties
+
+Keep these settings in the separate ReviewRemoval project; never place the secret in frontend code:
 
 | Property | Value |
 | --- | --- |
@@ -16,10 +30,12 @@ Set these Script Properties in the new project:
 | `TURNSTILE_SECRET` | Private secret matching existing key `0x4AAAAAAFy2ZmcJCPhgxNBL`. |
 | `TURNSTILE_HOSTNAMES` | `reviewremoval.ca`, optionally the allowed and served `www.reviewremoval.ca`. |
 
-Run `checkReviewRemovalSetup` in the new editor first. It only reads configuration/headers and probes the configured secret; it writes no row or email. When you permit an isolated test deployment, use the private browser utility described in the guide to test fresh, invalid, wrong-action and replayed tokens, exactly one saved row and the normal owner notification. No live form changes are needed to test that candidate.
+The complete [google-apps-script.gs](google-apps-script.gs) preserves the twelve-column sheet, field fallbacks, formula protection, notification template and JSON contract. `claimVerifiedTurnstileToken` atomically records a short-lived token hash to guard against duplicate processing. A saved request with failed mail still returns `result: success`, `notification_sent: false`; do not blindly retry an uncertain request.
 
-The handler resolves its spreadsheet with `openById` and the configured tab, then retains the original twelve columns, field fallbacks, formula protection, owner-email template and success JSON. A saved request whose email fails still returns success with `notification_sent: false`, as before; check the sheet before retrying an uncertain request.
+## Validation and release follow-up
 
-The existing submission URLs remain untouched. After the candidate passes and the website change is approved, update ReviewRemoval's `const endpoint` in `script.js` and the native homepage `action` in `index.html` together. The seven platform forms use the shared JS handler. Keep the Google Ads configuration, consent behavior and confirmed-success hook unchanged. No ReviewsBoost code or endpoint needs editing.
+The owner-operated `.seo-private/turnstile-standalone-2026-11-03/test-new-endpoint.js` tests the separate backend without calling site form handlers or Ads conversions. The reported result is evidence of real-token acceptance/replay rejection and an accepted MailApp call, not independent confirmation of inbox delivery or a row count. Confirm exactly one row and one corresponding owner email for the latest test reference; those manual observations have not yet been supplied.
 
-Local files do not configure private properties, create/deploy an Apps Script project, verify live delivery or publish a website. Automated requests are mocked.
+After website publication, verify the first normal request end to end and check Cloudflare's token-validation view for this existing widget. The Siteverify request is server-to-server from Apps Script and does not appear in the visitor's browser Network panel. A widget success alone does not verify the server. Preserve consent and count an Ads lead only after the existing explicit success response.
+
+Local checks: `node turnstile-check.cjs`, `node homepage-check.cjs`, `node measurement-check.cjs`, `node gtm-check.cjs`, `node launch-check.cjs` and `node seo-audit.cjs`. These use mocked submissions/providers and do not create real leads or prove live attribution. See [TURNSTILE-SETUP.md](TURNSTILE-SETUP.md) for setup and historical validation details.

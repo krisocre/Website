@@ -1,43 +1,44 @@
 # ReviewRemoval: separate Apps Script project and Turnstile setup
 
-Prepared November 3, 2026; validation status updated November 4. The owner created a separate ReviewRemoval Apps Script deployment and confirmed `checkReviewRemovalSetup` passed. A normal-browser test accepted a fresh token but also created a duplicate row on replay. A backend replay fix is prepared locally; updating the candidate version and retesting are required before the website cutover.
+Prepared November 3, 2026; current validation status updated November 6. The owner updated the separate ReviewRemoval project and reported all six real-token tests passing. The frontend cutover is now prepared locally; no website publication was performed by the agent.
 
-## Current candidate and validation status — November 4, 2026
+## Current tested deployment and validation - November 6, 2026
 
-Owner-supplied ReviewRemoval-only candidate:
+ReviewRemoval-only deployment:
 
 ```text
 https://script.google.com/macros/s/AKfycbzK_hATDZaXApgEUITdZ1kgF6VirBLCpcK1q3tmiFoWhG2AZpy_B6uOy5CFjTejVo8T/exec
 ```
 
-- All eight form pages and the page generator already use the requested existing public key `0x4AAAAAAFy2ZmcJCPhgxNBL`.
-- Live requests to this candidate with a missing token and an invalid token both returned `result: error`, `code: verification_failed`. The same rejection checks also passed through the real ReviewRemoval browser origin.
-- The owner's normal-browser test passed missing-token, invalid-token, wrong-action and fresh-token checks, but failed replay rejection. The sheet contains two rows two seconds apart with the identical `TURNSTILE TEST 2026-11-04T18:27:08.024Z` reference. This proves a duplicate submission, rather than just an unexpected console warning. The underlying reason for the repeated acceptance has not been established.
-- `google-apps-script.gs` now adds a durable, locked replay check after Siteverify and before any sheet/mail work. It stores only a SHA-256 token hash and six-minute expiry in this project's Script Properties. Cloudflare's success/action/hostname checks remain required. Expired runtime markers are cleaned automatically; no additional manual Script Properties are needed.
-- The private test utility now sends each request with a unique non-secret URL identifier and `cache: no-store`, and reports only safe result fields. The new diagnostic distinguishes a replay accepted as success from an unrelated backend error; it does not print tokens or complete response bodies.
-- No production form endpoint was changed. ReviewsBoost retains the original shared deployment. Do not switch ReviewRemoval until the real-token checks pass.
+| Owner-reported test | Result |
+| --- | --- |
+| Missing token | Rejected: `verification_failed` |
+| Invalid token | Rejected: `verification_failed` |
+| Wrong action | Rejected: `verification_failed` |
+| Fresh real token | Accepted: `result: success` |
+| Owner notification accepted | `notification_sent: true` |
+| Replay of same token | Rejected: `verification_failed` |
 
-### Apply the replay fix to the separate candidate
+- `checkReviewRemovalSetup` also passed configuration, sheet-header and secret-probe checks.
+- All eight form pages retain site key `0x4AAAAAAFy2ZmcJCPhgxNBL`. The shared frontend endpoint and homepage native form action now target the separate deployment above in local source. Each form page and the platform generator use script version `20261106-turnstile-endpoint` to avoid retaining the previous form runtime in cache.
+- The owner has not yet supplied an independently checked row count or inbox-delivery confirmation. Confirm exactly one new labelled row and one corresponding owner email for this run. `notification_sent: true` means the MailApp call was accepted, not proof of inbox arrival.
+- No real form submission or Google Ads conversion was sent by the agent during the cutover. Local test sends and provider responses are mocked. No website deployment, commit, push or Apps Script deployment was performed by the agent; the live frontend remains unchanged until these files are deliberately released.
 
-1. In the **separate ReviewRemoval** Apps Script project, replace all of `Code.gs` with the current [google-apps-script.gs](google-apps-script.gs). Save. Keep the five existing configuration properties and their values.
-2. Run `checkReviewRemovalSetup` again.
-3. **Deploy → Manage deployments → select the new ReviewRemoval candidate → pencil/Edit → Version: New version → Deploy**. Saving the editor alone does not update a pinned `/exec` deployment. Retain this candidate's existing URL; never edit the old shared/ReviewsBoost deployment.
-4. Refresh reviewremoval.ca and run the current private `test-new-endpoint.js` utility. Confirm its prefilled candidate URL and complete the challenges.
-5. Require every check to pass, including **Replay of same token**. This run must add exactly one new labelled row and one owner notification. Two old rows from the previous run do not count toward the new run's total; identify each run by its test reference.
+### Historical replay failure and fix
 
-Local verification: 46 backend cases plus browser token-lifecycle checks pass, including duplicate rejection even if Siteverify unexpectedly reports success twice, independent execution contexts, a request arriving during another claim, persistence/lock failure, expiry cleanup, and unchanged lead handling. The private test utility's success/failure diagnostics also pass intercepted-request checks. These do not replace the new candidate's real-token/replay test. No deployment was performed by the agent.
+The November 4 test accepted a fresh token but also accepted replay; the owner supplied two rows with identical reference `TURNSTILE TEST 2026-11-04T18:27:08.024Z`. That failure is why the website initially stayed on its shared endpoint. The prepared handler adds a durable SHA-256 token claim under a script lock after Siteverify and before Sheets/mail. The November 6 owner-reported real-token test now rejects replay. No raw token is persisted and no extra manually configured property is required.
 
 ## Existing widget and protected request
 
 Use existing site key **`0x4AAAAAAFy2ZmcJCPhgxNBL`**. The frontend submits `cf-turnstile-response`; the handler requires Siteverify `success === true`, action **`quote_request`**, and the exact configured ReviewRemoval hostname before accessing the spreadsheet or sending mail. No submitted brand/plan/page value can bypass verification. Preserve the existing widget mode and clearance setting.
 
-The current ReviewRemoval and ReviewsBoost source uses this shared endpoint:
+ReviewsBoost retains its original shared endpoint below. ReviewRemoval source now uses the separate tested deployment above:
 
 ```text
 https://script.google.com/macros/s/AKfycby4mQu0BJFu8Jmbw_zZPzrBb9TF_YRw4j0Ayu3PFvwgicSN5vtzynX0ASet2utzxtlnMw/exec
 ```
 
-**Do not update that deployment, its project, its properties or the ReviewsBoost repository.** Use a new standalone ReviewRemoval project with independent properties. A real endpoint can only be tested after an isolated candidate deployment exists. If no deployment at all is permitted yet, stop after the editor configuration check: full HTTP/token/replay validation remains pending. No website release is needed to test a separate candidate.
+**Do not update that deployment, its project, its properties or the ReviewsBoost repository.** The separate ReviewRemoval project already exists and has independent properties. The setup procedure below is retained for maintenance; do not create another project or widget for the completed owner test. A backend test does not publish the frontend changes.
 
 ## 1. Select the spreadsheet and tab
 
@@ -119,23 +120,25 @@ The owner-operated utility is the local file **`.seo-private/turnstile-standalon
 
 Tokens remain only in the utility's temporary closure, are never printed, and the panel/widget is removed afterward. Existing form actions, form values and Ads tracking remain untouched. Missing/invalid/wrong-action/replay requests must add no rows and send no emails. Local mocked tests have not performed this real deployment check.
 
-## 7. Cut over only after testing and a deliberate release
+## 7. Prepared frontend cutover and deliberate release
 
-Provide the **new public `/exec` URL** and the test results; no secret needs to be shared. Current active code has the old endpoint literal in two places:
+The owner-reported real-token checks passed. Local source now contains the cutover in both required places:
 
-- `script.js`: `const endpoint`, shared by all eight assessment forms.
-- `index.html`: the homepage form's native `action`.
+- `script.js`: the endpoint used by all eight assessment forms.
+- `index.html`: the homepage native form action.
 
-Update those together only after successful candidate validation, refreshing the script cache version. The seven platform forms already require JavaScript and use that shared frontend handler; their current HTML has no separate action URL. `build-platform-pages.cjs` already has the new key/markup and contains no endpoint literal. Never fall back to the old endpoint on verification failure.
+All eight form pages request the refreshed `script.js?v=20261106-turnstile-endpoint`, and `build-platform-pages.cjs` retains that version. The seven platform forms continue to require JavaScript for the security check and use the same handler. There is no automatic fallback to the old shared endpoint.
 
-Keep all existing input names, email templates/recipient, terms records and the confirmed-success measurement hook. Preserve Ads destination **AW-18449308865/HqdzCIv5z4gdEMG5qN1E**, its nominal CAD $1 lead value and consent behavior. The browser-console backend test intentionally sends no Ads conversion. A later controlled site-form check verifies the full flow and tracking after the approved release.
+Release the changed runtime and form HTML together when publishing the website. After release, verify a normal form request targets the separate tested URL. Confirm the saved row and owner email without repeatedly submitting an uncertain request. Siteverify runs inside Apps Script, so inspect Apps Script executions or Cloudflare validation analytics rather than expecting a browser-side Siteverify request.
 
-ReviewsBoost keeps its existing code, endpoint and deployment throughout. Local test success does not authorize a deployment or endpoint switch; no live cutover has been performed.
+All existing input names, optional profile/review links, notification behavior, terms records and the confirmed-success measurement hook are preserved. Ads destination **AW-18449308865/HqdzCIv5z4gdEMG5qN1E**, nominal CAD $1 lead value and consent behavior are unchanged. The owner-operated backend test does not call the website's form handler or conversion hook.
+
+ReviewsBoost keeps its original endpoint and deployment. No website publication or account/backend deployment was performed by the agent.
 
 ## Local files and verification
 
-Changed: `google-apps-script.gs` for explicit destination/diagnostic; eight form HTML pages plus `build-platform-pages.cjs` for the latest public key; `turnstile-check.cjs` for the key and standalone-configuration tests; `FORM-SETUP.md` and this guide for the isolated procedure. The private utility is not published. Existing Google Ads files and submission URLs were preserved.
+Current cutover changes: `script.js`, eight form HTML pages, `build-platform-pages.cjs`, `turnstile-check.cjs`, `FORM-SETUP.md` and this guide. The test now checks the exact protected destination, matching native action, all eight form script versions and rejection/retry/success routing. The already prepared Apps Script, existing site key, styling, blog content and measurement source files are unchanged in this cutover.
 
-Run `node turnstile-check.cjs`, `node homepage-check.cjs`, `node measurement-check.cjs`, `node launch-check.cjs`, `node seo-audit.cjs`. These use mocked submissions/provider responses and cannot establish production secret storage, actual delivery or real-token replay rejection.
+Run `node turnstile-check.cjs`, `node homepage-check.cjs`, `node measurement-check.cjs`, `node launch-check.cjs`, `node seo-audit.cjs`. These use mocked submissions/provider responses and cannot independently establish production secret storage or inbox delivery. The real-token result above was supplied by the owner; publication of the frontend and the normal live form flow are still separate checks.
 
 References: [Cloudflare server validation](https://developers.cloudflare.com/turnstile/get-started/server-side-validation/), [Apps Script web apps](https://developers.google.com/apps-script/guides/web), [Script Properties](https://developers.google.com/apps-script/guides/properties), [openById](https://developers.google.com/apps-script/reference/spreadsheet/spreadsheet-app#openById(String)), [ContentService redirects](https://developers.google.com/apps-script/guides/content#redirects).

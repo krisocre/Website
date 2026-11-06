@@ -8,6 +8,23 @@ const http = require('node:http'),
 const { turnstileApiFixture, isTurnstileApi, completeSecurityCheck } = require('./turnstile-test-fixture.cjs');
 const root = __dirname;
 const source = fs.readFileSync(path.join(root, 'google-apps-script.gs'), 'utf8');
+const protectedEndpoint = 'https://script.google.com/macros/s/AKfycbzK_hATDZaXApgEUITdZ1kgF6VirBLCpcK1q3tmiFoWhG2AZpy_B6uOy5CFjTejVo8T/exec';
+const sharedEndpoint = 'https://script.google.com/macros/s/AKfycby4mQu0BJFu8Jmbw_zZPzrBb9TF_YRw4j0Ayu3PFvwgicSN5vtzynX0ASet2utzxtlnMw/exec';
+const formPages = ['index.html', 'remove-yelp-reviews.html', 'remove-facebook-reviews.html',
+    'remove-trustpilot-reviews.html', 'remove-tripadvisor-reviews.html',
+    'remove-booking-com-reviews.html', 'remove-glassdoor-reviews.html', 'remove-indeed-reviews.html'];
+const formScript = 'script.js?v=20261106-turnstile-endpoint';
+const frontend = fs.readFileSync(path.join(root, 'script.js'), 'utf8');
+assert.ok(frontend.includes("const endpoint = '" + protectedEndpoint + "';"), 'Requests must use the tested ReviewRemoval deployment');
+assert.ok(!frontend.includes(sharedEndpoint), 'No fallback to the unprotected shared deployment');
+for (const file of formPages) {
+    const html = fs.readFileSync(path.join(root, file), 'utf8');
+    assert.deepEqual([...html.matchAll(/<script\b[^>]*\bsrc="(script\.js(?:\?[^"]*)?)"/g)].map(match => match[1]), [formScript], file + ': fresh form runtime required');
+    assert.ok(html.includes('data-sitekey="0x4AAAAAAFy2ZmcJCPhgxNBL"'), file + ': existing widget required');
+    assert.ok(!html.includes(sharedEndpoint), file + ': no old form destination');
+    if (file === 'index.html') assert.ok(html.includes('action="' + protectedEndpoint + '"'), 'Native action and JavaScript must agree');
+}
+assert.ok(fs.readFileSync(path.join(root, 'build-platform-pages.cjs'), 'utf8').includes('src="' + formScript + '"'), 'Generated forms must retain the cache version');
 let cases = 0;
 
 function backend({ properties, provider, responseCode = 200, malformed = false, mailFailure = false, missingSheet = false, badHeaders = false, sharedState, lockUnavailable = false, propertyFailure = false, onClaim, clock = {now: Date.now()} } = {}) {
@@ -230,10 +247,12 @@ const server = http.createServer((req, res) => {
             const form = document.querySelector('#assessment-form');
             for (const [name, value] of Object.entries({ full_name: 'Local Test', business_name: 'Test Business', email_address: 'local@example.invalid', business_url: 'https://example.invalid/' })) form.elements[name].value = value;
             window.__sent = [];
+            window.__targets = [];
             window.__mode = 'reject';
             window.__leads = 0;
             window.ReviewRemovalMeasurement = { confirmedLead() { window.__leads++; } };
             window.fetch = async(url, options) => {
+                window.__targets.push(String(url));
                 window.__sent.push(options.body.toString());
                 if (window.__mode === 'network') throw Error('local network error');
                 return { ok: true, json: async() => window.__mode === 'success' ? { result: 'success' } : { result: 'error', code: 'verification_failed' } };
@@ -266,6 +285,7 @@ const server = http.createServer((req, res) => {
         const tokens = await page.evaluate(() => window.__sent.map(body => new URLSearchParams(body).get('cf-turnstile-response')));
         assert.equal(tokens.length, 3);
         assert.equal(new Set(tokens).size, 3, 'Every retry uses a fresh token');
+        assert.deepEqual(await page.evaluate(() => window.__targets), Array(3).fill(protectedEndpoint), 'Rejection, network error and success all use the separate backend');
         assert.ok(await page.evaluate(() => window.__turnstileFixture.resets >= 4));
         blocked = true;
         await page.goto(base, { waitUntil: 'load' });
@@ -300,7 +320,7 @@ const server = http.createServer((req, res) => {
         assert.equal(await page.$$eval('script[src*="challenges.cloudflare.com"]', nodes => nodes.length), 0);
         assert.deepEqual(errors, []);
         assert.deepEqual(externalPosts, []);
-        console.log('PASS: lazy loading, token gate, expiration, script failure/retry, fresh tokens after rejection/network/success, lead tracking, responsive widget, no loader on other pages. All provider responses mocked; zero real submissions.');
+        console.log('PASS: all eight forms use the separate tested backend and fresh script; lazy loading, token gate, expiration, script failure/retry, fresh tokens after rejection/network/success, lead tracking, responsive widget, no loader on other pages. All provider responses mocked; zero real submissions.');
     } finally {
         if (browser) await browser.close();
         server.closeAllConnections();

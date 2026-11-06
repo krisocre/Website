@@ -162,7 +162,7 @@ const form = document.querySelector('#assessment-form');
 const message = document.querySelector('#form-message');
 const submitButton = form?.querySelector('.submit-button');
 const successPanel = document.querySelector('#submission-success');
-const endpoint = 'https://script.google.com/macros/s/AKfycby4mQu0BJFu8Jmbw_zZPzrBb9TF_YRw4j0Ayu3PFvwgicSN5vtzynX0ASet2utzxtlnMw/exec';
+const endpoint = 'https://script.google.com/macros/s/AKfycbzK_hATDZaXApgEUITdZ1kgF6VirBLCpcK1q3tmiFoWhG2AZpy_B6uOy5CFjTejVo8T/exec';
 let submitting = false;
 
 // Load only on pages with a quote form, when the visitor approaches or uses it.
