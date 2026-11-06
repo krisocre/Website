@@ -20,9 +20,13 @@ https://script.google.com/macros/s/AKfycbzK_hATDZaXApgEUITdZ1kgF6VirBLCpcK1q3tmi
 | Replay of same token | Rejected: `verification_failed` |
 
 - `checkReviewRemovalSetup` also passed configuration, sheet-header and secret-probe checks.
-- All eight form pages retain site key `0x4AAAAAAFy2ZmcJCPhgxNBL`. The shared frontend endpoint and homepage native form action now target the separate deployment above in local source. Each form page and the platform generator use script version `20261106-turnstile-endpoint` to avoid retaining the previous form runtime in cache.
+- All eight form pages retain site key `0x4AAAAAAFy2ZmcJCPhgxNBL`. The shared frontend endpoint and homepage native form action now target the separate deployment above in local source. Each form page and the platform generator use script version `20261106-turnstile-endpoint-2` to avoid retaining the previous form runtime in cache.
 - The owner has not yet supplied an independently checked row count or inbox-delivery confirmation. Confirm exactly one new labelled row and one corresponding owner email for this run. `notification_sent: true` means the MailApp call was accepted, not proof of inbox arrival.
 - No real form submission or Google Ads conversion was sent by the agent during the cutover. Local test sends and provider responses are mocked. No website deployment, commit, push or Apps Script deployment was performed by the agent; the live frontend remains unchanged until these files are deliberately released.
+
+### Frontend cache follow-up
+
+The first release updated the homepage and unversioned origin script, but Cloudflare still served the old endpoint from the first versioned script URL (`CF-Cache-Status: HIT`, `max-age=14400`). The form pages and generator now use version `20261106-turnstile-endpoint-2` to avoid that stale response. Publish those references together and verify the exact versioned asset, not just the homepage action. No sitewide cache policy was changed.
 
 ### Historical replay failure and fix
 
@@ -127,7 +131,7 @@ The owner-reported real-token checks passed. Local source now contains the cutov
 - `script.js`: the endpoint used by all eight assessment forms.
 - `index.html`: the homepage native form action.
 
-All eight form pages request the refreshed `script.js?v=20261106-turnstile-endpoint`, and `build-platform-pages.cjs` retains that version. The seven platform forms continue to require JavaScript for the security check and use the same handler. There is no automatic fallback to the old shared endpoint.
+All eight form pages request the refreshed `script.js?v=20261106-turnstile-endpoint-2`, and `build-platform-pages.cjs` retains that version. The seven platform forms continue to require JavaScript for the security check and use the same handler. There is no automatic fallback to the old shared endpoint.
 
 Release the changed runtime and form HTML together when publishing the website. After release, verify a normal form request targets the separate tested URL. Confirm the saved row and owner email without repeatedly submitting an uncertain request. Siteverify runs inside Apps Script, so inspect Apps Script executions or Cloudflare validation analytics rather than expecting a browser-side Siteverify request.
 

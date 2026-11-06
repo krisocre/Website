@@ -11,10 +11,12 @@ https://script.google.com/macros/s/AKfycbzK_hATDZaXApgEUITdZ1kgF6VirBLCpcK1q3tmi
 ```
 
 - `script.js` sends all eight existing assessment forms to that endpoint. The homepage's native `action` agrees.
-- All eight form pages request `script.js?v=20261106-turnstile-endpoint`; the platform-page generator retains the same version.
+- All eight form pages request `script.js?v=20261106-turnstile-endpoint-2`; the platform-page generator retains the same version.
 - Existing widget: `0x4AAAAAAFy2ZmcJCPhgxNBL`. Each request includes `cf-turnstile-response`; the backend requires Siteverify success, action `quote_request` and an approved ReviewRemoval hostname before saving or emailing. No fallback to the shared endpoint.
 - Existing field names, optional profile/review links, pricing, terms records, owner notifications and confirmed-success Google Ads conversion hook remain unchanged.
 - ReviewsBoost keeps its original endpoint and deployment. Do not edit that project or its properties for this integration.
+
+A live cache check during the first frontend release found Cloudflare still serving the previous script contents under version `20261106-turnstile-endpoint` (`CF-Cache-Status: HIT`, four-hour cache lifetime). The `-2` version avoids that cached response. Verify the exact versioned runtime response after publication; checking the homepage action alone is insufficient.
 
 The website changes are local only. No website deployment, push or Apps Script deployment was performed by the agent. Until these frontend files are deliberately published, the live website may still use the old endpoint. Publish the updated runtime and all eight form HTML pages together, then verify the submission's Network request uses the separate URL above.
 

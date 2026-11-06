@@ -13,7 +13,7 @@ const sharedEndpoint = 'https://script.google.com/macros/s/AKfycby4mQu0BJFu8Jmbw
 const formPages = ['index.html', 'remove-yelp-reviews.html', 'remove-facebook-reviews.html',
     'remove-trustpilot-reviews.html', 'remove-tripadvisor-reviews.html',
     'remove-booking-com-reviews.html', 'remove-glassdoor-reviews.html', 'remove-indeed-reviews.html'];
-const formScript = 'script.js?v=20261106-turnstile-endpoint';
+const formScript = 'script.js?v=20261106-turnstile-endpoint-2';
 const frontend = fs.readFileSync(path.join(root, 'script.js'), 'utf8');
 assert.ok(frontend.includes("const endpoint = '" + protectedEndpoint + "';"), 'Requests must use the tested ReviewRemoval deployment');
 assert.ok(!frontend.includes(sharedEndpoint), 'No fallback to the unprotected shared deployment');
