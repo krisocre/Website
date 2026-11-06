@@ -1,4 +1,68 @@
-# ReviewRemoval conversion measurement — updated November 4, 2026
+# ReviewRemoval conversion measurement — updated November 6, 2026
+
+## November 6: existing GTM container installation
+
+The supplied container **GTM-NJ2W494M** is now configured through the existing
+measurement module on all 34 HTML pages. The single local measurement bootstrap
+is immediately after `<head>`; its deferred scripts establish the existing
+consent controls. After analytics consent, one asynchronous request loads
+`https://www.googletagmanager.com/gtm.js?id=GTM-NJ2W494M` and queues the standard
+`gtm.start` / `gtm.js` event. Rejecting consent does not load it. No unconditional
+noscript iframe or second pasted loader bypasses consent.
+
+The publicly published container was inspected on November 6: it contains GA4
+destination **G-9LFJWP87F0**, and no copy of the existing Ads destination. Keep
+`ga4MeasurementId: null` in the site's direct-tag configuration; GTM owns that
+GA4 initialization. The existing direct Ads destination and confirmed-success
+conversion label remain unchanged. Do not add another tag for the same Ads
+conversion into GTM without deliberately migrating the current route.
+
+The container loads for analytics consent. The existing Ads tag loads separately
+for advertising consent. With both choices accepted, these are two different
+products/destinations, each loaded once. Withdrawal sets the managed GA4 disable
+flag and updates consent; the existing Google code unloads on the next page load,
+without discarding an unfinished enquiry. The unsafe-URL guard also applies to
+GTM, including pages whose URLs accidentally contain personal information.
+
+**Account setting to review before publication:** the captured container has
+automatic user-provided data capabilities enabled. In the Google tag settings
+for this destination, open **Allow user-provided data capabilities** and turn
+that feature off. This website does not supply customer emails, names, phone
+numbers, addresses or review text to measurement. The local implementation sets
+`user_data` to an empty value, repeats that opt-out on its Ads conversion events,
+and disables Google Signals/ad personalisation. These site controls do not edit
+Google account settings or prove that future container changes are safe. See
+[Google's tag settings](https://support.google.com/analytics/answer/12131703)
+and [user-provided data controls](https://support.google.com/analytics/answer/14077171).
+
+Safe consented events are also available as GTM Custom Events:
+`reviewremoval_page_view`, `reviewremoval_quote_cta_click`,
+`reviewremoval_quote_form_start`, `reviewremoval_generate_lead`, and applicable
+contact events. Their fields use the existing allowlist only. For a GA4 confirmed
+lead, configure a GA4 Event tag using **Custom Event**
+`reviewremoval_generate_lead`, GA4 event name `generate_lead`, and measurement ID
+`G-9LFJWP87F0`; require analytics consent. This container currently has its base
+GA4 tag, not that custom lead event tag. Do not configure a second GA4 page_view
+tag for the custom page-view event: the container already sends its base view.
+Keep automatic `form_submit` / form interactions as diagnostics, not primary
+lead conversions. A CTA click is not a saved lead.
+
+The code and public Google libraries were tested locally with every Google
+collection endpoint intercepted. One GTM script and one existing Ads loader
+were requested after their respective consent choices; the captured GA4 base
+page view was not duplicated. A synthetic submission still emitted the existing
+Ads action, and no submitted email, email hash or review text appeared in the
+captured requests. This is not proof of live Google Ads attribution or account
+settings. No real leads or collection requests were sent; no account changes or
+production deployment were performed.
+
+Verification: run `node gtm-check.cjs`, `node measurement-check.cjs`,
+`node launch-check.cjs` and `node seo-audit.cjs`. Once approved and published,
+accept the relevant measurement choice before using Tag Assistant to check the
+container. Recheck rejection/withdrawal as well as successful submissions.
+The implementation follows Google's
+[web-container guidance](https://support.google.com/tagmanager/answer/14847097)
+and preserves the site's existing basic opt-in consent behaviour.
 
 ## Current audit and configuration
 
@@ -7,13 +71,15 @@ November 4 troubleshooting: the two supplied Google Ads emails are byte-for-byte
 A published-site browser check reproduced a Tag Assistant connection problem: plain and valid auto-tagged visits could initialize the Ads destination after consent, but `_dbg=1` and numeric `gtm_debug` debug URLs could not. The local URL guard now permits those narrowly validated debug values. Consent, unsafe-query suppression, canonical event URLs and confirmed-submission-only conversion behavior are unchanged. The check intercepted Google requests; it did not submit a real lead, send a conversion or prove account attribution. Publish the updated `measurement.js` and refresh its hosting cache before testing the change on the live site; nothing was deployed automatically.
 
 - Existing Google Ads destination: **AW-18449308865**, retained.
-- No GA4 Measurement ID or Google Tag Manager container was found in published
-  source. Loading `gtag.js` from googletagmanager.com is not itself a GTM container.
+- Before November 6, no GA4 Measurement ID or GTM container was configured in
+  this source. The new container/destination are described above; `gtag.js`
+  itself is still distinct from the GTM container.
 - Supplied Google Ads action: **Submit lead form**, with destination
   **AW-18449308865/HqdzCIv5z4gdEMG5qN1E**. Its event snippet was provided on
   November 3, 2026 and is now configured in the existing measurement module.
-- Existing consent controls and the confirmed-lead hook are retained. No second
-  Google tag, GTM container or submit-button click conversion was added.
+- Existing consent controls and the confirmed-lead hook are retained. One GTM
+  container was added on November 6; no duplicate container or submit-button
+  click conversion was added.
 - There are currently no `mailto:` or `tel:` links on the published pages.
 - Cloudflare's live hosting response injects a RUM beacon independently of the
   repository. It is not a GA4/GTM install and is not managed by this module.
@@ -22,20 +88,23 @@ A published-site browser check reproduced a Tag Assistant connection problem: pl
 
 ```js
 window.ReviewRemovalMeasurementConfig = Object.freeze({
+  googleTagManagerId: 'GTM-NJ2W494M',
+  tagManagerGa4MeasurementId: 'G-9LFJWP87F0',
   ga4MeasurementId: null,
   googleAdsId: 'AW-18449308865',
   googleAdsLeadConversionLabel: 'HqdzCIv5z4gdEMG5qN1E'
 });
 ```
 
-The null GA4 value deliberately disables that route. It is not a production
-placeholder. The Ads account and conversion label come from the supplied tag;
+The null GA4 value deliberately disables the direct GA4 route, because the new
+container owns GA4 initialization. It is not a production placeholder. The Ads
+account and conversion label come from the supplied tag;
 no account settings were changed.
 
 With the current configuration, the existing Ads base destination loads only
 after advertising consent. Native Ads lead conversions are enabled for confirmed
-submissions after that consent. GA4 events remain disabled until a real web-stream
-Measurement ID is supplied.
+submissions after that consent. The container's GA4 base tag uses analytics
+consent; the site does not initialize its GA4 destination again.
 After analytics consent, a small in-memory verification log records safe event
 signals even when GA4 is unconfigured; it is not a remote analytics service.
 

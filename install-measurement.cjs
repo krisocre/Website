@@ -5,7 +5,7 @@ const marker=/\s*<!-- measurement bootstrap start -->[\s\S]*?<!-- measurement bo
 function applyToHtml(html,file){
  const prefix=file==='404.html'?'/':file.startsWith('blog/')?'../':'';
  const block=`\n  <!-- measurement bootstrap start -->\n  <link rel="stylesheet" href="${prefix}measurement.css">\n  <script src="${prefix}measurement-config.js" defer></script>\n  <script src="${prefix}measurement.js" defer></script>\n  <!-- measurement bootstrap end -->`;
- return html.replace(legacy,'').replace(marker,'').replace('</head>',block+'\n</head>');
+ return html.replace(legacy,'').replace(marker,'').replace(/(<head\b[^>]*>)(?:[ \t]*\r?\n)*/,(_,head)=>head+block+'\n');
 }
 function install(){
  const files=[...fs.readdirSync(root).filter(f=>f.endsWith('.html')),...fs.readdirSync(path.join(root,'blog')).filter(f=>f.endsWith('.html')).map(f=>'blog/'+f)];

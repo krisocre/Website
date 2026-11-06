@@ -2,6 +2,8 @@
   'use strict';
   if (window.ReviewRemovalMeasurement) return;
   var config = window.ReviewRemovalMeasurementConfig || {};
+  var gtm = /^GTM-[A-Z0-9]+$/.test(config.googleTagManagerId || '') ? config.googleTagManagerId : null;
+  var managerGa4 = /^G-[A-Z0-9]+$/.test(config.tagManagerGa4MeasurementId || '') ? config.tagManagerGa4MeasurementId : null;
   var ga4 = /^G-[A-Z0-9]+$/.test(config.ga4MeasurementId || '') ? config.ga4MeasurementId : null;
   var ads = /^AW-\d+$/.test(config.googleAdsId || '') ? config.googleAdsId : null;
   var label = /^[A-Za-z0-9_-]+$/.test(config.googleAdsLeadConversionLabel || '') ? config.googleAdsLeadConversionLabel : null;
@@ -9,6 +11,7 @@
   var ttl = 180 * 24 * 60 * 60 * 1000;
   var preferences = { analytics: false, advertising: false };
   var remembered = false, loaded = false, initialized = false, viewed = false;
+  var managerLoaded = false;
   var configured = new Set(), started = new WeakSet(), confirmed = new WeakSet(), recent = [];
   var privacySignal = window.navigator.globalPrivacyControl === true;
   var canonical;
@@ -44,6 +47,11 @@
   }
   window.gtag('consent', 'default', consent(false, false));
   window.gtag('set', 'ads_data_redaction', true);
+  // Empty user_data opts this site's events out of enhanced/user-provided data.
+  // Never derive analytics data from assessment fields or customer records.
+  window.gtag('set', 'user_data', '');
+  window.gtag('set', 'allow_google_signals', false);
+  window.gtag('set', 'allow_ad_personalization_signals', false);
   try {
     var stored = JSON.parse(window.localStorage.getItem(key));
     if (stored && stored.version === 1 && stored.expires > Date.now() && stored.expires <= Date.now() + ttl &&
@@ -70,12 +78,30 @@
     }
     if (!loaded) {
       loaded = true;
-      // One loader serves both configured destinations. No GTM container is installed.
+      // The existing direct loader owns Ads (and any separately configured GA4 route).
+      // The supplied GTM container has a different GA4 destination, not this Ads action.
       if (!document.querySelector('script[src*="googletagmanager.com/gtag/js"]')) {
         var script = document.createElement('script'); script.id = 'reviewremoval-google-tag'; script.async = true;
         script.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(wantsAnalytics ? ga4 : ads);
         document.head.appendChild(script);
       }
+    }
+  }
+  function initializeTagManager() {
+    // The published container is an Analytics container; analytics consent is required.
+    if (!gtm || managerLoaded || !preferences.analytics || !safeVisitorUrl()) return;
+    managerLoaded = true;
+    window.gtag('set', Object.assign(baseParameters(), { user_data: '', allow_google_signals: false, allow_ad_personalization_signals: false }));
+    var existing = Array.from(document.scripts).find(function (script) {
+      try { var url = new URL(script.src); return url.hostname === 'www.googletagmanager.com' && url.pathname === '/gtm.js' && url.searchParams.get('id') === gtm; } catch (_) { return false; }
+    });
+    if (!existing) {
+      window.dataLayer.push({ 'gtm.start': Date.now(), event: 'gtm.js' });
+      var script = document.createElement('script');
+      script.id = 'reviewremoval-tag-manager'; script.async = true;
+      script.dataset.reviewremovalGtm = gtm;
+      script.src = 'https://www.googletagmanager.com/gtm.js?id=' + encodeURIComponent(gtm);
+      document.head.appendChild(script);
     }
   }
   function record(name, extra) {
@@ -88,6 +114,7 @@
       initializeDestinations();
       window.gtag('event', name, Object.assign({}, parameters, { send_to: ga4 }));
     }
+    if (gtm && managerLoaded) window.dataLayer.push(Object.assign({ event: 'reviewremoval_' + name }, parameters));
   }
   function clearOptionalCookies() {
     document.cookie.split(';').forEach(function (cookie) {
@@ -101,9 +128,11 @@
   function applyPreferences() {
     if (privacySignal) preferences.advertising = false;
     if (ga4) window['ga-disable-' + ga4] = !preferences.analytics;
+    if (managerGa4) window['ga-disable-' + managerGa4] = !preferences.analytics;
     window.gtag('consent', 'update', consent(preferences.analytics, preferences.advertising));
     clearOptionalCookies();
     initializeDestinations();
+    initializeTagManager();
     if (preferences.analytics && !viewed && safeVisitorUrl()) { viewed = true; record('page_view'); }
   }
   function savePreferences(analytics, advertising) {
@@ -126,7 +155,7 @@
         Array.from(window.crypto.getRandomValues(new Uint32Array(4))).map(function (n) { return n.toString(16); }).join('-') : null;
       // CAD $1 is the nominal lead value in the supplied Ads snippet, not revenue.
       if (id) window.gtag('event', 'conversion', Object.assign(baseParameters(), {
-        send_to: ads + '/' + label, value: 1, currency: 'CAD', transaction_id: id
+        send_to: ads + '/' + label, value: 1, currency: 'CAD', transaction_id: id, user_data: ''
       }));
     }
   }
@@ -166,7 +195,8 @@
   window.ReviewRemovalMeasurement = Object.freeze({
     confirmedLead: confirmedLead,
     status: function () { return { analyticsConsent: preferences.analytics, advertisingConsent: preferences.advertising,
-      ga4Configured: !!ga4, adsLeadConfigured: !!(ads && label), googleTagRequested: loaded, urlEligible: safeVisitorUrl() }; },
+      ga4Configured: !!ga4, adsLeadConfigured: !!(ads && label), googleTagRequested: loaded,
+      tagManagerConfigured: !!gtm, tagManagerRequested: managerLoaded, urlEligible: safeVisitorUrl() }; },
     recentEvents: function () { return recent.slice(); }
   });
   applyPreferences();

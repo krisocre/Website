@@ -1,4 +1,5 @@
 exclude:
+  - gtm-check.cjs
   - apply-service-positioning.cjs
   - service-positioning-check.cjs
   - SERVICE-POSITIONING-SEO-REPORT.md
