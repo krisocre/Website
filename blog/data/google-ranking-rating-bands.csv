@@ -1,0 +1,6 @@
+category,rating_band,listings,top3_count,top3_percent,top10_count,top10_percent,top20_count,top20_percent,not_seen_count,not_seen_percent,source,source_version,snapshot
+all,<4.0,139,2,1.43884892,19,13.66906475,21,15.10791367,97,69.78417266,https://datanephew.com/data/gbp-study/v1.2/cubes/listings_by_rating.json,v1.2,2026-10-18
+all,4.0-4.4,105,7,6.66666667,11,10.47619048,29,27.61904762,58,55.23809524,https://datanephew.com/data/gbp-study/v1.2/cubes/listings_by_rating.json,v1.2,2026-10-18
+all,4.5-4.7,122,21,17.21311475,25,20.49180328,18,14.75409836,58,47.54098361,https://datanephew.com/data/gbp-study/v1.2/cubes/listings_by_rating.json,v1.2,2026-10-18
+all,4.8-5.0,852,89,10.44600939,131,15.37558685,94,11.03286385,538,63.14553991,https://datanephew.com/data/gbp-study/v1.2/cubes/listings_by_rating.json,v1.2,2026-10-18
+all,no rating,353,9,2.54957507,25,7.08215297,34,9.63172805,285,80.73654391,https://datanephew.com/data/gbp-study/v1.2/cubes/listings_by_rating.json,v1.2,2026-10-18

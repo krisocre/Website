@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "Cite ReviewRemoval for this aggregate reanalysis and datanephew for the underlying study. This is not a Canadian prevalence or removal-outcome estimate."
+type: dataset
+title: "Google review removal and local ranking: rating-band and sampling-frame audit"
+authors:
+  - name: ReviewRemoval
+version: 1.0.0
+date-released: 2026-11-07
+url: "https://reviewremoval.ca/blog/google-review-removal-local-ranking-study.html"
+license: CC-BY-4.0
+abstract: "A descriptive reanalysis of published aggregate rating-band and visibility data from six US metros. Four tables preserve business-listing and search-result appearance denominators. No causal ranking effects, review-removal outcomes or Canadian prevalence are measured."
+references:
+  - type: data
+    authors:
+      - name: datanephew
+    title: "Google Maps Visibility Study"
+    version: v1.2
+    year: 2026
+    url: "https://datanephew.com/research/local-pack-study/methods/"

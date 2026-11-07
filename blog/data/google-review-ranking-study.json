@@ -1,0 +1,427 @@
+{
+  "title": "Google review removal and local ranking: rating-band and sampling-frame audit",
+  "creator": "ReviewRemoval",
+  "version": "1.0.0",
+  "date": "2026-11-07",
+  "article": "https://reviewremoval.ca/blog/google-review-removal-local-ranking-study.html",
+  "license": "https://creativecommons.org/licenses/by/4.0/",
+  "source": {
+    "creator": "datanephew",
+    "study": "https://datanephew.com/research/local-pack-study/",
+    "methods": "https://datanephew.com/research/local-pack-study/methods/",
+    "version": "v1.2",
+    "snapshot": "2026-10-18",
+    "geography": "Six US metros; no Canadian sample",
+    "license": "CC BY 4.0",
+    "files": [
+      {
+        "url": "https://datanephew.com/data/gbp-study/v1.2/cubes/listings_by_rating.json",
+        "sha256": "9c4a6fffffec011566a5accc4f1b80739ea0a5ec637326dd373da24800b4234a"
+      },
+      {
+        "url": "https://datanephew.com/data/gbp-study/v1.2/cubes/curve_rank_by_rating.json",
+        "sha256": "3b18b6c14fc5301c99c8d32f2ba9abc75d32ecd7186b1c3838b23b26a809ed0a"
+      },
+      {
+        "url": "https://datanephew.com/data/gbp-study/v1.2/cubes/listings.json",
+        "sha256": "825c2321a26c5dbfe2c5f7f81141c5f6b1806c87965fcafaa252b280669fbc48"
+      }
+    ]
+  },
+  "method": {
+    "count_recovery": "For unsuppressed cells with n >= 10, round(n * published_share); require integer residual < 0.00001 and tier totals equal n.",
+    "suppression": "Never reconstruct omitted source cells or publish business identities.",
+    "scope": "Descriptive aggregate reanalysis, not a new Maps crawl, experiment, forecast or causal estimate.",
+    "tiers": "top3=best 1-3; top10=best 4-10; top20=best 11-20; not_seen=no sampled top-20 appearance.",
+    "comparability": "Listings use the listing rating source; appearances use Maps-result ratings. Frames cannot be joined at business level from these aggregates."
+  },
+  "summary": {
+    "listings": 1571,
+    "high_rating_listings": 852,
+    "high_rating_not_seen": 538,
+    "high_rating_not_seen_percent": 63.14553991,
+    "high_rating_top3": 89,
+    "high_rating_top3_percent": 10.44600939,
+    "high_rating_appearance_n": 1214,
+    "high_rating_appearance_top3": 232,
+    "high_rating_appearance_top3_percent": 19.11037891,
+    "high_rated_share_of_not_seen_percent": 51.93050193050193,
+    "appearance_total": 2025
+  },
+  "rating_bands": [
+    {
+      "category": "all",
+      "rating_band": "<4.0",
+      "listings": 139,
+      "top3_count": 2,
+      "top3_percent": 1.43884892,
+      "top10_count": 19,
+      "top10_percent": 13.66906475,
+      "top20_count": 21,
+      "top20_percent": 15.10791367,
+      "not_seen_count": 97,
+      "not_seen_percent": 69.78417266,
+      "source": "https://datanephew.com/data/gbp-study/v1.2/cubes/listings_by_rating.json",
+      "source_version": "v1.2",
+      "snapshot": "2026-10-18"
+    },
+    {
+      "category": "all",
+      "rating_band": "4.0-4.4",
+      "listings": 105,
+      "top3_count": 7,
+      "top3_percent": 6.66666667,
+      "top10_count": 11,
+      "top10_percent": 10.47619048,
+      "top20_count": 29,
+      "top20_percent": 27.61904762,
+      "not_seen_count": 58,
+      "not_seen_percent": 55.23809524,
+      "source": "https://datanephew.com/data/gbp-study/v1.2/cubes/listings_by_rating.json",
+      "source_version": "v1.2",
+      "snapshot": "2026-10-18"
+    },
+    {
+      "category": "all",
+      "rating_band": "4.5-4.7",
+      "listings": 122,
+      "top3_count": 21,
+      "top3_percent": 17.21311475,
+      "top10_count": 25,
+      "top10_percent": 20.49180328,
+      "top20_count": 18,
+      "top20_percent": 14.75409836,
+      "not_seen_count": 58,
+      "not_seen_percent": 47.54098361,
+      "source": "https://datanephew.com/data/gbp-study/v1.2/cubes/listings_by_rating.json",
+      "source_version": "v1.2",
+      "snapshot": "2026-10-18"
+    },
+    {
+      "category": "all",
+      "rating_band": "4.8-5.0",
+      "listings": 852,
+      "top3_count": 89,
+      "top3_percent": 10.44600939,
+      "top10_count": 131,
+      "top10_percent": 15.37558685,
+      "top20_count": 94,
+      "top20_percent": 11.03286385,
+      "not_seen_count": 538,
+      "not_seen_percent": 63.14553991,
+      "source": "https://datanephew.com/data/gbp-study/v1.2/cubes/listings_by_rating.json",
+      "source_version": "v1.2",
+      "snapshot": "2026-10-18"
+    },
+    {
+      "category": "all",
+      "rating_band": "no rating",
+      "listings": 353,
+      "top3_count": 9,
+      "top3_percent": 2.54957507,
+      "top10_count": 25,
+      "top10_percent": 7.08215297,
+      "top20_count": 34,
+      "top20_percent": 9.63172805,
+      "not_seen_count": 285,
+      "not_seen_percent": 80.73654391,
+      "source": "https://datanephew.com/data/gbp-study/v1.2/cubes/listings_by_rating.json",
+      "source_version": "v1.2",
+      "snapshot": "2026-10-18"
+    }
+  ],
+  "high_rating_categories": [
+    {
+      "category": "accountant",
+      "rating_band": "4.8-5.0",
+      "listings": 60,
+      "top3_count": 10,
+      "top3_percent": 16.66666667,
+      "top10_count": 8,
+      "top10_percent": 13.33333333,
+      "top20_count": 5,
+      "top20_percent": 8.33333333,
+      "not_seen_count": 37,
+      "not_seen_percent": 61.66666667,
+      "source": "https://datanephew.com/data/gbp-study/v1.2/cubes/listings_by_rating.json",
+      "source_version": "v1.2",
+      "snapshot": "2026-10-18"
+    },
+    {
+      "category": "estate_attorney",
+      "rating_band": "4.8-5.0",
+      "listings": 59,
+      "top3_count": 13,
+      "top3_percent": 22.03389831,
+      "top10_count": 15,
+      "top10_percent": 25.42372881,
+      "top20_count": 8,
+      "top20_percent": 13.55932203,
+      "not_seen_count": 23,
+      "not_seen_percent": 38.98305085,
+      "source": "https://datanephew.com/data/gbp-study/v1.2/cubes/listings_by_rating.json",
+      "source_version": "v1.2",
+      "snapshot": "2026-10-18"
+    },
+    {
+      "category": "handyman",
+      "rating_band": "4.8-5.0",
+      "listings": 86,
+      "top3_count": 14,
+      "top3_percent": 16.27906977,
+      "top10_count": 14,
+      "top10_percent": 16.27906977,
+      "top20_count": 10,
+      "top20_percent": 11.62790698,
+      "not_seen_count": 48,
+      "not_seen_percent": 55.81395349,
+      "source": "https://datanephew.com/data/gbp-study/v1.2/cubes/listings_by_rating.json",
+      "source_version": "v1.2",
+      "snapshot": "2026-10-18"
+    },
+    {
+      "category": "home_health",
+      "rating_band": "4.8-5.0",
+      "listings": 67,
+      "top3_count": 1,
+      "top3_percent": 1.49253731,
+      "top10_count": 4,
+      "top10_percent": 5.97014925,
+      "top20_count": 9,
+      "top20_percent": 13.43283582,
+      "not_seen_count": 53,
+      "not_seen_percent": 79.10447761,
+      "source": "https://datanephew.com/data/gbp-study/v1.2/cubes/listings_by_rating.json",
+      "source_version": "v1.2",
+      "snapshot": "2026-10-18"
+    },
+    {
+      "category": "house_cleaning",
+      "rating_band": "4.8-5.0",
+      "listings": 158,
+      "top3_count": 14,
+      "top3_percent": 8.86075949,
+      "top10_count": 24,
+      "top10_percent": 15.18987342,
+      "top20_count": 12,
+      "top20_percent": 7.59493671,
+      "not_seen_count": 108,
+      "not_seen_percent": 68.35443038,
+      "source": "https://datanephew.com/data/gbp-study/v1.2/cubes/listings_by_rating.json",
+      "source_version": "v1.2",
+      "snapshot": "2026-10-18"
+    },
+    {
+      "category": "landscaper",
+      "rating_band": "4.8-5.0",
+      "listings": 89,
+      "top3_count": 11,
+      "top3_percent": 12.35955056,
+      "top10_count": 14,
+      "top10_percent": 15.73033708,
+      "top20_count": 9,
+      "top20_percent": 10.11235955,
+      "not_seen_count": 55,
+      "not_seen_percent": 61.79775281,
+      "source": "https://datanephew.com/data/gbp-study/v1.2/cubes/listings_by_rating.json",
+      "source_version": "v1.2",
+      "snapshot": "2026-10-18"
+    },
+    {
+      "category": "massage",
+      "rating_band": "4.8-5.0",
+      "listings": 178,
+      "top3_count": 8,
+      "top3_percent": 4.49438202,
+      "top10_count": 13,
+      "top10_percent": 7.30337079,
+      "top20_count": 10,
+      "top20_percent": 5.61797753,
+      "not_seen_count": 147,
+      "not_seen_percent": 82.58426966,
+      "source": "https://datanephew.com/data/gbp-study/v1.2/cubes/listings_by_rating.json",
+      "source_version": "v1.2",
+      "snapshot": "2026-10-18"
+    },
+    {
+      "category": "personal_trainer",
+      "rating_band": "4.8-5.0",
+      "listings": 83,
+      "top3_count": 14,
+      "top3_percent": 16.86746988,
+      "top10_count": 23,
+      "top10_percent": 27.71084337,
+      "top20_count": 21,
+      "top20_percent": 25.30120482,
+      "not_seen_count": 25,
+      "not_seen_percent": 30.12048193,
+      "source": "https://datanephew.com/data/gbp-study/v1.2/cubes/listings_by_rating.json",
+      "source_version": "v1.2",
+      "snapshot": "2026-10-18"
+    },
+    {
+      "category": "plumber",
+      "rating_band": "4.8-5.0",
+      "listings": 72,
+      "top3_count": 4,
+      "top3_percent": 5.55555556,
+      "top10_count": 16,
+      "top10_percent": 22.22222222,
+      "top20_count": 10,
+      "top20_percent": 13.88888889,
+      "not_seen_count": 42,
+      "not_seen_percent": 58.33333333,
+      "source": "https://datanephew.com/data/gbp-study/v1.2/cubes/listings_by_rating.json",
+      "source_version": "v1.2",
+      "snapshot": "2026-10-18"
+    }
+  ],
+  "frame_comparison": [
+    {
+      "rating_band": "<4.0",
+      "listing_frame_n": 139,
+      "listing_best_top3_count": 2,
+      "listing_best_top3_percent": 1.43884892,
+      "appearance_frame_n": 115,
+      "appearance_rank1_3_count": 9,
+      "appearance_rank1_3_percent": 7.82608696,
+      "appearance_median_rank": 11.0,
+      "listing_source": "https://datanephew.com/data/gbp-study/v1.2/cubes/listings_by_rating.json",
+      "appearance_source": "https://datanephew.com/data/gbp-study/v1.2/cubes/curve_rank_by_rating.json",
+      "comparison_note": "Different frames, units and rating sources; not paired effects or removal outcomes."
+    },
+    {
+      "rating_band": "4.0-4.4",
+      "listing_frame_n": 105,
+      "listing_best_top3_count": 7,
+      "listing_best_top3_percent": 6.66666667,
+      "appearance_frame_n": 175,
+      "appearance_rank1_3_count": 21,
+      "appearance_rank1_3_percent": 12.0,
+      "appearance_median_rank": 12.0,
+      "listing_source": "https://datanephew.com/data/gbp-study/v1.2/cubes/listings_by_rating.json",
+      "appearance_source": "https://datanephew.com/data/gbp-study/v1.2/cubes/curve_rank_by_rating.json",
+      "comparison_note": "Different frames, units and rating sources; not paired effects or removal outcomes."
+    },
+    {
+      "rating_band": "4.5-4.7",
+      "listing_frame_n": 122,
+      "listing_best_top3_count": 21,
+      "listing_best_top3_percent": 17.21311475,
+      "appearance_frame_n": 276,
+      "appearance_rank1_3_count": 57,
+      "appearance_rank1_3_percent": 20.65217391,
+      "appearance_median_rank": 9.0,
+      "listing_source": "https://datanephew.com/data/gbp-study/v1.2/cubes/listings_by_rating.json",
+      "appearance_source": "https://datanephew.com/data/gbp-study/v1.2/cubes/curve_rank_by_rating.json",
+      "comparison_note": "Different frames, units and rating sources; not paired effects or removal outcomes."
+    },
+    {
+      "rating_band": "4.8-5.0",
+      "listing_frame_n": 852,
+      "listing_best_top3_count": 89,
+      "listing_best_top3_percent": 10.44600939,
+      "appearance_frame_n": 1214,
+      "appearance_rank1_3_count": 232,
+      "appearance_rank1_3_percent": 19.11037891,
+      "appearance_median_rank": 9.0,
+      "listing_source": "https://datanephew.com/data/gbp-study/v1.2/cubes/listings_by_rating.json",
+      "appearance_source": "https://datanephew.com/data/gbp-study/v1.2/cubes/curve_rank_by_rating.json",
+      "comparison_note": "Different frames, units and rating sources; not paired effects or removal outcomes."
+    },
+    {
+      "rating_band": "no rating",
+      "listing_frame_n": 353,
+      "listing_best_top3_count": 9,
+      "listing_best_top3_percent": 2.54957507,
+      "appearance_frame_n": 245,
+      "appearance_rank1_3_count": 19,
+      "appearance_rank1_3_percent": 7.75510204,
+      "appearance_median_rank": 12.0,
+      "listing_source": "https://datanephew.com/data/gbp-study/v1.2/cubes/listings_by_rating.json",
+      "appearance_source": "https://datanephew.com/data/gbp-study/v1.2/cubes/curve_rank_by_rating.json",
+      "comparison_note": "Different frames, units and rating sources; not paired effects or removal outcomes."
+    }
+  ],
+  "frame_audit": [
+    {
+      "measure": "listing_frame",
+      "count": 1571,
+      "unit": "business listings",
+      "definition": "Matched visible plus not-seen enriched owner-operated listings; not all businesses in the six metros."
+    },
+    {
+      "measure": "listing_best_top3",
+      "count": 128,
+      "unit": "business listings",
+      "definition": "Best observed rank 1-3 at any of eight search points for its market."
+    },
+    {
+      "measure": "listing_rank4_10",
+      "count": 211,
+      "unit": "business listings",
+      "definition": "Best observed rank 4-10; excludes top3."
+    },
+    {
+      "measure": "listing_rank11_20",
+      "count": 196,
+      "unit": "business listings",
+      "definition": "Best observed rank 11-20; excludes higher tiers."
+    },
+    {
+      "measure": "listing_not_seen",
+      "count": 1036,
+      "unit": "business listings",
+      "definition": "No top-20 result at the study search points in this one snapshot; not proof of general invisibility."
+    },
+    {
+      "measure": "appearance_frame",
+      "count": 2025,
+      "unit": "business-by-search-point appearances",
+      "definition": "Visible results; businesses can recur; a different frame from listings."
+    },
+    {
+      "measure": "high_rating_listings",
+      "count": 852,
+      "unit": "business listings",
+      "definition": "Listing rating 4.8-5.0 inclusive; this is not a perfect-5.0-only group."
+    },
+    {
+      "measure": "high_rating_not_seen",
+      "count": 538,
+      "unit": "business listings",
+      "definition": "High-rating listings absent from sampled top-20 results."
+    }
+  ],
+  "limitations": [
+    "One snapshot, non-random six-US-metro sample; not a Canada-wide prevalence estimate.",
+    "No review removals, before/after rank changes, authenticity labels or customer outcomes measured.",
+    "Best rank across eight widely spaced search points is not a single-point rank or universal visibility.",
+    "Enrichment under-matches service-area businesses; original frame is selected.",
+    "Rating bands mix review counts, sectors, distances and business characteristics; no causal adjustment attempted.",
+    "Appearance and listing sources/frames differ; their percentages are not paired estimates.",
+    "No new confidence intervals, significance tests or independence assumptions added."
+  ],
+  "distributions": [
+    {
+      "file": "google-ranking-rating-bands.csv",
+      "rows": 5,
+      "sha256": "6617d0dacdd83f3994d5e43d3346b6d14cc333fec797d424a7e68f305568e859"
+    },
+    {
+      "file": "google-ranking-high-rating-categories.csv",
+      "rows": 9,
+      "sha256": "4383f007f49157e75127327f66d157039aefd5154356a0faca2f4737369dcaf8"
+    },
+    {
+      "file": "google-ranking-frame-comparison.csv",
+      "rows": 5,
+      "sha256": "f0a526c0ed57b8731cd19edbeb6d20d8d1990bf01e607b9d9004e2b73b92dee5"
+    },
+    {
+      "file": "google-ranking-frame-audit.csv",
+      "rows": 8,
+      "sha256": "d34b9dd33b96d1c4e33a1d0ba3d0feb89d02a8d3ed49f527622c03f898f9b09d"
+    }
+  ]
+}

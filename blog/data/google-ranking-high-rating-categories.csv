@@ -1,0 +1,10 @@
+category,rating_band,listings,top3_count,top3_percent,top10_count,top10_percent,top20_count,top20_percent,not_seen_count,not_seen_percent,source,source_version,snapshot
+accountant,4.8-5.0,60,10,16.66666667,8,13.33333333,5,8.33333333,37,61.66666667,https://datanephew.com/data/gbp-study/v1.2/cubes/listings_by_rating.json,v1.2,2026-10-18
+estate_attorney,4.8-5.0,59,13,22.03389831,15,25.42372881,8,13.55932203,23,38.98305085,https://datanephew.com/data/gbp-study/v1.2/cubes/listings_by_rating.json,v1.2,2026-10-18
+handyman,4.8-5.0,86,14,16.27906977,14,16.27906977,10,11.62790698,48,55.81395349,https://datanephew.com/data/gbp-study/v1.2/cubes/listings_by_rating.json,v1.2,2026-10-18
+home_health,4.8-5.0,67,1,1.49253731,4,5.97014925,9,13.43283582,53,79.10447761,https://datanephew.com/data/gbp-study/v1.2/cubes/listings_by_rating.json,v1.2,2026-10-18
+house_cleaning,4.8-5.0,158,14,8.86075949,24,15.18987342,12,7.59493671,108,68.35443038,https://datanephew.com/data/gbp-study/v1.2/cubes/listings_by_rating.json,v1.2,2026-10-18
+landscaper,4.8-5.0,89,11,12.35955056,14,15.73033708,9,10.11235955,55,61.79775281,https://datanephew.com/data/gbp-study/v1.2/cubes/listings_by_rating.json,v1.2,2026-10-18
+massage,4.8-5.0,178,8,4.49438202,13,7.30337079,10,5.61797753,147,82.58426966,https://datanephew.com/data/gbp-study/v1.2/cubes/listings_by_rating.json,v1.2,2026-10-18
+personal_trainer,4.8-5.0,83,14,16.86746988,23,27.71084337,21,25.30120482,25,30.12048193,https://datanephew.com/data/gbp-study/v1.2/cubes/listings_by_rating.json,v1.2,2026-10-18
+plumber,4.8-5.0,72,4,5.55555556,16,22.22222222,10,13.88888889,42,58.33333333,https://datanephew.com/data/gbp-study/v1.2/cubes/listings_by_rating.json,v1.2,2026-10-18

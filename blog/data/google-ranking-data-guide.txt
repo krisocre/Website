@@ -1,0 +1,147 @@
+GOOGLE REVIEW REMOVAL AND LOCAL RANKING: RATING-BAND AND SAMPLING-FRAME AUDIT
+ReviewRemoval | Version 1.0.0 | 2026-11-07
+https://reviewremoval.ca/blog/google-review-removal-local-ranking-study.html
+
+WHAT THIS RELEASE IS
+An original descriptive reanalysis of three published aggregate JSON cubes
+from datanephew's Google Maps Visibility Study v1.2. It is not a new Maps crawl,
+business-level data release, causal experiment, Canadian survey or analysis
+of successful review removals. No review text or business identifiers appear.
+
+ATTRIBUTION AND LICENCE
+Underlying research: datanephew (2026), Google Maps Visibility Study, v1.2.
+Snapshot 2026-10-18; source published 2026-10-20, updated 2026-10-27.
+Study: https://datanephew.com/research/local-pack-study/
+Methods/licence: https://datanephew.com/research/local-pack-study/methods/
+The source explicitly licences its aggregate data and charts under CC BY 4.0,
+including commercial reuse with credit and a link to the study.
+Our aggregate reanalysis, charts and reproduction code: CC BY 4.0 as well.
+https://creativecommons.org/licenses/by/4.0/
+Credit both datanephew for the underlying study and ReviewRemoval for this
+reanalysis. Google trademarks and third-party documentation remain their own.
+No affiliation or endorsement is claimed.
+
+PINNED INPUTS
+Base URL: https://datanephew.com/data/gbp-study/v1.2/cubes/
+listings_by_rating.json SHA256:
+9c4a6fffffec011566a5accc4f1b80739ea0a5ec637326dd373da24800b4234a
+curve_rank_by_rating.json SHA256:
+3b18b6c14fc5301c99c8d32f2ba9abc75d32ecd7186b1c3838b23b26a809ed0a
+listings.json SHA256:
+825c2321a26c5dbfe2c5f7f81141c5f6b1806c87965fcafaa252b280669fbc48
+Hashes match those published on the original methods page.
+
+METHOD
+For selected unsuppressed source cells with n >= 10:
+  recovered count = round(n * published share)
+  require abs(n * share - recovered count) < 0.00001
+  require mutually exclusive tier counts sum to n
+  percentage = recovered count / n * 100
+Verify all five rating groups sum to 1,571 and all nine 4.8-5.0 category
+groups sum to 852. Cross-check tier totals against the separate listing cube.
+Do not reconstruct metrics omitted by the original publisher's suppression.
+
+LISTING TIERS (exclusive, based on best observed rank across eight points)
+top3: best position 1-3.
+top10: best position 4-10, NOT cumulative top ten.
+top20: best position 11-20, NOT cumulative top twenty.
+not_seen: no sampled top-20 appearance in this snapshot.
+"Not seen" does not mean generally invisible, penalised or delisted.
+
+RATING BANDS
+<4.0, 4.0-4.4, 4.5-4.7, 4.8-5.0 and no rating.
+The 4.8-5.0 group is not a perfect-5.0-only group.
+No rating is a source category, not a zero-star value.
+
+DATA DICTIONARY
+All percentage fields are on a 0-100 scale, rounded to 8 decimal places.
+Article/figure percentages are generally displayed to 1 decimal place.
+
+google-ranking-rating-bands.csv (5 aggregate rows)
+  category: all, the original category rollup.
+  rating_band: source listing-rating interval or no rating.
+  listings: denominator for that rating group.
+  top3_count / top3_percent: exclusive best-rank 1-3 group.
+  top10_count / top10_percent: exclusive best-rank 4-10 group.
+  top20_count / top20_percent: exclusive best-rank 11-20 group.
+  not_seen_count / not_seen_percent: no sampled top-20 appearance.
+  source, source_version, snapshot: exact provenance.
+
+google-ranking-high-rating-categories.csv (9 aggregate rows)
+  Same fields as the rating-band CSV, with category-specific denominators.
+  rating_band is 4.8-5.0 throughout. Categories partition the pooled 852
+  high-rating listings; they are not an additional 852 independent records.
+  Each category pools two of the six source metros.
+
+google-ranking-frame-comparison.csv (5 aggregate rows)
+  rating_band: band label as used separately in the two source frames.
+  listing_frame_n: business-listing denominator, including not-seen listings.
+  listing_best_top3_count / listing_best_top3_percent: best-rank 1-3 listings.
+  appearance_frame_n: visible business-by-search-point appearances. A business
+    may contribute more than one appearance.
+  appearance_rank1_3_count / appearance_rank1_3_percent: appearances at 1-3.
+  appearance_median_rank: source-published median appearance rank, not a
+    newly pooled median and not a rank-change estimate.
+  listing_source, appearance_source, comparison_note: provenance/scope.
+  Listings use listing-source ratings; appearances use Maps-result ratings.
+  Their frames differ. These are not matched before-and-after observations.
+  Do not attribute the difference solely to repeat appearances.
+
+google-ranking-frame-audit.csv (8 measures)
+  measure, count, unit, definition. Units are explicit; never sum different
+  units or overlapping subgroups as an overall sample size.
+
+google-review-ranking-study.json
+  Complete aggregate release: source provenance/checksums, methods, summary,
+  all four tables, limitations and CSV SHA256 checksums.
+
+google-ranking-observation-template.csv
+  Blank operational worksheet; no records or outcome data. The suggested
+  fields keep review reporting and rank observations separate. This is not
+  a validated experimental design. Completed worksheets should remain private.
+
+KEY ARITHMETIC
+Total listing frame: 1,571 = 128 + 211 + 196 + 1,036.
+High-rating listings: 852 = 89 + 131 + 94 + 538.
+538 / 852 * 100 = 63.1455399061...% not seen (63.1% displayed).
+89 / 852 * 100 = 10.4460093897...% best rank 1-3 (10.4% displayed).
+538 / 1,036 * 100 = 51.9305019305...% of not-seen listings are high-rating.
+Appearance frame: 2,025 appearances; different unit/frame from listings.
+High-rating appearances: 1,214; 232 at rank 1-3 = 19.1103789127...%.
+The 10.4% and 19.1% values do not measure a causal change.
+27 released aggregate rows are not 27 studies or 27 independent samples.
+
+REPRODUCTION
+Python 3.12.0 was used. The table builder uses only Python's standard library.
+Place the two scripts in blog/data/ in a working folder. Then run:
+  python blog/data/build-google-ranking.py --download
+The script caches the three public aggregate inputs in:
+  .seo-private/google-review-evidence-study-2026-11-07/
+Subsequent offline runs can omit --download. Changed source hashes stop the
+builder; review a new source release before making new-version claims.
+Independent read-only numeric checks (after the cache exists):
+  python blog/data/audit-google-ranking.py
+
+For the original charts:
+  python -m pip install matplotlib==3.10.7
+  python blog/data/plot-google-ranking.py
+Plots use the supplied aggregate JSON and system DejaVu fonts; no remote
+fonts, review APIs, accounts or site runtime changes are required. SVG/PNG
+outputs go to blog/assets/. Plotting can run without fetching source cubes.
+
+LIMITATIONS
+Six selected US metros, nine categories, one date. Widely spaced search
+points, enrichment/matching bias and different rating sources. Business
+characteristics and category composition differ across bands. No microdata
+join, causal adjustment, new confidence interval or significance test.
+No review removals, authenticity labels, Canadian prevalence, ranking gains,
+revenue effects or ReviewRemoval customer results are measured.
+
+CITE
+ReviewRemoval. (2026, November 7). Google review removal and local ranking:
+rating-band and sampling-frame audit (Version 1.0.0).
+https://reviewremoval.ca/blog/google-review-removal-local-ranking-study.html
+Derived from datanephew, Google Maps Visibility Study, data release v1.2,
+snapshot October 18, 2026.
+
+Corrections: https://reviewremoval.ca/editorial-policy.html

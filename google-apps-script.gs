@@ -5,7 +5,7 @@
  * Preferred Contact | Contact Detail | Profile URL | Review Count |
  * Review Links | Reason
  *
- * Paste the entire file into Code.gs in a NEW, standalone ReviewRemoval project.
+ * Maintain this file as Code.gs in the existing separate ReviewRemoval project.
  * Script Properties: SPREADSHEET_ID, SHEET_NAME, NOTIFICATION_EMAIL,
  * TURNSTILE_SECRET, TURNSTILE_HOSTNAMES. See TURNSTILE-SETUP.md.
  * Do not paste into or update the existing ReviewsBoost/shared deployment.
@@ -256,14 +256,14 @@ function leadInputErrors(data, requireReviewCount) {
   }
   var name = text('full_name');
   if (!name) errors.full_name = 'Enter your name.';
-  else if (name.length > 150) errors.full_name = 'Keep your name to 150 characters or fewer.';
-  else if (/[$\uFE69\uFF04\u0000-\u001F\u007F]|https?:\/\/|www\./i.test(name) || !/\p{L}/u.test(name)) {
+  else if (data.full_name.length > 150) errors.full_name = 'Keep your name to 150 characters or fewer.';
+  else if (/[$\uFE69\uFF04\u0000-\u001F\u007F]|https?:\/\/|www\./i.test(data.full_name) || !/\p{L}/u.test(name)) {
     errors.full_name = 'Enter your name without links, dollar signs or line breaks.';
   }
   var business = text('business_name');
   if (!business) errors.business_name = 'Enter your business name.';
-  else if (business.length > 250) errors.business_name = 'Keep the business name to 250 characters or fewer.';
-  else if (/[\u0000-\u001F\u007F]|https?:\/\//i.test(business)) errors.business_name = 'Enter a business name without web links or line breaks.';
+  else if (data.business_name.length > 250) errors.business_name = 'Keep the business name to 250 characters or fewer.';
+  else if (/[\u0000-\u001F\u007F]|https?:\/\//i.test(data.business_name)) errors.business_name = 'Enter a business name without web links or line breaks.';
 
   var contact = text('contact_detail');
   var email = text('email_address') || text('email') || ((/^Email\b/i.test(text('contact_method')) || contact.indexOf('@') !== -1) ? contact : '');

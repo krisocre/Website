@@ -170,14 +170,14 @@ function leadInputErrors(data, requireReviewCount) {
   }
   var name = text('full_name');
   if (!name) errors.full_name = 'Enter your name.';
-  else if (name.length > 150) errors.full_name = 'Keep your name to 150 characters or fewer.';
-  else if (/[$\uFE69\uFF04\u0000-\u001F\u007F]|https?:\/\/|www\./i.test(name) || !/\p{L}/u.test(name)) {
+  else if (data.full_name.length > 150) errors.full_name = 'Keep your name to 150 characters or fewer.';
+  else if (/[$\uFE69\uFF04\u0000-\u001F\u007F]|https?:\/\/|www\./i.test(data.full_name) || !/\p{L}/u.test(name)) {
     errors.full_name = 'Enter your name without links, dollar signs or line breaks.';
   }
   var business = text('business_name');
   if (!business) errors.business_name = 'Enter your business name.';
-  else if (business.length > 250) errors.business_name = 'Keep the business name to 250 characters or fewer.';
-  else if (/[\u0000-\u001F\u007F]|https?:\/\//i.test(business)) errors.business_name = 'Enter a business name without web links or line breaks.';
+  else if (data.business_name.length > 250) errors.business_name = 'Keep the business name to 250 characters or fewer.';
+  else if (/[\u0000-\u001F\u007F]|https?:\/\//i.test(data.business_name)) errors.business_name = 'Enter a business name without web links or line breaks.';
 
   var contact = text('contact_detail');
   var email = text('email_address') || text('email') || ((/^Email\b/i.test(text('contact_method')) || contact.indexOf('@') !== -1) ? contact : '');
@@ -213,6 +213,9 @@ const submitButton = form?.querySelector('.submit-button');
 const successPanel = document.querySelector('#submission-success');
 const endpoint = 'https://script.google.com/macros/s/AKfycbzK_hATDZaXApgEUITdZ1kgF6VirBLCpcK1q3tmiFoWhG2AZpy_B6uOy5CFjTejVo8T/exec';
 let submitting = false;
+// Validate current values in the submit handler, including autofill corrections.
+// Native input validity still supplies accessible messages; no-JS HTML is unchanged.
+if (form) form.noValidate = true;
 
 const leadFields = ['full_name', 'business_name', 'email_address', 'phone_number', 'business_url', 'review_count', 'review_links', 'reason'];
 function refreshLeadInputValidity() {
