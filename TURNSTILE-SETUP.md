@@ -2,6 +2,10 @@
 
 Prepared November 3, 2026; current validation status updated November 6. The owner updated the separate ReviewRemoval project and reported all six real-token tests passing. The frontend cutover is now prepared locally; no website publication was performed by the agent.
 
+## Subsequent input-validation release
+
+The endpoint cutover described below was observed live after an external release. The current source also adds targeted spam/input validation before storage/mail and uses form runtime version `20261106-input-validation`. These NEW backend rules are prepared locally and require another New version deployment of the existing separate ReviewRemoval Apps Script project. Keep the tested endpoint and all Script Properties. See [FORM-SETUP.md](FORM-SETUP.md) for rules, deployment steps and remaining live verification. The six real-token results below describe the prior Turnstile release; they do not prove that the new input rules have been deployed.
+
 ## Current tested deployment and validation - November 6, 2026
 
 ReviewRemoval-only deployment:

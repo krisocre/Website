@@ -158,12 +158,70 @@ document.querySelectorAll('[data-qty-step]').forEach(button => button.addEventLi
   updateQuote(clamp(input.value) + Number(button.dataset.qtyStep));
 }));
 
+// BEGIN LEAD INPUT RULES
+// Keep this pure validation function identical in the browser and Apps Script.
+// It uses no browser/Node APIs; Apps Script's V8 runtime can execute it directly.
+function leadInputErrors(data, requireReviewCount) {
+  var errors = {};
+  function text(name) { return typeof data[name] === 'string' ? data[name].trim() : ''; }
+  function blockedEmail(address) {
+    var domain = address.toLowerCase().split('@').pop().replace(/\.+$/, '');
+    return domain === 'fldubai.com' || domain.slice(-12) === '.fldubai.com';
+  }
+  var name = text('full_name');
+  if (!name) errors.full_name = 'Enter your name.';
+  else if (name.length > 150) errors.full_name = 'Keep your name to 150 characters or fewer.';
+  else if (/[$\uFE69\uFF04\u0000-\u001F\u007F]|https?:\/\/|www\./i.test(name) || !/\p{L}/u.test(name)) {
+    errors.full_name = 'Enter your name without links, dollar signs or line breaks.';
+  }
+  var business = text('business_name');
+  if (!business) errors.business_name = 'Enter your business name.';
+  else if (business.length > 250) errors.business_name = 'Keep the business name to 250 characters or fewer.';
+  else if (/[\u0000-\u001F\u007F]|https?:\/\//i.test(business)) errors.business_name = 'Enter a business name without web links or line breaks.';
+
+  var contact = text('contact_detail');
+  var email = text('email_address') || text('email') || ((/^Email\b/i.test(text('contact_method')) || contact.indexOf('@') !== -1) ? contact : '');
+  if (!email || email.length > 254 || /[\u0000-\u0020\u007F]/.test(email) || !/^[^\s@<>]+@[^\s@<>.]+(?:\.[^\s@<>.]+)+$/.test(email)) errors.email_address = 'Enter a valid email address.';
+  else if (blockedEmail(email) || (contact.indexOf('@') !== -1 && blockedEmail(contact))) errors.email_address = 'Please use a different email address.';
+
+  var count = text('review_count') || text('reviews_to_remove') || text('review_quantity');
+  if ((requireReviewCount || count) && (!/^\d+$/.test(count) || Number(count) < 1 || Number(count) > 50)) {
+    errors.review_count = 'Enter a whole number of reviews from 1 to 50.';
+  }
+  var profile = text('business_url');
+  if (profile) {
+    var parts = profile.match(/^https?:\/\/([^\s/?#]+)(?:[/?#][^\s]*)?$/i);
+    if (profile.length > 2048 || !parts || /[@<>"\\]/.test(parts[1])) errors.business_url = 'Enter a valid public profile URL.';
+    else {
+      var decoded = profile;
+      try { decoded = decodeURIComponent(profile); } catch (_) { /* Format checks above still apply. */ }
+      if (/^https?:\/\/(?:www\.)?google\.com\/share\.google(?:[/?#]|$)/i.test(decoded)) {
+        errors.business_url = 'Use a direct business profile or review link instead of this redirect link.';
+      }
+    }
+  }
+  if (text('phone_number').length > 80 || text('phone').length > 80) errors.phone_number = 'Keep the phone number to 80 characters or fewer.';
+  if (text('review_links').length > 12000) errors.review_links = 'Keep review details to 12,000 characters or fewer.';
+  if (text('reason').length > 20000) errors.reason = 'Keep additional details to 20,000 characters or fewer.';
+  return errors;
+}
+// END LEAD INPUT RULES
+
 const form = document.querySelector('#assessment-form');
 const message = document.querySelector('#form-message');
 const submitButton = form?.querySelector('.submit-button');
 const successPanel = document.querySelector('#submission-success');
 const endpoint = 'https://script.google.com/macros/s/AKfycbzK_hATDZaXApgEUITdZ1kgF6VirBLCpcK1q3tmiFoWhG2AZpy_B6uOy5CFjTejVo8T/exec';
 let submitting = false;
+
+const leadFields = ['full_name', 'business_name', 'email_address', 'phone_number', 'business_url', 'review_count', 'review_links', 'reason'];
+function refreshLeadInputValidity() {
+  const errors = leadInputErrors(Object.fromEntries(new FormData(form)), true);
+  leadFields.forEach(name => form.elements.namedItem(name)?.setCustomValidity(errors[name] || ''));
+  return errors;
+}
+form?.addEventListener('input', refreshLeadInputValidity);
+form?.addEventListener('change', refreshLeadInputValidity);
 
 // Load only on pages with a quote form, when the visitor approaches or uses it.
 // The server independently verifies the token; this UI is not a security boundary.
@@ -286,15 +344,17 @@ form?.addEventListener('submit', async event => {
   event.preventDefault();
   if (submitting) return;
   form.querySelectorAll('[aria-invalid]').forEach(field => field.removeAttribute('aria-invalid'));
-  updateQuote(document.querySelector('#formQuantity').value);
-  const firstInvalid = [...form.querySelectorAll('[required]')].find(field => !field.checkValidity());
+  refreshLeadInputValidity();
+  const firstInvalid = [...form.querySelectorAll('input, textarea, select')].find(field => !field.checkValidity());
   if (firstInvalid) {
     firstInvalid.setAttribute('aria-invalid', 'true');
     firstInvalid.focus();
     message.className = 'form-message is-error';
-    message.textContent = 'Please complete the required fields with valid details.';
+    message.textContent = firstInvalid.validationMessage || 'Please check the highlighted details.';
+    firstInvalid.reportValidity();
     return;
   }
+  updateQuote(document.querySelector('#formQuantity').value);
 
   const verificationToken = assessmentVerification.getToken();
   if (!verificationToken) { assessmentVerification.prompt(); return; }
@@ -324,6 +384,11 @@ form?.addEventListener('submit', async event => {
     if (!response.ok) throw new Error('unconfirmed');
     const result = await response.json();
     if (result.code === 'verification_failed') throw new Error('verification_failed');
+    if (result.code === 'invalid_input') {
+      const inputError = new Error('invalid_input');
+      inputError.field = leadFields.includes(result.field) ? result.field : null;
+      throw inputError;
+    }
     const notificationFailed = (result.result === 'success' && result.notification_sent === false) ||
       (result.result === 'error' && /failed to send email:\s*no recipient/i.test(result.error || ''));
     if (result.result !== 'success' && !notificationFailed) throw new Error('unconfirmed');
@@ -346,7 +411,17 @@ form?.addEventListener('submit', async event => {
     message.className = 'form-message is-error';
     message.textContent = error.message === 'verification_failed'
       ? 'The security check was not accepted. Your details are still here; complete the new check and try again.'
+      : error.message === 'invalid_input'
+      ? 'Please check your details and try again. Your answers are still here.'
       : 'We could not confirm your request. Your details are still here; please wait a few minutes before trying again.';
+    if (error.message === 'invalid_input' && error.field) {
+      const invalid = form.elements.namedItem(error.field);
+      const errors = leadInputErrors(Object.fromEntries(new FormData(form)), true);
+      invalid?.setCustomValidity(errors[error.field] || message.textContent);
+      invalid?.setAttribute('aria-invalid', 'true');
+      invalid?.focus();
+      invalid?.reportValidity();
+    }
     submitButton.disabled = false;
     submitButton.innerHTML = originalButton;
     submitting = false;

@@ -13,8 +13,10 @@ const sharedEndpoint = 'https://script.google.com/macros/s/AKfycby4mQu0BJFu8Jmbw
 const formPages = ['index.html', 'remove-yelp-reviews.html', 'remove-facebook-reviews.html',
     'remove-trustpilot-reviews.html', 'remove-tripadvisor-reviews.html',
     'remove-booking-com-reviews.html', 'remove-glassdoor-reviews.html', 'remove-indeed-reviews.html'];
-const formScript = 'script.js?v=20261106-turnstile-endpoint-2';
+const formScript = 'script.js?v=20261106-input-validation';
 const frontend = fs.readFileSync(path.join(root, 'script.js'), 'utf8');
+const ruleBlock = value => value.match(/\/\/ BEGIN LEAD INPUT RULES[\s\S]*?\/\/ END LEAD INPUT RULES/)[0];
+assert.equal(ruleBlock(frontend), ruleBlock(source), 'Browser and backend input rules must agree');
 assert.ok(frontend.includes("const endpoint = '" + protectedEndpoint + "';"), 'Requests must use the tested ReviewRemoval deployment');
 assert.ok(!frontend.includes(sharedEndpoint), 'No fallback to the unprotected shared deployment');
 for (const file of formPages) {
@@ -108,7 +110,40 @@ function backend({ properties, provider, responseCode = 200, malformed = false, 
     vm.runInContext(source, context);
     return { calls, state, post: parameter => context.doPost({ parameter }), check: () => context.checkReviewRemovalSetup() };
 }
-const payload = { 'cf-turnstile-response': 'LOCAL_TOKEN', full_name: '=formula', email_address: 'private@example.invalid', reason: 'private review text', selected_plan: 'Existing plan', review_count: '2' };
+const payload = { 'cf-turnstile-response': 'LOCAL_TOKEN', full_name: '=formula', business_name: 'Test Business', email_address: 'private@example.invalid', reason: 'private review text', selected_plan: 'Existing plan', review_count: '2' };
+
+for (const [overrides, field] of [
+    [{full_name:'$4,000 PROMO https://www.google.com/share.google?q=TEST'},'full_name'],
+    [{full_name:'\uFF04 Bonus'},'full_name'], [{full_name:'\uFE69 Bonus'},'full_name'],
+    [{full_name:'https://example.invalid'},'full_name'], [{full_name:'www.example.invalid'},'full_name'],
+    [{full_name:'John\nSmith'},'full_name'], [{full_name:'12345'},'full_name'],
+    [{full_name:'A'.repeat(151)},'full_name'], [{full_name:' '},'full_name'],
+    [{business_name:'https://example.invalid'},'business_name'], [{business_name:'Shop\nName'},'business_name'],
+    [{business_name:' '},'business_name'], [{business_name:'A'.repeat(251)},'business_name'],
+    [{email_address:'bot@fldubai.com'},'email_address'], [{email_address:' BOT@FLDUBAI.COM '},'email_address'],
+    [{email_address:'bot@sub.fldubai.com'},'email_address'], [{contact_detail:'bot@fldubai.com'},'email_address'],
+    [{email_address:'a\u0000b@example.ca'},'email_address'], [{email_address:'invalid-email'},'email_address'],
+    ...['rbka80','2.5','0','51',''].map(review_count=>[{review_count},'review_count']),
+    [{business_url:'https://www.google.com/share.google?q=TEST'},'business_url'],
+    [{business_url:'https://google.com/%73hare.google?q=TEST'},'business_url'],
+    [{business_url:'javascript:alert(1)'},'business_url'], [{business_url:'https://user:pass@example.ca'},'business_url'],
+    [{business_url:'https://example.ca/'+ 'a'.repeat(2048)},'business_url'],
+    [{reason:'a'.repeat(20001)},'reason'], [{review_links:'a'.repeat(12001)},'review_links'],
+    [{phone_number:'1'.repeat(81)},'phone_number']
+]) {
+    const invalid = backend(), result = invalid.post({...payload,...overrides});
+    assert.equal(result.code,'invalid_input',JSON.stringify(overrides));
+    assert.equal(result.field,field); assert.equal(invalid.calls.sheets,0); assert.equal(invalid.calls.mail,0);
+    cases++;
+}
+for (const full_name of ["\u00c9lodie O'Neill",'Jean-Luc St. Pierre','\u674e','\u9648\u4f1f','\u0645\u062d\u0645\u062f \u0639\u0644\u064a','\u0906\u0930\u0935 \u0936\u0930\u094d\u092e\u093e','A. Com']) {
+    const normal = backend();
+    assert.equal(normal.post({...payload,full_name,business_name:'$5 Pizza & Caf\u00e9 Inc.',email_address:'owner+quote@gmail.com',business_url:'',review_links:'',reason:'The review contains $4,000 casino bonus text and https://www.google.com/share.google?q=EVIDENCE'}).result,'success',full_name);
+    assert.equal(normal.calls.rows.length,1); cases++;
+}
+for (const email_address of ['owner@notfldubai.com','owner@fldubai.com.example.ca','owner+case@outlook.com']) {
+    assert.equal(backend().post({...payload,email_address,business_url:'https://share.google/real-profile'}).result,'success'); cases++;
+}
 
 function reject(options, data = payload) {
     const app = backend(options),
@@ -210,7 +245,7 @@ assert.throws(() => backend({ badHeaders: true }).check(), /12 headers/);
 cases++;
 assert.throws(() => backend({ provider: () => ({ success: false, 'error-codes': ['invalid-input-secret'] }) }).check(), /secret check failed/);
 cases++;
-console.log(`PASS: ${cases} backend cases; missing/invalid/expired/replayed tokens, action/hostname/config checks, provider failures, zero writes on rejection, existing lead handling.`);
+console.log(`PASS: ${cases} backend cases; token/action/hostname checks, spam/domain/input rejection before storage/mail, international names and optional links, replay protection and existing lead handling.`);
 
 const server = http.createServer((req, res) => {
     if (req.method !== 'GET') { res.writeHead(405).end(); return; }
@@ -255,7 +290,7 @@ const server = http.createServer((req, res) => {
                 window.__targets.push(String(url));
                 window.__sent.push(options.body.toString());
                 if (window.__mode === 'network') throw Error('local network error');
-                return { ok: true, json: async() => window.__mode === 'success' ? { result: 'success' } : { result: 'error', code: 'verification_failed' } };
+                return { ok: true, json: async() => window.__mode === 'success' ? { result: 'success' } : window.__mode === 'invalid_input' ? { result: 'error', code: 'invalid_input', field: 'email_address' } : { result: 'error', code: 'verification_failed' } };
             };
             form.requestSubmit();
         });
@@ -264,6 +299,17 @@ const server = http.createServer((req, res) => {
         assert.equal(await page.evaluate(() => window.__turnstileFixture.sitekey), '0x4AAAAAAFy2ZmcJCPhgxNBL');
         assert.equal(await page.evaluate(() => window.__turnstileFixture.action), 'quote_request');
         assert.equal(await page.$$eval('input[name="cf-turnstile-response"]', nodes => nodes.length), 1);
+        for (const [name, bad, good] of [
+            ['full_name','$4,000 PROMO https://example.invalid','Local Test'],
+            ['email_address','bot@sub.fldubai.com','local@example.invalid'],
+            ['business_url','https://www.google.com/share.google?q=TEST','https://example.invalid/']
+        ]) {
+            await page.evaluate(({name,value})=>{const f=document.querySelector('form'),input=f.elements.namedItem(name);input.value=value;input.dispatchEvent(new Event('input',{bubbles:true}));f.requestSubmit();},{name,value:bad});
+            assert.equal(await page.evaluate(()=>window.__sent.length),0,'Invalid input must not be sent even with a valid token');
+            assert.equal(await page.$eval('[name="'+name+'"]',input=>input.checkValidity()),false);
+            assert.equal(await page.$eval('[name="'+name+'"]',input=>input.value),bad,'Keep invalid answers available to correct');
+            await page.evaluate(({name,value})=>{const input=document.querySelector('form').elements.namedItem(name);input.value=value;input.dispatchEvent(new Event('input',{bubbles:true}));},{name,value:good});
+        }
         await page.evaluate(() => { window.__turnstileFixture.expire();
             document.querySelector('form').requestSubmit(); });
         assert.equal(await page.evaluate(() => window.__sent.length), 0, 'Expired tokens cannot be submitted');
@@ -274,6 +320,12 @@ const server = http.createServer((req, res) => {
         assert.equal(await page.evaluate(() => window.__leads), 0);
         assert.equal(await page.$eval('[name="full_name"]', node => node.value), 'Local Test');
         await completeSecurityCheck(page);
+        await page.evaluate(()=>{window.__mode='invalid_input';document.querySelector('form').requestSubmit();});
+        await page.waitForFunction(()=>document.querySelector('#form-message').textContent.includes('check your details'));
+        assert.equal(await page.evaluate(()=>window.__leads),0,'A definitive input rejection is not a lead');
+        assert.equal(await page.$eval('[name="email_address"]',input=>input.checkValidity()),false);
+        await page.$eval('[name="email_address"]',input=>{input.value='local+retry@example.invalid';input.dispatchEvent(new Event('input',{bubbles:true}));});
+        await completeSecurityCheck(page);
         await page.evaluate(() => { window.__mode = 'network';
             document.querySelector('form').requestSubmit(); });
         await page.waitForFunction(() => document.querySelector('#form-message').textContent.includes('could not confirm'));
@@ -283,9 +335,9 @@ const server = http.createServer((req, res) => {
         await page.waitForSelector('#submission-success:not([hidden])');
         assert.equal(await page.evaluate(() => window.__leads), 1);
         const tokens = await page.evaluate(() => window.__sent.map(body => new URLSearchParams(body).get('cf-turnstile-response')));
-        assert.equal(tokens.length, 3);
-        assert.equal(new Set(tokens).size, 3, 'Every retry uses a fresh token');
-        assert.deepEqual(await page.evaluate(() => window.__targets), Array(3).fill(protectedEndpoint), 'Rejection, network error and success all use the separate backend');
+        assert.equal(tokens.length, 4);
+        assert.equal(new Set(tokens).size, 4, 'Every retry uses a fresh token');
+        assert.deepEqual(await page.evaluate(() => window.__targets), Array(4).fill(protectedEndpoint), 'Security/input rejection, network error and success all use the separate backend');
         assert.ok(await page.evaluate(() => window.__turnstileFixture.resets >= 4));
         blocked = true;
         await page.goto(base, { waitUntil: 'load' });

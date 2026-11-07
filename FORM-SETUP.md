@@ -11,14 +11,22 @@ https://script.google.com/macros/s/AKfycbzK_hATDZaXApgEUITdZ1kgF6VirBLCpcK1q3tmi
 ```
 
 - `script.js` sends all eight existing assessment forms to that endpoint. The homepage's native `action` agrees.
-- All eight form pages request `script.js?v=20261106-turnstile-endpoint-2`; the platform-page generator retains the same version.
+- All eight form pages request `script.js?v=20261106-input-validation`; the platform-page generator retains the same version.
 - Existing widget: `0x4AAAAAAFy2ZmcJCPhgxNBL`. Each request includes `cf-turnstile-response`; the backend requires Siteverify success, action `quote_request` and an approved ReviewRemoval hostname before saving or emailing. No fallback to the shared endpoint.
 - Existing field names, optional profile/review links, pricing, terms records, owner notifications and confirmed-success Google Ads conversion hook remain unchanged.
 - ReviewsBoost keeps its original endpoint and deployment. Do not edit that project or its properties for this integration.
 
-A live cache check during the first frontend release found Cloudflare still serving the previous script contents under version `20261106-turnstile-endpoint` (`CF-Cache-Status: HIT`, four-hour cache lifetime). The `-2` version avoids that cached response. Verify the exact versioned runtime response after publication; checking the homepage action alone is insufficient.
+The Turnstile endpoint cutover was observed live on November 6 after an external website release. A stale Cloudflare script cache required a fresh asset version. The new input-validation release uses another fresh version; no website or Apps Script deployment was performed by the agent.
 
-The website changes are local only. No website deployment, push or Apps Script deployment was performed by the agent. Until these frontend files are deliberately published, the live website may still use the old endpoint. Publish the updated runtime and all eight form HTML pages together, then verify the submission's Network request uses the separate URL above.
+## Input restrictions - November 6, 2026
+
+The browser and prepared Apps Script now use matching pure input rules. They reject personal names containing dollar signs (including common full-width variants), Web links, line breaks, no letters or excessive length; block `fldubai.com` and its subdomains as email/contact-email domains; and require an integer quantity from 1 to 50. Business names may contain dollar signs, accents and normal punctuation. Personal names support all Unicode letters, including single-character names. Profile and individual-review links stay non-required. Free-text evidence can quote casino spam, money and URLs.
+
+Supplied profile URLs must be HTTP(S), at most 2048 characters and have no embedded credentials. The observed `google.com/share.google` redirect path is refused in the profile field; normal `share.google`, Maps, g.page, maps.app.goo.gl and other platform profile URLs remain usable. Large field limits prevent oversized input without restricting normal requests. These are targeted filters, not a guarantee against all spam.
+
+**The server-side rules require a new Apps Script version.** In the existing separate ReviewRemoval project, replace Code.gs with the complete current [google-apps-script.gs](google-apps-script.gs), keep all existing properties, save, run `checkReviewRemovalSetup`, then choose **Deploy > Manage deployments > Edit > New version > Deploy** for the SAME deployment. Do not change the URL or the Turnstile secret. Publishing frontend files alone does not update Apps Script; client checks can be bypassed.
+
+Rerun the existing owner-operated token test after the backend update. The additional input cases are tested locally without real emails or rows. No live validation-rejection probe was sent by the agent for this release. A rejected input returns `result: error`, `code: invalid_input` and a fixed field/message before Sheets/mail. The UI keeps answers available and permits correction without reporting a lead. Invalid requests also consume their submitted Turnstile token, so the existing reset/fresh-token flow remains required.
 
 ## Existing Script Properties
 
