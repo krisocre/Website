@@ -6,6 +6,7 @@ const http = require('node:http'),
     assert = require('node:assert/strict'),
     puppeteer = require('puppeteer');
 const { turnstileApiFixture, isTurnstileApi, completeSecurityCheck } = require('./turnstile-test-fixture.cjs');
+const { workbookFixture } = require('./acknowledgement-sheet-fixture.cjs');
 const root = __dirname;
 const source = fs.readFileSync(path.join(root, 'google-apps-script.gs'), 'utf8');
 const protectedEndpoint = 'https://script.google.com/macros/s/AKfycbzK_hATDZaXApgEUITdZ1kgF6VirBLCpcK1q3tmiFoWhG2AZpy_B6uOy5CFjTejVo8T/exec';
@@ -34,6 +35,7 @@ let cases = 0;
 
 function backend({ properties, provider, responseCode = 200, malformed = false, mailFailure = false, missingSheet = false, badHeaders = false, sharedState, lockUnavailable = false, propertyFailure = false, onClaim, clock = {now: Date.now()} } = {}) {
     const calls = { verify: [], sheets: 0, rows: [], mail: 0, mailBodies: [], claims: [], releases: 0 };
+    const book = workbookFixture({brand:'ReviewRemoval', rows:calls.rows, width:13});
     const used = new Set();
     const state = sharedState || {properties: {...(properties || {
         TURNSTILE_SECRET: 'LOCAL_TEST_SECRET', TURNSTILE_HOSTNAMES: 'reviewremoval.ca,www.reviewremoval.ca',
@@ -60,6 +62,10 @@ function backend({ properties, provider, responseCode = 200, malformed = false, 
             })
         },
         LockService: {getScriptLock: () => ({
+            waitLock(timeout) {
+                assert.ok([5000, 10000].includes(timeout));
+                assert.equal(state.locked, false); state.locked = true;
+            },
             tryLock(timeout) {
                 assert.equal(timeout, 10000);
                 if (lockUnavailable || state.locked) return false;
@@ -93,16 +99,11 @@ function backend({ properties, provider, responseCode = 200, malformed = false, 
             openById(id) {
                 calls.sheets++;
                 assert.equal(id, 'LOCAL_SHEET_ID');
-                return {
-                    getSheetByName(name) {
-                        assert.equal(name, 'Leads');
-                        return missingSheet ? null : {
-                            appendRow: row => calls.rows.push(row),
-                            getRange: () => ({ getValues: () => [badHeaders ? [] : ['Timestamp', 'Selected Plan', 'Full Name', 'Business Name', 'Email', 'Phone', 'Preferred Contact', 'Contact Detail', 'Profile URL', 'Review Count', 'Review Links', 'Reason', 'Traffic Source']] })
-                        };
-                    }
-                };
-            }
+                if (badHeaders) book.leadSheet.headers = [];
+                return {...book.spreadsheet, getSheetByName: name =>
+                    name === 'Leads' && missingSheet ? null : book.spreadsheet.getSheetByName(name)};
+            },
+            flush() {}
         },
         Session: { getEffectiveUser: () => ({ getEmail: () => 'test@example.invalid' }) },
         MailApp: { sendEmail(to, subject, body) { calls.mail++; calls.mailBodies.push(body); if (mailFailure) throw Error('local mail test'); } },
@@ -111,7 +112,7 @@ function backend({ properties, provider, responseCode = 200, malformed = false, 
     };
     vm.createContext(context);
     vm.runInContext(source, context);
-    return { calls, state, post: parameter => context.doPost({ parameter }), check: () => context.checkReviewRemovalSetup() };
+    return { calls, state, book, post: parameter => context.doPost({ parameter }), check: () => context.checkReviewRemovalSetup() };
 }
 const payload = { 'cf-turnstile-response': 'LOCAL_TOKEN', full_name: '=formula', business_name: 'Test Business', email_address: 'private@example.invalid', reason: 'private review text', selected_plan: 'Existing plan', review_count: '2' };
 
@@ -197,9 +198,13 @@ assert.equal(app.calls.mail, 1);
         'Method: submission after linked notice; not a claim of document reading', 'Client-device time: 2026-10-28T03:32:44.853Z'].join('\n');
     const reason = '[Traffic Source: Organic - Google]\nKeep customer notes.\n\n' + record + '\nSubmission page: https://reviewremoval.ca/\nKeep trailing details.';
     const clean = backend();assert.equal(clean.post({...payload, reason, traffic_source:'organic_google'}).result, 'success');
-    assert.ok(clean.calls.rows[0][11].includes(record), 'Keep the private acknowledgement record');
+    assert.ok(!clean.calls.rows[0][11].includes(record), 'Main sheet notes exclude generated metadata');
+    assert.equal(clean.book.audit().hidden, true);
+    assert.ok(clean.book.audit().rows[0][5].includes(record), 'Keep the full record in the separate audit tab');
     const body = clean.calls.mailBodies[0];assert.ok(!body.includes('[Submission acknowledgement]'));assert.ok(!body.includes('Client-device time:'));
-    for (const value of ['Keep customer notes.', 'Keep trailing details.', 'Traffic Source: Organic - Google']) assert.ok(body.includes(value), value);
+    for (const value of ['Keep customer notes.', 'Keep trailing details.', 'Traffic Source: Organic - Google']) {
+        assert.ok(body.includes(value), value); assert.ok(clean.calls.rows[0][11].includes(value), value);
+    }
     cases++;
 }
 assert.equal(app.calls.rows[0][2], "'=formula", 'Existing spreadsheet formula protection is preserved');
@@ -213,7 +218,7 @@ const guarded = backend({provider: providerAlwaysAccepts});
 assert.equal(guarded.post(payload).result,'success');
 assert.equal(guarded.post(payload).code,'verification_failed');
 assert.equal(guarded.calls.rows.length,1); assert.equal(guarded.calls.mail,1);
-assert.equal(guarded.calls.claims.length,1); assert.equal(guarded.calls.releases,2);
+assert.equal(guarded.calls.claims.length,1); assert.equal(guarded.calls.releases,3);
 assert.equal(JSON.stringify(guarded.calls.claims).includes('LOCAL_TOKEN'),false,'Never persist raw tokens');
 const otherExecution = backend({provider:providerAlwaysAccepts, sharedState:guarded.state});
 assert.equal(otherExecution.post({...payload, full_name:'Different posted fields'}).code,'verification_failed');

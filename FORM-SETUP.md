@@ -1,22 +1,28 @@
 # ReviewRemoval quote forms - verified standalone backend
 
-## November 7: concise owner notification
+## November 8: concise emails and main sheet notes
 
-The prepared backend now filters the generated `[Submission acknowledgement]`
-block from the owner notification email only. It preserves customer details,
-source labels, request references, the short website notice and the complete
-private acknowledgement in the stored Reason field. The editable website
-field was never populated with this generated record by the current code.
+This replaces the November 7 email-only instructions. The prepared backend
+removes the generated `[Submission acknowledgement]` block from owner emails
+and the main sheet's Reason column. Customer notes, traffic-source labels,
+references and the thirteen-column layout remain. Before clearing the block
+from a sheet cell, the backend archives it in a hidden `ReviewRemoval
+Acknowledgements` tab in the same spreadsheet. This is an organisational
+separation; spreadsheet editors can unhide the tab.
 
-To apply without replacing unrelated deployed code, add
-`notificationBodyWithoutAcknowledgement` from
-`.seo-private/clean-notification-2026-11-07/email-helper.txt` to this site's
-existing standalone Apps Script project. In the owner `MailApp.sendEmail`
-call replace only the third argument `body` with
-`notificationBodyWithoutAcknowledgement(body)`. Keep recipient and subject
-unchanged. Save and deploy a New version of the SAME deployment. No website
-release, new property, column or endpoint is needed for this email-only edit.
-Do not change the old shared project. The agent has not deployed the change.
+Use this site's complete `google-apps-script.gs` in the EXISTING separate
+ReviewRemoval project, preserving its Script Properties and current /exec
+URL. Save and deploy a New version of that same deployment. Do not change
+the old shared project or the ReviewsBoost project. No new keys or main
+sheet columns are needed. The website's short legal notice and hidden
+submission fields remain unchanged; they do not populate the editable notes.
+
+For existing rows, first run `previewAcknowledgementCleanup` and review its
+counts; then run `cleanExistingAcknowledgements`, up to fifty matching rows
+per run. Repeat until `remaining` is zero. Neither function submits a form
+or sends emails. Existing delivered emails cannot be edited retroactively.
+Detailed installation and checks: `.seo-private/sheet-ack-cleanup-2026-11-08/INSTALL.md`.
+Nothing has been deployed or changed in the live sheet by the agent.
 
 ## November 7: source label in existing notifications
 

@@ -23,12 +23,13 @@ function notificationBodyWithoutAcknowledgement(body) {
 }
 
 // Caller holds the script lock. Archive first; clear only the matching cell.
-function archiveAcknowledgementRow(spreadsheet, leadSheet, rowNumber, brand) {
+function archiveAcknowledgementRow(spreadsheet, leadSheet, rowNumber, brand, expectedReason) {
   try {
     if (['ReviewRemoval', 'ReviewsBoost'].indexOf(brand) === -1) throw new Error('Unknown acknowledgement brand.');
     var cell = leadSheet.getRange(rowNumber, 12);
     var originalValue = cell.getValue();
     var original = String(originalValue == null ? '' : originalValue);
+    if (expectedReason !== undefined && original !== expectedReason) return false;
     var parts = submissionAcknowledgements(original);
     if (!parts.records.length) return true;
     var record = parts.records.join('\n\n');
@@ -71,7 +72,7 @@ function archiveAcknowledgementRow(spreadsheet, leadSheet, rowNumber, brand) {
     return true;
   } catch (_) {
     // Keep the saved lead and original acknowledgement intact on archive failure.
-    console.error('Acknowledgement cleanup pending; the original sheet record was retained.');
+    console.error('Acknowledgement cleanup incomplete; check the lead and acknowledgement tabs.');
     return false;
   }
 }
@@ -178,13 +179,18 @@ function doPost(e) {
       trafficSource
     ];
     var hasAcknowledgement = submissionAcknowledgements(reason).records.length > 0;
-    var acknowledgementArchived = true, writeLock = null;
-    if (hasAcknowledgement) { writeLock = LockService.getScriptLock(); writeLock.waitLock(5000); }
+    var acknowledgementArchived = true, writeLock = LockService.getScriptLock();
+    writeLock.waitLock(5000);
     try {
       sheet.appendRow(row);
       if (hasAcknowledgement) {
-        SpreadsheetApp.flush();
-        acknowledgementArchived = archiveAcknowledgementRow(spreadsheet, sheet, sheet.getLastRow(), 'ReviewRemoval');
+        try {
+          SpreadsheetApp.flush();
+          acknowledgementArchived = archiveAcknowledgementRow(spreadsheet, sheet, sheet.getLastRow(), 'ReviewRemoval', reason);
+        } catch (_) {
+          acknowledgementArchived = false;
+          console.error('Lead saved; acknowledgement cleanup pending.');
+        }
       }
     } finally { if (writeLock) writeLock.releaseLock(); }
 

@@ -1,4 +1,6 @@
 exclude:
+  - acknowledgement-sheet-fixture.cjs
+  - acknowledgement-storage.test.cjs
   - lead-source-check.cjs
   - gtm-check.cjs
   - apply-service-positioning.cjs
