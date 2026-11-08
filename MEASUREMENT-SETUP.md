@@ -339,3 +339,31 @@ Primary references checked November 1, 2026:
 - [Canada OPC: behavioural advertising and meaningful choice](https://www.priv.gc.ca/en/privacy-topics/technology/online-privacy-tracking-cookies/tracking-and-ads/bg_ba_1206/)
 - [Quebec CAI: consent and default privacy settings](https://www.cai.gouv.qc.ca/protection-renseignements-personnels/sujets-et-domaines-dinteret/interfaces-truquees)
 - [Cloudflare: injected RUM beacon](https://developers.cloudflare.com/speed/observatory/rum-beacon/)
+
+
+## Lead-record traffic source ? November 7, 2026
+
+`script.js` now adds a whitelisted `traffic_source` enum to the existing quote
+payload. The prepared ReviewRemoval backend maps it to a fixed label in column
+M (Traffic Source) and the owner email. This private lead-record attribute is
+not added to GA4/Ads event parameters. Existing measurement tags, destinations,
+referrer redaction, URL guard and confirmed-submission conversion timing are
+unchanged. UTM-tagged visits can receive a coarse lead label after appropriate
+consent without enabling the Google collection that the existing URL guard
+suppresses. The label is not a replacement for account-level Ads attribution.
+
+Paid labels require advertising consent; organic/referral labels require
+analytics consent. Missing/declined consent or insufficient evidence remains
+Direct / unknown. A 30-minute same-tab source enum/expiry cache preserves
+permitted entry information across internal navigation. No raw click ID, UTM
+value, referrer URL, search query or lead PII is stored in that cache.
+
+Run `node lead-source-check.cjs` and the existing security/measurement checks.
+Activation requires adding Traffic Source in M1 and updating the SAME separate
+ReviewRemoval Apps Script deployment; see FORM-SETUP.md for exact steps.
+No live submission, analytics collection or Apps Script deployment was performed.
+
+Primary references: [Google campaign/source definitions](https://support.google.com/analytics/answer/11242841?hl=en),
+[Google Ads auto-tagging](https://support.google.com/google-ads/answer/3095550?hl=en),
+[document.referrer](https://developer.mozilla.org/en-US/docs/Web/API/Document/referrer),
+and [sessionStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage).

@@ -13,7 +13,7 @@ const sharedEndpoint = 'https://script.google.com/macros/s/AKfycby4mQu0BJFu8Jmbw
 const formPages = ['index.html', 'remove-yelp-reviews.html', 'remove-facebook-reviews.html',
     'remove-trustpilot-reviews.html', 'remove-tripadvisor-reviews.html',
     'remove-booking-com-reviews.html', 'remove-glassdoor-reviews.html', 'remove-indeed-reviews.html'];
-const formScript = 'script.js?v=20261106-input-validation';
+const formScript = 'script.js?v=20261107-lead-source';
 const frontend = fs.readFileSync(path.join(root, 'script.js'), 'utf8');
 const ruleBlock = value => value.match(/\/\/ BEGIN LEAD INPUT RULES[\s\S]*?\/\/ END LEAD INPUT RULES/)[0];
 assert.equal(ruleBlock(frontend), ruleBlock(source), 'Browser and backend input rules must agree');
@@ -30,7 +30,7 @@ assert.ok(fs.readFileSync(path.join(root, 'build-platform-pages.cjs'), 'utf8').i
 let cases = 0;
 
 function backend({ properties, provider, responseCode = 200, malformed = false, mailFailure = false, missingSheet = false, badHeaders = false, sharedState, lockUnavailable = false, propertyFailure = false, onClaim, clock = {now: Date.now()} } = {}) {
-    const calls = { verify: [], sheets: 0, rows: [], mail: 0, claims: [], releases: 0 };
+    const calls = { verify: [], sheets: 0, rows: [], mail: 0, mailBodies: [], claims: [], releases: 0 };
     const used = new Set();
     const state = sharedState || {properties: {...(properties || {
         TURNSTILE_SECRET: 'LOCAL_TEST_SECRET', TURNSTILE_HOSTNAMES: 'reviewremoval.ca,www.reviewremoval.ca',
@@ -95,14 +95,14 @@ function backend({ properties, provider, responseCode = 200, malformed = false, 
                         assert.equal(name, 'Leads');
                         return missingSheet ? null : {
                             appendRow: row => calls.rows.push(row),
-                            getRange: () => ({ getValues: () => [badHeaders ? [] : ['Timestamp', 'Selected Plan', 'Full Name', 'Business Name', 'Email', 'Phone', 'Preferred Contact', 'Contact Detail', 'Profile URL', 'Review Count', 'Review Links', 'Reason']] })
+                            getRange: () => ({ getValues: () => [badHeaders ? [] : ['Timestamp', 'Selected Plan', 'Full Name', 'Business Name', 'Email', 'Phone', 'Preferred Contact', 'Contact Detail', 'Profile URL', 'Review Count', 'Review Links', 'Reason', 'Traffic Source']] })
                         };
                     }
                 };
             }
         },
         Session: { getEffectiveUser: () => ({ getEmail: () => 'test@example.invalid' }) },
-        MailApp: { sendEmail() { calls.mail++; if (mailFailure) throw Error('local mail test'); } },
+        MailApp: { sendEmail(to, subject, body) { calls.mail++; calls.mailBodies.push(body); if (mailFailure) throw Error('local mail test'); } },
         ContentService: { MimeType: { JSON: 'json' }, createTextOutput: text => ({ setMimeType: () => JSON.parse(text) }) },
         console: { error() {}, log() {} }
     };
@@ -169,6 +169,18 @@ reject({}, { selected_plan: 'ReviewsBoost', submission_page: 'https://reviewsboo
 const app = backend();
 assert.equal(app.post(payload).result, 'success');
 assert.equal(app.calls.rows.length, 1);
+assert.equal(app.calls.rows[0][12], 'Direct / unknown', 'Older clients keep submitting without attribution');
+for (const [traffic_source, label] of [
+    ['paid_google','Paid - Google Ads'], ['paid_other','Paid - Other campaign'],
+    ['organic_google','Organic - Google'], ['organic_bing','Organic - Bing'],
+    ['organic_other','Organic - Other search'], ['referral','Referral / other'],
+    ['=HYPERLINK("private")','Direct / unknown'], ['__proto__','Direct / unknown'],
+    [{source:'paid_google'},'Direct / unknown']
+]) {
+    const attributed=backend();assert.equal(attributed.post({...payload,traffic_source}).result,'success');
+    assert.equal(attributed.calls.rows[0].length,13);assert.equal(attributed.calls.rows[0][12],label);
+    assert.ok(attributed.calls.mailBodies[0].includes('Traffic Source: '+label+'\n'));cases++;
+}
 assert.equal(app.calls.mail, 1);
 assert.equal(app.calls.rows[0][2], "'=formula", 'Existing spreadsheet formula protection is preserved');
 assert.equal(app.post(payload).code, 'verification_failed', 'Provider replay rejection must prevent another lead');
@@ -241,7 +253,7 @@ for (const name of Object.keys(configured)) {
     assert.equal(broken.calls.mail, 0);
     cases++;
 }
-assert.throws(() => backend({ badHeaders: true }).check(), /12 headers/);
+assert.throws(() => backend({ badHeaders: true }).check(), /Traffic Source in M1/);
 cases++;
 assert.throws(() => backend({ provider: () => ({ success: false, 'error-codes': ['invalid-input-secret'] }) }).check(), /secret check failed/);
 cases++;

@@ -1,4 +1,5 @@
 exclude:
+  - lead-source-check.cjs
   - gtm-check.cjs
   - apply-service-positioning.cjs
   - service-positioning-check.cjs

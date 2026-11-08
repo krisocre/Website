@@ -182,7 +182,7 @@ function head(title, description) { return `<!doctype html>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="platforms.css">
-  <script src="script.js?v=20261106-input-validation" defer></script>
+  <script src="script.js?v=20261107-lead-source" defer></script>
 </head>`; }
 
 function header(current) { return `<a class="skip-link" href="#main">Skip to content</a>

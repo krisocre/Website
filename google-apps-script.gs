@@ -3,7 +3,7 @@
  * Sheet columns, in order:
  * Timestamp | Selected Plan | Full Name | Business Name | Email | Phone |
  * Preferred Contact | Contact Detail | Profile URL | Review Count |
- * Review Links | Reason
+ * Review Links | Reason | Traffic Source
  *
  * Maintain this file as Code.gs in the existing separate ReviewRemoval project.
  * Script Properties: SPREADSHEET_ID, SHEET_NAME, NOTIFICATION_EMAIL,
@@ -54,6 +54,7 @@ function doPost(e) {
     var reviewCount = data.review_count || data.reviews_to_remove || 'N/A';
     var reviewLinks = data.review_links || 'N/A';
     var reason = data.reason && data.reason.trim() ? data.reason.trim() : 'None Provided';
+    var trafficSource = reviewRemovalTrafficSource(data.traffic_source);
 
     // Prevent submitted text from being interpreted as a formula in Sheets.
     function sheetText(value) {
@@ -73,13 +74,15 @@ function doPost(e) {
       sheetText(businessUrl),
       sheetText(reviewCount),
       sheetText(reviewLinks),
-      sheetText(reason)
+      sheetText(reason),
+      trafficSource
     ]);
 
     var formType = selectedPlan !== 'N/A' ? 'New Order Placement' : 'New Assessment / Quote Request';
     var subject = formType + ' from ' + fullName;
     var body = 'You received a new ReviewRemoval submission!\n\n' +
       'Form Type: ' + formType + '\n' +
+      'Traffic Source: ' + trafficSource + '\n' +
       'Selected Plan: ' + selectedPlan + '\n' +
       'Full Name: ' + fullName + '\n' +
       'Business Name: ' + businessName + '\n' +
@@ -114,6 +117,18 @@ function doPost(e) {
       error: String(error)
     })).setMimeType(ContentService.MimeType.JSON);
   }
+}
+
+// Client-detected attribution is a descriptive hint, not verified ad billing data.
+// Only fixed labels can enter Sheets/email; never store raw referrer/query values.
+function reviewRemovalTrafficSource(value) {
+  var labels = {
+    paid_google: 'Paid - Google Ads', paid_other: 'Paid - Other campaign',
+    organic_google: 'Organic - Google', organic_bing: 'Organic - Bing',
+    organic_other: 'Organic - Other search', referral: 'Referral / other'
+  };
+  return typeof value === 'string' && Object.prototype.hasOwnProperty.call(labels, value)
+    ? labels[value] : 'Direct / unknown';
 }
 
 function verifyTurnstile(token) {
@@ -204,10 +219,10 @@ function checkReviewRemovalSetup() {
     .getSheetByName(properties.getProperty('SHEET_NAME'));
   if (!sheet) throw new Error('The configured submissions tab was not found.');
   var expected = ['Timestamp', 'Selected Plan', 'Full Name', 'Business Name', 'Email', 'Phone',
-    'Preferred Contact', 'Contact Detail', 'Profile URL', 'Review Count', 'Review Links', 'Reason'];
+    'Preferred Contact', 'Contact Detail', 'Profile URL', 'Review Count', 'Review Links', 'Reason', 'Traffic Source'];
   var headers = sheet.getRange(1, 1, 1, expected.length).getValues()[0];
   if (expected.some(function (header, index) { return headers[index] !== header; })) {
-    throw new Error('Row 1 must match the 12 headers in TURNSTILE-SETUP.md, in order.');
+    throw new Error('Keep the existing 12 headers in A1:L1 and add Traffic Source in M1. See FORM-SETUP.md.');
   }
   var validSecret = false;
   try {

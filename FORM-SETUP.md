@@ -1,6 +1,28 @@
 # ReviewRemoval quote forms - verified standalone backend
 
-Updated November 6, 2026. The owner reported all six real backend checks passing: missing token, invalid token and wrong action rejected; a fresh real token accepted; owner notification accepted; replay of the same token rejected. The setup check also reported matching headers and a valid secret probe.
+Updated November 7, 2026. The owner previously reported all six real backend checks passing: missing token, invalid token and wrong action rejected; a fresh real token accepted; owner notification accepted; replay of the same token rejected. The setup check also reported matching headers and a valid secret probe. The traffic-source extension below is tested locally and requires a backend version update.
+
+## Traffic source on new leads — November 7, 2026
+
+New requests include one coarse `traffic_source` enum. The updated standalone backend saves a fixed label in **column M, Traffic Source**, and adds it near the top of the owner email. Existing columns A–L and form fields stay in the same order. No visible form question, new Script Property, analytics ID or endpoint is needed.
+
+To activate the prepared backend change:
+
+1. In the existing ReviewRemoval destination tab, leave A1:L1 unchanged and enter **Traffic Source** in **M1**. If M is already used for another purpose, resolve that conflict before deploying; do not overwrite it.
+2. In the existing **separate ReviewRemoval** Apps Script project, replace Code.gs with the complete current [google-apps-script.gs](google-apps-script.gs). Keep all existing Script Properties and the existing Turnstile secret.
+3. Save and run `checkReviewRemovalSetup`. It now checks all 13 headers and the existing security configuration. This setup check does not submit a lead or send an email.
+4. Choose **Deploy → Manage deployments → Edit → New version → Deploy** for the **same deployment**. Keep the existing `/exec` URL. Do not edit the ReviewsBoost deployment.
+5. Publish the updated website files through the normal release process. The runtime version is `script.js?v=20261107-lead-source`, including on blog pages so source information can carry across a visit. Publishing the website alone does not update Apps Script; the older backend safely ignores the new field.
+
+Labels include **Paid - Google Ads**, **Paid - Other campaign**, **Organic - Google**, **Organic - Bing**, **Organic - Other search**, **Referral / other** and **Direct / unknown**. Unknown or forged enum values become the fixed unknown label, without rejecting an otherwise valid lead.
+
+Classification uses valid-format Google click indicators, known UTM medium/source values, or recognised search-referrer hostnames. A campaign tag takes precedence over a search referrer. Incomplete campaign tags remain unknown. Only an enum and expiry can enter session storage; no full URL, search term, referrer URL, click ID or free-form campaign value is stored or forwarded with the lead.
+
+Paid attribution requires the existing advertising-measurement consent. Organic/referral attribution requires analytics consent. Declined/missing consent stays unknown. Only the current tab's most recent known entry source is carried across internal/direct navigation, for at most 30 minutes; a new external entry can replace it. Storage failures preserve current-page classification where permitted and never block the form. The source cache is cleared when the relevant consent is withdrawn or expires. No new cookies are introduced.
+
+This is **browser-detected visit attribution**, not verified Google Ads billing data, GA4's attribution model or proof that an ad caused a sale. Untagged ads, stripped referrers, browser restrictions and missing consent can prevent or distort classification. Enable Google Ads auto-tagging and verify with the actual account before relying on paid reporting. Historical rows are not backfilled or guessed. An older frontend remains compatible and produces the unknown label with the new backend.
+
+Local checks: `node lead-source-check.cjs`, `node turnstile-check.cjs` and the existing measurement tests. All form submissions and providers are mocked; no live Sheets rows, emails or Ads conversions are created.
 
 ## Active source configuration
 
@@ -11,7 +33,7 @@ https://script.google.com/macros/s/AKfycbzK_hATDZaXApgEUITdZ1kgF6VirBLCpcK1q3tmi
 ```
 
 - `script.js` sends all eight existing assessment forms to that endpoint. The homepage's native `action` agrees.
-- All eight form pages request `script.js?v=20261106-input-validation`; the platform-page generator retains the same version.
+- All form and content pages request `script.js?v=20261107-lead-source`; the page generators retain the same version.
 - Existing widget: `0x4AAAAAAFy2ZmcJCPhgxNBL`. Each request includes `cf-turnstile-response`; the backend requires Siteverify success, action `quote_request` and an approved ReviewRemoval hostname before saving or emailing. No fallback to the shared endpoint.
 - Existing field names, optional profile/review links, pricing, terms records, owner notifications and confirmed-success Google Ads conversion hook remain unchanged.
 - ReviewsBoost keeps its original endpoint and deployment. Do not edit that project or its properties for this integration.
@@ -40,7 +62,7 @@ Keep these settings in the separate ReviewRemoval project; never place the secre
 | `TURNSTILE_SECRET` | Private secret matching existing key `0x4AAAAAAFy2ZmcJCPhgxNBL`. |
 | `TURNSTILE_HOSTNAMES` | `reviewremoval.ca`, optionally the allowed and served `www.reviewremoval.ca`. |
 
-The complete [google-apps-script.gs](google-apps-script.gs) preserves the twelve-column sheet, field fallbacks, formula protection, notification template and JSON contract. `claimVerifiedTurnstileToken` atomically records a short-lived token hash to guard against duplicate processing. A saved request with failed mail still returns `result: success`, `notification_sent: false`; do not blindly retry an uncertain request.
+The complete [google-apps-script.gs](google-apps-script.gs) preserves the original twelve sheet columns, field fallbacks, formula protection and JSON contract, and adds Traffic Source as column M and in the owner notification. `claimVerifiedTurnstileToken` atomically records a short-lived token hash to guard against duplicate processing. A saved request with failed mail still returns `result: success`, `notification_sent: false`; do not blindly retry an uncertain request.
 
 ## Validation and release follow-up
 

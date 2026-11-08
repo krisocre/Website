@@ -1,3 +1,83 @@
+// BEGIN LEAD TRAFFIC SOURCE
+// Coarse visit attribution for the private lead record, never analytics events.
+const leadTrafficSource = (() => {
+  const storageKey = 'reviewremoval.lead-source.v1';
+  const lifetime = 30 * 60 * 1000;
+  const enteredAt = Date.now();
+  const sources = ['paid_google', 'paid_other', 'organic_google', 'organic_bing', 'organic_other', 'referral'];
+  const googleHosts = /(^|\.)google\.(com|ca|co\.uk|com\.au|fr|de|ie|co\.nz|co\.in)$/;
+  const hostIs = (host, domain) => host === domain || host.endsWith('.' + domain);
+  function detect() {
+    try {
+      const url = new URL(window.location.href);
+      const params = url.searchParams;
+      for (const key of ['gclid', 'dclid', 'gbraid', 'wbraid']) {
+        if (params.has(key)) return /^[A-Za-z0-9_-]{1,256}$/.test(params.get(key) || '') ? (key === 'dclid' ? 'paid_other' : 'paid_google') : 'unknown';
+      }
+      const medium = String(params.get('utm_medium') || '').trim().toLowerCase();
+      const source = String(params.get('utm_source') || '').trim().toLowerCase();
+      if (params.has('utm_medium')) {
+        if (['cpc', 'ppc', 'paid', 'paidsearch', 'paid_search', 'paid-social', 'paid_social', 'paidsocial', 'display', 'cpm', 'cpv'].includes(medium)) {
+          return source === 'google' ? 'paid_google' : 'paid_other';
+        }
+        if (medium === 'organic') return source === 'google' ? 'organic_google' : source === 'bing' ? 'organic_bing' : ['yahoo', 'duckduckgo', 'ecosia', 'brave'].includes(source) ? 'organic_other' : 'unknown';
+        return ['referral', 'email', 'social'].includes(medium) ? 'referral' : 'unknown';
+      }
+      // Incomplete/ambiguous campaign tags must not turn an ad visit into organic.
+      if (['utm_source', 'utm_campaign', 'gad_source', 'gad_campaignid'].some(key => params.has(key))) return 'unknown';
+      if (!document.referrer) return 'direct';
+      const referrer = new URL(document.referrer);
+      if (!['http:', 'https:'].includes(referrer.protocol)) return 'unknown';
+      const host = referrer.hostname.toLowerCase();
+      const ownHosts = ['reviewremoval.ca', 'www.reviewremoval.ca'];
+      if (referrer.origin === url.origin || (ownHosts.includes(host) && ownHosts.includes(url.hostname))) return 'internal';
+      if (hostIs(host, 'googleadservices.com') || hostIs(host, 'googleads.g.doubleclick.net')) return 'paid_google';
+      if (googleHosts.test(host)) return 'organic_google';
+      if (hostIs(host, 'bing.com')) return 'organic_bing';
+      if (hostIs(host, 'search.yahoo.com') || hostIs(host, 'duckduckgo.com') || hostIs(host, 'ecosia.org') || hostIs(host, 'search.brave.com')) return 'organic_other';
+      return 'referral';
+    } catch (_) { return 'unknown'; }
+  }
+  const entry = detect();
+  let active = null;
+  function allowed(source, consent) {
+    return source.startsWith('paid_') ? consent.advertisingConsent === true : consent.analyticsConsent === true;
+  }
+  function clear() {
+    active = null;
+    try { window.sessionStorage.removeItem(storageKey); } catch (_) { /* Storage is optional. */ }
+  }
+  function get() {
+    let consent;
+    try { consent = window.ReviewRemovalMeasurement?.status(); } catch (_) { /* Fail closed for measurement, not the form. */ }
+    if (!consent || (!consent.analyticsConsent && !consent.advertisingConsent)) { clear(); return 'unknown'; }
+    const now = Date.now();
+    if (sources.includes(entry)) {
+      if (!allowed(entry, consent) || now >= enteredAt + lifetime) { clear(); return 'unknown'; }
+      active = { source: entry, expires: enteredAt + lifetime };
+      try { window.sessionStorage.setItem(storageKey, JSON.stringify(active)); } catch (_) { /* Current-page attribution still works. */ }
+    } else if (entry === 'internal' || entry === 'direct') {
+      if (!active) {
+        try { active = JSON.parse(window.sessionStorage.getItem(storageKey)); } catch (_) { /* No stored source. */ }
+      }
+      if (!active || !sources.includes(active.source) || !allowed(active.source, consent) ||
+          !Number.isFinite(active.expires) || active.expires <= now || active.expires > now + lifetime) {
+        clear(); return 'unknown';
+      }
+    } else { clear(); return 'unknown'; }
+    return active.source;
+  }
+  // Keep only a short-lived enum across this tab's navigation, after consent.
+  get();
+  window.addEventListener('pagehide', get);
+  window.addEventListener('storage', event => { if (event.key === 'reviewremoval.measurement.v1') get(); });
+  document.addEventListener('click', event => {
+    if (event.target.closest?.('#measurement-preferences [data-choice]')) get();
+  });
+  return Object.freeze({ get });
+})();
+// END LEAD TRAFFIC SOURCE
+
 const menuButton = document.querySelector('.menu-toggle');
 const navigation = document.querySelector('.primary-nav');
 
@@ -363,6 +443,7 @@ form?.addEventListener('submit', async event => {
   if (!verificationToken) { assessmentVerification.prompt(); return; }
   const payload = new FormData(form);
   payload.set('cf-turnstile-response', verificationToken);
+  payload.set('traffic_source', leadTrafficSource.get());
   window.SubmissionTerms?.prepare(payload);
   payload.set('contact_detail', String(payload.get('email_address') || ''));
   payload.set('review_count', String(clamp(payload.get('review_count'))));

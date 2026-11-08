@@ -57,7 +57,7 @@ Copy the spreadsheet ID from its URL, between `/spreadsheets/d/` and `/edit`. Th
 For a new sheet, paste this tab-separated header row into A1. For an existing destination, check the headers without overwriting lead records:
 
 ```text
-Timestamp	Selected Plan	Full Name	Business Name	Email	Phone	Preferred Contact	Contact Detail	Profile URL	Review Count	Review Links	Reason
+Timestamp	Selected Plan	Full Name	Business Name	Email	Phone	Preferred Contact	Contact Detail	Profile URL	Review Count	Review Links	Reason	Traffic Source
 ```
 
 ## 2. Create the separate Apps Script project
