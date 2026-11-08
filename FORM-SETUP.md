@@ -1,11 +1,49 @@
 # ReviewRemoval quote forms - verified standalone backend
 
+## November 7: concise owner notification
+
+The prepared backend now filters the generated `[Submission acknowledgement]`
+block from the owner notification email only. It preserves customer details,
+source labels, request references, the short website notice and the complete
+private acknowledgement in the stored Reason field. The editable website
+field was never populated with this generated record by the current code.
+
+To apply without replacing unrelated deployed code, add
+`notificationBodyWithoutAcknowledgement` from
+`.seo-private/clean-notification-2026-11-07/email-helper.txt` to this site's
+existing standalone Apps Script project. In the owner `MailApp.sendEmail`
+call replace only the third argument `body` with
+`notificationBodyWithoutAcknowledgement(body)`. Keep recipient and subject
+unchanged. Save and deploy a New version of the SAME deployment. No website
+release, new property, column or endpoint is needed for this email-only edit.
+Do not change the old shared project. The agent has not deployed the change.
+
+## November 7: source label in existing notifications
+
+Each new form submission now prefixes its existing Reason with a fixed label,
+for example `[Traffic Source: Paid - Google Ads]` or
+`[Traffic Source: Organic - Google]`. Existing Apps Script handlers already
+save/email Reason, so this compatible label does not require a new project,
+endpoint, Script Property, column or backend deployment. Publish the website
+changes to activate it. The eight form pages and platform generator use
+`script.js?v=20261107-source-email`. There is exactly one source prefix per
+submission; user notes and legal records remain intact.
+
+The existing consent-aware classifier and 30-minute per-tab carryover remain
+unchanged. Missing consent or insufficient information gives
+`[Traffic Source: Direct / unknown]`; do not treat that label as organic.
+No raw click identifier, query or referring URL is included. Historical leads
+cannot be classified retrospectively from records that never captured source.
+The separate Traffic Source column/top email line described below is optional
+and still requires that prepared backend release. The compatible Reason label
+works with the current handler without that release.
+
 ## November 7: profile/review field accepts any text
 
 The public profile/review field is now a non-required text input on all eight
 assessment forms. It has no URL format, scheme, redirect or length validator.
 Labels, design, pricing, field name and submission endpoint are unchanged.
-Form pages and the platform generator use `script.js?v=20261107-profile-text`;
+Form pages and the platform generator now use `script.js?v=20261107-source-email`;
 other content/blog pages retain their existing asset versions.
 
 The local `script.js` and `google-apps-script.gs` rules agree. For the deployed
@@ -23,13 +61,13 @@ Updated November 7, 2026. The owner previously reported all six real backend che
 
 New requests include one coarse `traffic_source` enum. The updated standalone backend saves a fixed label in **column M, Traffic Source**, and adds it near the top of the owner email. Existing columns A–L and form fields stay in the same order. No visible form question, new Script Property, analytics ID or endpoint is needed.
 
-To activate the prepared backend change:
+To activate the optional dedicated column/top email line:
 
 1. In the existing ReviewRemoval destination tab, leave A1:L1 unchanged and enter **Traffic Source** in **M1**. If M is already used for another purpose, resolve that conflict before deploying; do not overwrite it.
 2. In the existing **separate ReviewRemoval** Apps Script project, replace Code.gs with the complete current [google-apps-script.gs](google-apps-script.gs). Keep all existing Script Properties and the existing Turnstile secret.
 3. Save and run `checkReviewRemovalSetup`. It now checks all 13 headers and the existing security configuration. This setup check does not submit a lead or send an email.
 4. Choose **Deploy → Manage deployments → Edit → New version → Deploy** for the **same deployment**. Keep the existing `/exec` URL. Do not edit the ReviewsBoost deployment.
-5. Publish the updated website files through the normal release process. The runtime version is `script.js?v=20261107-lead-source`, including on blog pages so source information can carry across a visit. Publishing the website alone does not update Apps Script; the older backend safely ignores the new field.
+5. Publish the updated website files through the normal release process. Form pages use `script.js?v=20261107-source-email`; protected blog/content pages retain their existing source-capable asset versions. Publishing the website alone does not update Apps Script. An older backend ignores the separate enum but still saves/emails the compatible source note in Reason.
 
 Labels include **Paid - Google Ads**, **Paid - Other campaign**, **Organic - Google**, **Organic - Bing**, **Organic - Other search**, **Referral / other** and **Direct / unknown**. Unknown or forged enum values become the fixed unknown label, without rejecting an otherwise valid lead.
 

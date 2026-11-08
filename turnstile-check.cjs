@@ -13,7 +13,7 @@ const sharedEndpoint = 'https://script.google.com/macros/s/AKfycby4mQu0BJFu8Jmbw
 const formPages = ['index.html', 'remove-yelp-reviews.html', 'remove-facebook-reviews.html',
     'remove-trustpilot-reviews.html', 'remove-tripadvisor-reviews.html',
     'remove-booking-com-reviews.html', 'remove-glassdoor-reviews.html', 'remove-indeed-reviews.html'];
-const formScript = 'script.js?v=20261107-profile-text';
+const formScript = 'script.js?v=20261107-source-email';
 const frontend = fs.readFileSync(path.join(root, 'script.js'), 'utf8');
 const ruleBlock = value => value.match(/\/\/ BEGIN LEAD INPUT RULES[\s\S]*?\/\/ END LEAD INPUT RULES/)[0];
 assert.equal(ruleBlock(frontend), ruleBlock(source), 'Browser and backend input rules must agree');
@@ -189,6 +189,19 @@ for (const [traffic_source, label] of [
     assert.ok(attributed.calls.mailBodies[0].includes('Traffic Source: '+label+'\n'));cases++;
 }
 assert.equal(app.calls.mail, 1);
+{
+    const record = ['[Submission acknowledgement]', 'Notice: By submitting, you agree to the Terms of Service.',
+        'Terms: https://reviewremoval.ca/terms-of-service.html | version 2026-10-27',
+        'Policy snapshot: https://reviewremoval.ca/legal-versions/policies-2026-10-27.json',
+        'Privacy: https://reviewremoval.ca/privacy-policy.html | version 2026-10-27', 'Language: en-CA',
+        'Method: submission after linked notice; not a claim of document reading', 'Client-device time: 2026-10-28T03:32:44.853Z'].join('\n');
+    const reason = '[Traffic Source: Organic - Google]\nKeep customer notes.\n\n' + record + '\nSubmission page: https://reviewremoval.ca/\nKeep trailing details.';
+    const clean = backend();assert.equal(clean.post({...payload, reason, traffic_source:'organic_google'}).result, 'success');
+    assert.ok(clean.calls.rows[0][11].includes(record), 'Keep the private acknowledgement record');
+    const body = clean.calls.mailBodies[0];assert.ok(!body.includes('[Submission acknowledgement]'));assert.ok(!body.includes('Client-device time:'));
+    for (const value of ['Keep customer notes.', 'Keep trailing details.', 'Traffic Source: Organic - Google']) assert.ok(body.includes(value), value);
+    cases++;
+}
 assert.equal(app.calls.rows[0][2], "'=formula", 'Existing spreadsheet formula protection is preserved');
 assert.equal(app.post(payload).code, 'verification_failed', 'Provider replay rejection must prevent another lead');
 assert.equal(app.calls.rows.length, 1);

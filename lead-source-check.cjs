@@ -94,6 +94,8 @@ const server=http.createServer((req,res)=>{
   await page.waitForSelector('#submission-success:not([hidden])');
   const payload=await page.evaluate(()=>window.__leadSourcePayload);
   assert.equal(posts.length,1);assert.equal(payload.traffic_source,test.want,'Source enum included in submitted FormData');
+  const label={paid_google:'Paid - Google Ads',organic_google:'Organic - Google',unknown:'Direct / unknown'}[test.want];
+  assert.ok(payload.reason.startsWith('[Traffic Source: '+label+']\n'),'Existing Reason must expose the label to legacy emails and sheets');
   assert.ok(!JSON.stringify(payload).includes('LOCAL_CLICK'),'Raw advertising ID is not sent with lead');
   assert.deepEqual(errors,[]);await context.close();checks++;
  }

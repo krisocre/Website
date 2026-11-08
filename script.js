@@ -74,7 +74,15 @@ const leadTrafficSource = (() => {
   document.addEventListener('click', event => {
     if (event.target.closest?.('#measurement-preferences [data-choice]')) get();
   });
-  return Object.freeze({ get });
+  function label(source) {
+    const labels = {
+      paid_google: 'Paid - Google Ads', paid_other: 'Paid - Other campaign',
+      organic_google: 'Organic - Google', organic_bing: 'Organic - Bing',
+      organic_other: 'Organic - Other search', referral: 'Referral / other'
+    };
+    return Object.prototype.hasOwnProperty.call(labels, source) ? labels[source] : 'Direct / unknown';
+  }
+  return Object.freeze({ get, label });
 })();
 // END LEAD TRAFFIC SOURCE
 
@@ -432,8 +440,11 @@ form?.addEventListener('submit', async event => {
   if (!verificationToken) { assessmentVerification.prompt(); return; }
   const payload = new FormData(form);
   payload.set('cf-turnstile-response', verificationToken);
-  payload.set('traffic_source', leadTrafficSource.get());
+  const trafficSource = leadTrafficSource.get();
+  payload.set('traffic_source', trafficSource);
   window.SubmissionTerms?.prepare(payload);
+  // Older handlers already save/email Reason, even if they ignore traffic_source.
+  payload.set('reason', '[Traffic Source: ' + leadTrafficSource.label(trafficSource) + ']\n' + String(payload.get('reason') || ''));
   payload.set('contact_detail', String(payload.get('email_address') || ''));
   payload.set('review_count', String(clamp(payload.get('review_count'))));
   const count = Number(payload.get('review_count'));
