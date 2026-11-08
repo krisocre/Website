@@ -13,7 +13,7 @@ const sharedEndpoint = 'https://script.google.com/macros/s/AKfycby4mQu0BJFu8Jmbw
 const formPages = ['index.html', 'remove-yelp-reviews.html', 'remove-facebook-reviews.html',
     'remove-trustpilot-reviews.html', 'remove-tripadvisor-reviews.html',
     'remove-booking-com-reviews.html', 'remove-glassdoor-reviews.html', 'remove-indeed-reviews.html'];
-const formScript = 'script.js?v=20261107-lead-source';
+const formScript = 'script.js?v=20261107-profile-text';
 const frontend = fs.readFileSync(path.join(root, 'script.js'), 'utf8');
 const ruleBlock = value => value.match(/\/\/ BEGIN LEAD INPUT RULES[\s\S]*?\/\/ END LEAD INPUT RULES/)[0];
 assert.equal(ruleBlock(frontend), ruleBlock(source), 'Browser and backend input rules must agree');
@@ -21,6 +21,9 @@ assert.ok(frontend.includes("const endpoint = '" + protectedEndpoint + "';"), 'R
 assert.ok(!frontend.includes(sharedEndpoint), 'No fallback to the unprotected shared deployment');
 for (const file of formPages) {
     const html = fs.readFileSync(path.join(root, file), 'utf8');
+    const profile = html.match(/<input\b[^>]*\bname="business_url"[^>]*>/)[0];
+    assert.match(profile, /\btype="text"/);
+    assert.doesNotMatch(profile, /\brequired\b|\b(?:maxlength|minlength|pattern)=/);
     assert.deepEqual([...html.matchAll(/<script\b[^>]*\bsrc="(script\.js(?:\?[^"]*)?)"/g)].map(match => match[1]), [formScript], file + ': fresh form runtime required');
     assert.ok(html.includes('data-sitekey="0x4AAAAAAFy2ZmcJCPhgxNBL"'), file + ': existing widget required');
     assert.ok(!html.includes(sharedEndpoint), file + ': no old form destination');
@@ -124,10 +127,6 @@ for (const [overrides, field] of [
     [{email_address:'bot@sub.fldubai.com'},'email_address'], [{contact_detail:'bot@fldubai.com'},'email_address'],
     [{email_address:'a\u0000b@example.ca'},'email_address'], [{email_address:'invalid-email'},'email_address'],
     ...['rbka80','2.5','0','51',''].map(review_count=>[{review_count},'review_count']),
-    [{business_url:'https://www.google.com/share.google?q=TEST'},'business_url'],
-    [{business_url:'https://google.com/%73hare.google?q=TEST'},'business_url'],
-    [{business_url:'javascript:alert(1)'},'business_url'], [{business_url:'https://user:pass@example.ca'},'business_url'],
-    [{business_url:'https://example.ca/'+ 'a'.repeat(2048)},'business_url'],
     [{reason:'a'.repeat(20001)},'reason'], [{review_links:'a'.repeat(12001)},'review_links'],
     [{phone_number:'1'.repeat(81)},'phone_number']
 ]) {
@@ -143,6 +142,14 @@ for (const full_name of ["\u00c9lodie O'Neill",'Jean-Luc St. Pierre','\u674e','\
 }
 for (const email_address of ['owner@notfldubai.com','owner@fldubai.com.example.ca','owner+case@outlook.com']) {
     assert.equal(backend().post({...payload,email_address,business_url:'https://share.google/real-profile'}).result,'success'); cases++;
+}
+
+for (const business_url of ['', 'Find our shop on King Street, Toronto', 'www.example.ca', 'https://www.google.com/share.google?q=TEST', 'https://google.com/%73hare.google?q=TEST', 'javascript:void(0)', 'https://user:pass@example.ca', 'x'.repeat(2500), '=not a link']) {
+    const app = backend(), result = app.post({...payload, business_url});
+    assert.equal(result.result, 'success', 'Profile field must accept free text');
+    assert.equal(app.calls.rows.length, 1);
+    assert.equal(app.calls.rows[0][8], business_url.startsWith('=') ? "'" + business_url : business_url || 'N/A');
+    cases++;
 }
 
 function reject(options, data = payload) {
@@ -292,7 +299,7 @@ const server = http.createServer((req, res) => {
         assert.equal(apiLoads, 0, 'Widget must not load on the first screen');
         await page.evaluate(() => {
             const form = document.querySelector('#assessment-form');
-            for (const [name, value] of Object.entries({ full_name: 'Local Test', business_name: 'Test Business', email_address: 'local@example.invalid', business_url: 'https://example.invalid/' })) form.elements[name].value = value;
+            for (const [name, value] of Object.entries({ full_name: 'Local Test', business_name: 'Test Business', email_address: 'local@example.invalid', business_url: 'Find our shop on King Street, Toronto. ' + 'x'.repeat(2200) })) form.elements[name].value = value;
             window.__sent = [];
             window.__targets = [];
             window.__mode = 'reject';
@@ -307,6 +314,7 @@ const server = http.createServer((req, res) => {
             form.requestSubmit();
         });
         assert.equal(await page.evaluate(() => window.__sent.length), 0, 'No token means no POST');
+        assert.deepEqual(await page.$eval('[name="business_url"]', input => ({type:input.type,required:input.required,maxLength:input.maxLength,valid:input.checkValidity()})), {type:'text',required:false,maxLength:-1,valid:true});
         await completeSecurityCheck(page);
         assert.equal(await page.evaluate(() => window.__turnstileFixture.sitekey), '0x4AAAAAAFy2ZmcJCPhgxNBL');
         assert.equal(await page.evaluate(() => window.__turnstileFixture.action), 'quote_request');
@@ -314,7 +322,6 @@ const server = http.createServer((req, res) => {
         for (const [name, bad, good] of [
             ['full_name','$4,000 PROMO https://example.invalid','Local Test'],
             ['email_address','bot@sub.fldubai.com','local@example.invalid'],
-            ['business_url','https://www.google.com/share.google?q=TEST','https://example.invalid/']
         ]) {
             await page.evaluate(({name,value})=>{const f=document.querySelector('form'),input=f.elements.namedItem(name);input.value=value;input.dispatchEvent(new Event('input',{bubbles:true}));f.requestSubmit();},{name,value:bad});
             assert.equal(await page.evaluate(()=>window.__sent.length),0,'Invalid input must not be sent even with a valid token');
@@ -346,6 +353,7 @@ const server = http.createServer((req, res) => {
             document.querySelector('form').requestSubmit(); });
         await page.waitForSelector('#submission-success:not([hidden])');
         assert.equal(await page.evaluate(() => window.__leads), 1);
+        assert.ok(await page.evaluate(() => window.__sent.every(body => new URLSearchParams(body).get('business_url') === 'Find our shop on King Street, Toronto. ' + 'x'.repeat(2200))), 'Free text reaches the backend unchanged');
         const tokens = await page.evaluate(() => window.__sent.map(body => new URLSearchParams(body).get('cf-turnstile-response')));
         assert.equal(tokens.length, 4);
         assert.equal(new Set(tokens).size, 4, 'Every retry uses a fresh token');

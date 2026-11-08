@@ -268,18 +268,7 @@ function leadInputErrors(data, requireReviewCount) {
   if ((requireReviewCount || count) && (!/^\d+$/.test(count) || Number(count) < 1 || Number(count) > 50)) {
     errors.review_count = 'Enter a whole number of reviews from 1 to 50.';
   }
-  var profile = text('business_url');
-  if (profile) {
-    var parts = profile.match(/^https?:\/\/([^\s/?#]+)(?:[/?#][^\s]*)?$/i);
-    if (profile.length > 2048 || !parts || /[@<>"\\]/.test(parts[1])) errors.business_url = 'Enter a valid public profile URL.';
-    else {
-      var decoded = profile;
-      try { decoded = decodeURIComponent(profile); } catch (_) { /* Format checks above still apply. */ }
-      if (/^https?:\/\/(?:www\.)?google\.com\/share\.google(?:[/?#]|$)/i.test(decoded)) {
-        errors.business_url = 'Use a direct business profile or review link instead of this redirect link.';
-      }
-    }
-  }
+  // business_url is optional free text; do not validate its format or length.
   if (text('phone_number').length > 80 || text('phone').length > 80) errors.phone_number = 'Keep the phone number to 80 characters or fewer.';
   if (text('review_links').length > 12000) errors.review_links = 'Keep review details to 12,000 characters or fewer.';
   if (text('reason').length > 20000) errors.reason = 'Keep additional details to 20,000 characters or fewer.';

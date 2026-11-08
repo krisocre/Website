@@ -1,5 +1,22 @@
 # ReviewRemoval quote forms - verified standalone backend
 
+## November 7: profile/review field accepts any text
+
+The public profile/review field is now a non-required text input on all eight
+assessment forms. It has no URL format, scheme, redirect or length validator.
+Labels, design, pricing, field name and submission endpoint are unchanged.
+Form pages and the platform generator use `script.js?v=20261107-profile-text`;
+other content/blog pages retain their existing asset versions.
+
+The local `script.js` and `google-apps-script.gs` rules agree. For the deployed
+backend, replace ONLY the existing `leadInputErrors` function using
+`.seo-private/profile-text-2026-11-07/AppsScript-validation-replacement.txt`,
+then save and deploy a New version of the SAME standalone ReviewRemoval web
+app. Keep its URL, Script Properties, Turnstile, notifications and sheet
+columns unchanged. The identical replacement also works in ReviewsBoost's
+separate project. Leave the old shared project untouched. Publish the website
+files separately; the agent has not deployed either side.
+
 Updated November 7, 2026. The owner previously reported all six real backend checks passing: missing token, invalid token and wrong action rejected; a fresh real token accepted; owner notification accepted; replay of the same token rejected. The setup check also reported matching headers and a valid secret probe. The traffic-source extension below is tested locally and requires a backend version update.
 
 ## Traffic source on new leads — November 7, 2026
@@ -44,7 +61,10 @@ The Turnstile endpoint cutover was observed live on November 6 after an external
 
 The browser and prepared Apps Script now use matching pure input rules. They reject personal names containing dollar signs (including common full-width variants), Web links, line breaks, no letters or excessive length; block `fldubai.com` and its subdomains as email/contact-email domains; and require an integer quantity from 1 to 50. Business names may contain dollar signs, accents and normal punctuation. Personal names support all Unicode letters, including single-character names. Profile and individual-review links stay non-required. Free-text evidence can quote casino spam, money and URLs.
 
-Supplied profile URLs must be HTTP(S), at most 2048 characters and have no embedded credentials. The observed `google.com/share.google` redirect path is refused in the profile field; normal `share.google`, Maps, g.page, maps.app.goo.gl and other platform profile URLs remain usable. Large field limits prevent oversized input without restricting normal requests. These are targeted filters, not a guarantee against all spam.
+The former profile URL restrictions are superseded by the free-text update
+above. That field now accepts any text or link, including redirect links,
+and remains non-required. Other name, email, quantity and evidence rules
+remain unchanged. These targeted filters are not a guarantee against all spam.
 
 **The server-side rules require a new Apps Script version.** In the existing separate ReviewRemoval project, replace Code.gs with the complete current [google-apps-script.gs](google-apps-script.gs), keep all existing properties, save, run `checkReviewRemovalSetup`, then choose **Deploy > Manage deployments > Edit > New version > Deploy** for the SAME deployment. Do not change the URL or the Turnstile secret. Publishing frontend files alone does not update Apps Script; client checks can be bypassed.
 
