@@ -72,7 +72,7 @@ const server=http.createServer((req,res)=>{
   await page.evaluate(()=>window.ReviewRemovalMeasurement.confirmedLead(document.querySelector('form')));
   const realConversions=(await events(page)).filter(e=>e[1]==='conversion');
   assert.equal(realConversions.length,1);
-  assert.equal(realConversions[0][2].send_to,'AW-18449308865/HqdzCIv5z4gdEMG5qN1E');
+  assert.equal(realConversions[0][2].send_to,'AW-18449308865/EVurCIn11LQdEMG5qN1E');
   assert.equal(realConversions[0][2].value,1);assert.equal(realConversions[0][2].currency,'CAD');
   assert.ok(realConversions[0][2].transaction_id);
   assert.ok(!/PRIVATE_|private\.person|example\.com/.test(JSON.stringify(realConversions)),'No form data sent to the real Ads destination');
@@ -145,7 +145,7 @@ const server=http.createServer((req,res)=>{
    assert.equal(google.length-start,1,'Tag Assistant can load exactly one tag after consent');
    await fillAndSubmit(page);
    const conversions=(await events(page)).filter(e=>e[1]==='conversion');
-   assert.equal(conversions.length,1);assert.equal(conversions[0][2].send_to,'AW-18449308865/HqdzCIv5z4gdEMG5qN1E');
+   assert.equal(conversions.length,1);assert.equal(conversions[0][2].send_to,'AW-18449308865/EVurCIn11LQdEMG5qN1E');
    assert.equal(conversions[0][2].page_location,'https://reviewremoval.ca/');
    assert.ok(!/gtm_debug|_dbg|LOCAL_TEST_AUTOTAG|PRIVATE_/.test(JSON.stringify(conversions)),'No debug/query/form contents in event parameters');
    await test.context.close();

@@ -59,7 +59,7 @@ const server=http.createServer((req,res)=>{
   assert.equal(data.filter(e=>e[0]==='event'&&e[1]==='conversion').length,1);await t.context.close();
   t=await open();await t.page.click('[data-choice="accept"]');await t.page.waitForSelector('#reviewremoval-tag-manager');await t.page.waitForSelector('#reviewremoval-google-tag');await submit(t.page);
   await t.page.evaluate(()=>ReviewRemovalMeasurement.confirmedLead(document.querySelector('form')));data=await layer(t.page);
-  assert.equal(data.filter(e=>e.event==='reviewremoval_generate_lead').length,1);const conversions=data.filter(e=>e[0]==='event'&&e[1]==='conversion');assert.equal(conversions.length,1);assert.equal(conversions[0][2].send_to,'AW-18449308865/HqdzCIv5z4gdEMG5qN1E');assert.equal(conversions[0][2].user_data,'');
+  assert.equal(data.filter(e=>e.event==='reviewremoval_generate_lead').length,1);const conversions=data.filter(e=>e[0]==='event'&&e[1]==='conversion');assert.equal(conversions.length,1);assert.equal(conversions[0][2].send_to,'AW-18449308865/EVurCIn11LQdEMG5qN1E');assert.equal(conversions[0][2].user_data,'');
   assert.equal(t.loads.filter(url=>url.includes('/gtm.js?')).length,1);assert.equal(t.loads.filter(url=>url.includes('/gtag/js?')).length,1);assert.ok(!data.some(e=>e[0]==='config'&&e[1]==='G-9LFJWP87F0'),'GTM-owned GA4 is not initialized a second time by site code');await t.context.close();
   t=await open('?email=PRIVATE_EMAIL');await t.page.click('[data-choice="accept"]');assert.equal(t.loads.length,0);await t.context.close();
   t=await open('',true);await t.page.click('[data-choice="accept"]');await t.page.waitForSelector('#reviewremoval-tag-manager');assert.equal(t.loads.filter(url=>url.includes('/gtag/js?')).length,0);await t.context.close();

@@ -1,4 +1,32 @@
-# ReviewRemoval conversion measurement — updated November 6, 2026
+# ReviewRemoval conversion measurement — updated November 8, 2026
+
+## November 8: current lead action
+
+The owner supplied a new **Submit lead form (1)** snippet with destination
+**AW-18449308865/EVurCIn11LQdEMG5qN1E**. The LOCAL configuration now uses
+this label instead of `HqdzCIv5z4gdEMG5qN1E`; it does not send both. The owner
+subsequently reported that connecting the tag in Google's interface worked.
+That connection report is not an agent-run live confirmed-lead test.
+
+The existing runtime already sends a conversion after the backend confirms
+`result: success`, with advertising consent and a random transaction ID.
+Only the label changed. The supplied `gtag_report_conversion` click wrapper
+was not pasted onto a submit button: a click alone does not confirm a saved
+request. Existing consent, deduplication, nominal CAD $1 lead value, safe
+parameters, GTM/GA4 IDs and Apps Script integration remain intact.
+
+For the Ads destination/test choose **AW-18449308865**. The separate
+**ReviewRemoval / GTM-NJ2W494M** container owns the existing GA4 route; no
+second Ads conversion tag was added there. Select **Submit lead form (1)**
+as the intended campaign lead goal; the previously supplied Purchase label
+`KSgVCKDDzrQdEMG5qN1E` is not used for enquiry submissions.
+
+Publish the updated `measurement-config.js` to activate this local label
+change; it has not been deployed by the agent. After publication, refresh
+the site's cache and verify a consented, clearly labelled test assessment
+through that action's Tag Assistant flow. Confirm the event's exact send_to
+and that it fires once only after successful storage. The current configuration
+below supersedes historical November 3–6 label references.
 
 ## November 6: existing GTM container installation
 
@@ -74,9 +102,9 @@ A published-site browser check reproduced a Tag Assistant connection problem: pl
 - Before November 6, no GA4 Measurement ID or GTM container was configured in
   this source. The new container/destination are described above; `gtag.js`
   itself is still distinct from the GTM container.
-- Supplied Google Ads action: **Submit lead form**, with destination
-  **AW-18449308865/HqdzCIv5z4gdEMG5qN1E**. Its event snippet was provided on
-  November 3, 2026 and is now configured in the existing measurement module.
+- Current Google Ads action: **Submit lead form (1)**, with destination
+  **AW-18449308865/EVurCIn11LQdEMG5qN1E**, supplied November 8. This replaces
+  the earlier November 3 lead label in the existing measurement module.
 - Existing consent controls and the confirmed-lead hook are retained. One GTM
   container was added on November 6; no duplicate container or submit-button
   click conversion was added.
@@ -92,7 +120,7 @@ window.ReviewRemovalMeasurementConfig = Object.freeze({
   tagManagerGa4MeasurementId: 'G-9LFJWP87F0',
   ga4MeasurementId: null,
   googleAdsId: 'AW-18449308865',
-  googleAdsLeadConversionLabel: 'HqdzCIv5z4gdEMG5qN1E'
+  googleAdsLeadConversionLabel: 'EVurCIn11LQdEMG5qN1E'
 });
 ```
 
@@ -200,8 +228,8 @@ analytics is anonymous or exempt from applicable privacy requirements.
    version any necessary policy update without rewriting archived releases.
 2. Replace only `ga4MeasurementId: null` with the real public G- ID. Never put
    passwords, API tokens or service-account credentials in browser files.
-3. The supplied **Submit lead form** action in account AW-18449308865 is already
-   configured using label `HqdzCIv5z4gdEMG5qN1E`. Check that this is the intended
+3. The supplied **Submit lead form (1)** action in account AW-18449308865 is
+   configured using label `EVurCIn11LQdEMG5qN1E`. Check that this is the intended
    ReviewRemoval action in Google Ads; no new account or action is needed.
 4. `googleAdsLeadConversionLabel` contains that real label. The existing account
    ID is retained and one Google loader serves both configured destinations.
@@ -272,7 +300,7 @@ check builds and checks repeatability in a temporary directory.
 - [ ] Explicit saved success, including notification_sent:false, produces one
       generate_lead and at most one configured native Ads conversion.
 - [ ] With the current Ads-only configuration, Tag Assistant shows one conversion
-      to `AW-18449308865/HqdzCIv5z4gdEMG5qN1E`, value `1`, currency `CAD` and a random
+      to `AW-18449308865/EVurCIn11LQdEMG5qN1E`, value `1`, currency `CAD` and a random
       transaction ID after confirmed success. No GA4 event is sent without a G- ID.
 - [ ] Inspect every event parameter: no names, email, review text, profile URLs,
       contact destinations, free-text fields or visitor query/hash.

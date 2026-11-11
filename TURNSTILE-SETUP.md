@@ -139,7 +139,7 @@ All eight form pages request the refreshed `script.js?v=20261106-turnstile-endpo
 
 Release the changed runtime and form HTML together when publishing the website. After release, verify a normal form request targets the separate tested URL. Confirm the saved row and owner email without repeatedly submitting an uncertain request. Siteverify runs inside Apps Script, so inspect Apps Script executions or Cloudflare validation analytics rather than expecting a browser-side Siteverify request.
 
-All existing input names, optional profile/review links, notification behavior, terms records and the confirmed-success measurement hook are preserved. Ads destination **AW-18449308865/HqdzCIv5z4gdEMG5qN1E**, nominal CAD $1 lead value and consent behavior are unchanged. The owner-operated backend test does not call the website's form handler or conversion hook.
+All existing input names, optional profile/review links, notification behavior, terms records and the confirmed-success measurement hook are preserved. The current Ads destination is **AW-18449308865/EVurCIn11LQdEMG5qN1E** for the owner-supplied Submit lead form (1) action (November 8; see MEASUREMENT-SETUP.md). The nominal CAD $1 lead value and consent behavior are unchanged. The owner-operated backend test does not call the website's form handler or conversion hook.
 
 ReviewsBoost keeps its original endpoint and deployment. No website publication or account/backend deployment was performed by the agent.
 
