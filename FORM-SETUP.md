@@ -24,6 +24,52 @@ or sends emails. Existing delivered emails cannot be edited retroactively.
 Detailed installation and checks: `.seo-private/sheet-ack-cleanup-2026-11-08/INSTALL.md`.
 Nothing has been deployed or changed in the live sheet by the agent.
 
+## November 12: ChatGPT Ads tracking link
+
+Use this landing URL for the ChatGPT ad:
+
+```text
+https://reviewremoval.ca/?utm_source=chatgpt&utm_medium=cpc&utm_campaign=google_review_removal_canada
+```
+
+If Ads Manager asks for tracking/query parameters separately, leave the landing
+URL as `https://reviewremoval.ca/` and enter these parameters once:
+
+```text
+utm_source=chatgpt&utm_medium=cpc&utm_campaign=google_review_removal_canada
+```
+
+The website classifies this as `paid_chatgpt` and includes
+`[Traffic Source: Paid - ChatGPT Ads]` in the existing Reason. This compatible
+label appears in email/notes even with the older handler. Like existing paid
+attribution, it requires advertising consent and lasts at most thirty minutes
+within the same tab. Without the required consent, the lead remains
+`Direct / unknown`; this must not be called organic.
+
+For the separate Traffic Source column and the top email line to say
+`Paid - ChatGPT Ads` too, copy this folder's updated google-apps-script.gs into
+Code.gs in the existing standalone ReviewRemoval project. Save and deploy a
+**New version of the same deployment**, preserving the existing /exec URL and
+Script Properties. Only one fixed source label was added to that backend.
+Until updated, the older backend may say `Direct / unknown` in that dedicated
+field while the Reason correctly identifies ChatGPT. Do not edit the shared
+project or ReviewsBoost deployment. No deployment was performed by the agent.
+
+Consented GA4 visits use source/medium `chatgpt / cpc`. The measurement privacy
+guard now accepts only the exact three public UTM values above; other unknown
+parameters, duplicate campaign keys or private query values remain blocked.
+Changing this campaign's values requires updating its explicit allowlist in
+measurement.js. The canonical link and SEO metadata remain unchanged.
+
+Publish the updated website scripts and their versioned HTML references
+together (`20261112-chatgpt-ads`); leave the cookie stylesheet unchanged.
+UTMs track source in the website/analytics. They do not install an OpenAI Pixel
+or send conversions to ChatGPT Ads Manager. Existing Google Ads conversion
+IDs and confirmed-submission triggers are unchanged.
+
+Source: [OpenAI's tracking overview](https://help.openai.com/en/articles/20001207-ads-in-chatgpt-the-basics)
+and [query-parameter guidance](https://help.openai.com/en/articles/20001214-measure-results).
+
 ## November 7: source label in existing notifications
 
 Each new form submission now prefixes its existing Reason with a fixed label,

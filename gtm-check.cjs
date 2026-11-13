@@ -8,7 +8,7 @@ for(const file of pages){
  const html=fs.readFileSync(path.join(root,file),'utf8'),head=html.split('</head>')[0];
  assert.match(head,/<head\b[^>]*>\s*<!-- measurement bootstrap start -->/);
  assert.equal((head.match(/src="[^"\s]*measurement-config\.js"/g)||[]).length,1,file);
- assert.equal((head.match(/src="[^"\s]*measurement\.js"/g)||[]).length,1,file);
+ assert.equal((head.match(/src="[^"\s]*measurement\.js(?:\?v=[A-Za-z0-9-]+)?"/g)||[]).length,1,file);
  assert.equal(applyToHtml(applyToHtml(html,file),file),html,file+' bootstrap must be repeatable');
  assert.ok(!/googletagmanager\.com\/(?:gtag\/js|gtm\.js)|googletagmanager\.com\/ns\.html/.test(html),'No unconditional loader/iframe bypasses consent');
 }

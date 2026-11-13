@@ -14,7 +14,7 @@ const sharedEndpoint = 'https://script.google.com/macros/s/AKfycby4mQu0BJFu8Jmbw
 const formPages = ['index.html', 'remove-yelp-reviews.html', 'remove-facebook-reviews.html',
     'remove-trustpilot-reviews.html', 'remove-tripadvisor-reviews.html',
     'remove-booking-com-reviews.html', 'remove-glassdoor-reviews.html', 'remove-indeed-reviews.html'];
-const formScript = 'script.js?v=20261107-source-email';
+const formScript = 'script.js?v=20261112-chatgpt-ads';
 const frontend = fs.readFileSync(path.join(root, 'script.js'), 'utf8');
 const ruleBlock = value => value.match(/\/\/ BEGIN LEAD INPUT RULES[\s\S]*?\/\/ END LEAD INPUT RULES/)[0];
 assert.equal(ruleBlock(frontend), ruleBlock(source), 'Browser and backend input rules must agree');
@@ -179,7 +179,7 @@ assert.equal(app.post(payload).result, 'success');
 assert.equal(app.calls.rows.length, 1);
 assert.equal(app.calls.rows[0][12], 'Direct / unknown', 'Older clients keep submitting without attribution');
 for (const [traffic_source, label] of [
-    ['paid_google','Paid - Google Ads'], ['paid_other','Paid - Other campaign'],
+    ['paid_google','Paid - Google Ads'], ['paid_chatgpt','Paid - ChatGPT Ads'], ['paid_other','Paid - Other campaign'],
     ['organic_google','Organic - Google'], ['organic_bing','Organic - Bing'],
     ['organic_other','Organic - Other search'], ['referral','Referral / other'],
     ['=HYPERLINK("private")','Direct / unknown'], ['__proto__','Direct / unknown'],

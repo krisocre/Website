@@ -1,4 +1,46 @@
-# ReviewRemoval conversion measurement — updated November 8, 2026
+# ReviewRemoval conversion measurement — updated November 12, 2026
+
+## ChatGPT Ads campaign — November 12, 2026
+
+The approved landing URL is:
+`https://reviewremoval.ca/?utm_source=chatgpt&utm_medium=cpc&utm_campaign=google_review_removal_canada`.
+These three exact public campaign values are now accepted by the URL privacy
+guard and preserved in measured page_location so GA4 can attribute the session
+to `chatgpt / cpc`. Arbitrary query text remains suppressed. No canonical tag,
+page_path, form-field data, destination ID or consent rule was changed.
+
+The private lead-source enum adds `paid_chatgpt`, labelled `Paid - ChatGPT Ads`.
+Existing Google click-ID precedence and organic/referral classification remain.
+The compatible Reason prefix works with the existing backend; updating the
+standalone ReviewRemoval Code.gs to a New version adds the same label to the
+separate Traffic Source column/top notification line. See FORM-SETUP.md for
+copy-and-paste parameters and the release steps.
+
+Measurement JS and main JS references use `20261112-chatgpt-ads`; the cookie
+stylesheet retains `20261112-cookie-banner`. Publish these website files
+together. Nothing was deployed. This is UTM/source tracking, not an installed
+OpenAI conversion Pixel or Conversions API.
+
+## Visible cookie choices — November 12, 2026
+
+The first-visit controls are now a compact, non-modal banner fixed near the
+bottom of the browser window, with the existing ReviewRemoval colours.
+Accept, Reject and Settings are visible immediately. Saved choices hide the
+prompt; the footer Cookie choices button allows review and withdrawal.
+Accept and Reject retain equal styling. The banner does not lock the page,
+trap focus or automatically grant consent. It respects mobile safe areas,
+scrolls internally on short screens, and preserves English/French controls.
+
+Dismissal and reopening preserve the visitor's scroll position and return
+focus to the previous field or opener. Google IDs, consent defaults, GPC,
+preference storage, confirmed-lead tracking, form handling, security checks,
+pricing and legal policy versions remain unchanged. Earlier references to
+footer-only controls below describe the previous presentation.
+
+Banner assets use `?v=20261112-cookie-banner`. Publish the changed HTML,
+measurement.js and measurement.css together; no automatic deployment.
+Checks and the full file list are in
+`.seo-private/cookie-banner-20261112/REPORT.md`.
 
 ## November 8: current lead action
 
@@ -171,8 +213,8 @@ change is required for the implemented browser hook.
 - Basic opt-in is applied consistently, without guessing visitors' province from
   their IP address. Optional Google tags do not load before a choice.
 - Analytics and advertising measurement are separate choices, initially off.
-  Accept and reject have equal prominence. There is no modal, sticky overlay,
-  consent wall or extra enquiry checkbox.
+  Accept and reject have equal prominence in the fixed non-modal banner.
+  There is no consent wall, focus trap or extra enquiry checkbox.
 - English/French controls and a permanent footer **Cookie choices** button let
   visitors review or withdraw their choices. The preference record contains only
   a version, two booleans and an expiry; it expires after 180 days. No visitor ID

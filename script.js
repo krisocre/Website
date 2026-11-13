@@ -4,7 +4,7 @@ const leadTrafficSource = (() => {
   const storageKey = 'reviewremoval.lead-source.v1';
   const lifetime = 30 * 60 * 1000;
   const enteredAt = Date.now();
-  const sources = ['paid_google', 'paid_other', 'organic_google', 'organic_bing', 'organic_other', 'referral'];
+  const sources = ['paid_google', 'paid_chatgpt', 'paid_other', 'organic_google', 'organic_bing', 'organic_other', 'referral'];
   const googleHosts = /(^|\.)google\.(com|ca|co\.uk|com\.au|fr|de|ie|co\.nz|co\.in)$/;
   const hostIs = (host, domain) => host === domain || host.endsWith('.' + domain);
   function detect() {
@@ -18,7 +18,7 @@ const leadTrafficSource = (() => {
       const source = String(params.get('utm_source') || '').trim().toLowerCase();
       if (params.has('utm_medium')) {
         if (['cpc', 'ppc', 'paid', 'paidsearch', 'paid_search', 'paid-social', 'paid_social', 'paidsocial', 'display', 'cpm', 'cpv'].includes(medium)) {
-          return source === 'google' ? 'paid_google' : 'paid_other';
+          return source === 'google' ? 'paid_google' : ['chatgpt', 'chatgpt.com'].includes(source) ? 'paid_chatgpt' : 'paid_other';
         }
         if (medium === 'organic') return source === 'google' ? 'organic_google' : source === 'bing' ? 'organic_bing' : ['yahoo', 'duckduckgo', 'ecosia', 'brave'].includes(source) ? 'organic_other' : 'unknown';
         return ['referral', 'email', 'social'].includes(medium) ? 'referral' : 'unknown';
@@ -76,7 +76,7 @@ const leadTrafficSource = (() => {
   });
   function label(source) {
     const labels = {
-      paid_google: 'Paid - Google Ads', paid_other: 'Paid - Other campaign',
+      paid_google: 'Paid - Google Ads', paid_chatgpt: 'Paid - ChatGPT Ads', paid_other: 'Paid - Other campaign',
       organic_google: 'Organic - Google', organic_bing: 'Organic - Bing',
       organic_other: 'Organic - Other search', referral: 'Referral / other'
     };

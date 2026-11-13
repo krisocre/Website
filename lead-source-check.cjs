@@ -18,6 +18,11 @@ for(const [url,referrer,expected] of [
  ['?gclid=LOCAL_CLICK','https://www.google.com/','paid_google'],
  ['?gbraid=LOCAL_CLICK','','paid_google'],['?wbraid=LOCAL_CLICK','','paid_google'],['?dclid=LOCAL_CLICK','','paid_other'],
  ['?utm_source=google&utm_medium=cpc','','paid_google'],['?utm_source=bing&utm_medium=ppc','','paid_other'],
+ ['?utm_source=chatgpt&utm_medium=cpc&utm_campaign=google_review_removal_canada','','paid_chatgpt'],
+ ['?utm_source=chatgpt.com&utm_medium=paid','','paid_chatgpt'],
+ ['?utm_source=CHATGPT&utm_medium=CPC','','paid_chatgpt'],
+ ['?gclid=LOCAL_CLICK&utm_source=chatgpt&utm_medium=cpc','','paid_google'],
+ ['?utm_source=chatgpt.com','','unknown'],['','https://chatgpt.com/','referral'],
  ['?utm_source=facebook&utm_medium=paid_social','','paid_other'],['?utm_source=google&utm_medium=organic','','organic_google'],
  ['?utm_source=bing&utm_medium=organic','','organic_bing'],['?utm_source=duckduckgo&utm_medium=organic','','organic_other'],
  ['', 'https://www.google.ca/search?q=PRIVATE_QUERY','organic_google'],['','https://www.google.com/','organic_google'],
@@ -42,6 +47,10 @@ assert.equal(carried.get(),'paid_google');
 carried.consent.advertisingConsent=false;assert.equal(carried.get(),'unknown');assert.equal(carried.store.size,0);checks+=5;
 const analyticOnly=visit({url:'https://reviewremoval.ca/?gclid=LOCAL_CLICK',referrer:'https://google.com/',consent:{analyticsConsent:true,advertisingConsent:false}});
 assert.equal(analyticOnly.get(),'unknown');checks++;
+const chatgpt=visit({url:'https://reviewremoval.ca/?utm_source=chatgpt&utm_medium=cpc&utm_campaign=google_review_removal_canada'});
+const chatgptCarried=visit({url:'https://reviewremoval.ca/remove-yelp-reviews.html',referrer:'https://reviewremoval.ca/',store:chatgpt.store});
+assert.equal(chatgptCarried.get(),'paid_chatgpt');
+chatgptCarried.consent.advertisingConsent=false;assert.equal(chatgptCarried.get(),'unknown');assert.equal(chatgptCarried.store.size,0);checks+=3;
 const late=visit({referrer:'https://google.com/'});late.tick(30*60*1000);assert.equal(late.get(),'unknown');assert.equal(late.store.size,0);checks++;
 const blocked=visit({url:'https://reviewremoval.ca/?gclid=LOCAL_CLICK',blocked:true});assert.equal(blocked.get(),'paid_google');checks++;
 for(const record of [{source:'PRIVATE_EMAIL',expires:1000001},{source:'paid_google',expires:999999},{source:'paid_google',expires:99999999}]){
@@ -58,7 +67,9 @@ const server=http.createServer((req,res)=>{
  await new Promise(r=>server.listen(0,'127.0.0.1',r));const base='http://127.0.0.1:'+server.address().port;
  browser=await puppeteer.launch({headless:true,executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe'});
  for(const test of [{query:'?gclid=LOCAL_CLICK',referrer:'https://www.google.com/',accept:true,want:'paid_google'},
+                   {query:'?utm_source=chatgpt&utm_medium=cpc&utm_campaign=google_review_removal_canada',referrer:'https://chatgpt.com/',accept:true,want:'paid_chatgpt'},
                    {query:'',referrer:'https://www.google.ca/',accept:true,want:'organic_google'},
+                   {query:'?utm_source=chatgpt&utm_medium=cpc&utm_campaign=google_review_removal_canada',referrer:'https://chatgpt.com/',accept:false,want:'unknown'},
                    {query:'?gclid=LOCAL_CLICK',referrer:'https://www.google.com/',accept:false,want:'unknown'}]){
   const context=await browser.createBrowserContext(),page=await context.newPage(),posts=[],errors=[];
   // Local HTTP previews suppress HTTPS search referrers on downgrade. Supply
@@ -94,10 +105,10 @@ const server=http.createServer((req,res)=>{
   await page.waitForSelector('#submission-success:not([hidden])');
   const payload=await page.evaluate(()=>window.__leadSourcePayload);
   assert.equal(posts.length,1);assert.equal(payload.traffic_source,test.want,'Source enum included in submitted FormData');
-  const label={paid_google:'Paid - Google Ads',organic_google:'Organic - Google',unknown:'Direct / unknown'}[test.want];
+  const label={paid_google:'Paid - Google Ads',paid_chatgpt:'Paid - ChatGPT Ads',organic_google:'Organic - Google',unknown:'Direct / unknown'}[test.want];
   assert.ok(payload.reason.startsWith('[Traffic Source: '+label+']\n'),'Existing Reason must expose the label to legacy emails and sheets');
   assert.ok(!JSON.stringify(payload).includes('LOCAL_CLICK'),'Raw advertising ID is not sent with lead');
   assert.deepEqual(errors,[]);await context.close();checks++;
  }
- console.log('PASS: '+checks+' source/consent/storage cases, including three mocked successful form submissions, paid/organic navigation carryover and consent rejection. No real leads or Google collection.');
+ console.log('PASS: '+checks+' source/consent/storage cases, including five mocked successful form submissions, Google/ChatGPT/organic navigation carryover and consent rejection. No real leads or Google collection.');
 }finally{if(browser)await browser.close();server.closeAllConnections();server.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

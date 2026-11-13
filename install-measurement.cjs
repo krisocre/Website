@@ -4,7 +4,8 @@ const legacy=/\s*<!-- Google tag \(gtag\.js\) -->[\s\S]*?<!-- \/Google tag \(gta
 const marker=/\s*<!-- measurement bootstrap start -->[\s\S]*?<!-- measurement bootstrap end -->/g;
 function applyToHtml(html,file){
  const prefix=file==='404.html'?'/':file.startsWith('blog/')?'../':'';
- const block=`\n  <!-- measurement bootstrap start -->\n  <link rel="stylesheet" href="${prefix}measurement.css">\n  <script src="${prefix}measurement-config.js" defer></script>\n  <script src="${prefix}measurement.js" defer></script>\n  <!-- measurement bootstrap end -->`;
+ const version='20261112-chatgpt-ads',cssVersion='20261112-cookie-banner';
+ const block=`\n  <!-- measurement bootstrap start -->\n  <link rel="stylesheet" href="${prefix}measurement.css?v=${cssVersion}">\n  <script src="${prefix}measurement-config.js" defer></script>\n  <script src="${prefix}measurement.js?v=${version}" defer></script>\n  <!-- measurement bootstrap end -->`;
  return html.replace(legacy,'').replace(marker,'').replace(/(<head\b[^>]*>)(?:[ \t]*\r?\n)*/,(_,head)=>head+block+'\n');
 }
 function install(){

@@ -15,7 +15,7 @@ const descriptions = new Set();
 function checkGoogleTag(html, name) {
   const head = html.split('</head>')[0];
   for (const file of ['measurement-config.js','measurement.js','measurement.css'])
-    if ((head.match(new RegExp('(?:src|href)="[^"\\s]*'+file.replace('.','\\.')+'"','g'))||[]).length!==1)errors.push(`${name}: exactly one ${file} bootstrap required`);
+    if ((head.match(new RegExp('(?:src|href)="[^"\\s]*'+file.replace('.','\\.')+'(?:\\?v=[A-Za-z0-9-]+)?"','g'))||[]).length!==1)errors.push(`${name}: exactly one ${file} bootstrap required`);
   if (/googletagmanager\.com\/(?:gtag\/js|gtm\.js)/.test(head)) errors.push(`${name}: direct Google loader bypasses consent`);
 }
 if (!fs.readFileSync(path.join(root,'measurement-config.js'),'utf8').includes("googleAdsId: 'AW-18449308865'")) errors.push('Existing Google Ads destination must be preserved');

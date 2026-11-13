@@ -120,20 +120,22 @@ const server=http.createServer((req,res)=>{
   assert.ok((await commands(page)).some(c=>c[0]==='config'&&c[1]===fixtures.ga4MeasurementId));assert.ok(!(await commands(page)).some(c=>c[0]==='config'&&c[1]===fixtures.googleAdsId));await test.context.close();
   test=await open();page=test.page;await choose(page,'customize');await page.click('[data-purpose="advertising"]');await choose(page,'save');await fillAndSubmit(page);
   assert.ok(!(await commands(page)).some(c=>c[0]==='config'&&c[1]===fixtures.ga4MeasurementId));assert.equal((await events(page)).filter(e=>e[1]==='generate_lead'||e[1]==='page_view').length,0);assert.equal((await events(page)).filter(e=>e[1]==='conversion').length,1);await test.context.close();
-  // Language, keyboard controls and a narrow inline layout without overlays.
+  // Language, keyboard controls and the non-modal on-screen banner.
   test=await open({language:'fr-CA'});page=test.page;
   assert.equal(await page.$eval('#measurement-preferences',e=>e.lang),'fr-CA');
   assert.equal(await page.$eval('#measurement-preferences [data-choice="reject"]',e=>e.textContent),'Refuser les mesures');
   await choose(page,'customize');assert.equal(await page.evaluate(()=>document.activeElement.dataset.purpose),'analytics');
   await page.focus('[data-choice="save"]');await page.keyboard.press('Enter');assert.equal(await page.$eval('#measurement-preferences',e=>e.hidden),true);
-  assert.equal(await page.evaluate(()=>document.activeElement.className),'measurement-settings');await page.keyboard.press('Enter');
+  assert.equal(await page.evaluate(()=>document.activeElement.tagName),'MAIN','First-visit dismissal returns to the page without jumping to footer');
+  await page.focus('.measurement-settings');const footerPosition=await page.evaluate(()=>scrollY);await page.keyboard.press('Enter');
+  assert.equal(await page.evaluate(()=>scrollY),footerPosition,'Reopening keeps the current scroll position');
   assert.equal(await page.$eval('#measurement-preferences',e=>e.hidden),false);
-  fs.mkdirSync('.seo-private/measurement-2026-11-01',{recursive:true});
+  fs.mkdirSync('.seo-private/cookie-banner-20261112',{recursive:true});
   for(const width of [320,1440]){
    await page.setViewport({width,height:900});
    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'No horizontal overflow at '+width);
-   assert.equal(await page.$eval('#measurement-preferences',e=>getComputedStyle(e).position),'static');
-   await (await page.$('#measurement-preferences')).screenshot({path:'.seo-private/measurement-2026-11-01/consent-fr-'+width+'.png'});
+   assert.equal(await page.$eval('#measurement-preferences',e=>getComputedStyle(e).position),'fixed');
+   await (await page.$('#measurement-preferences')).screenshot({path:'.seo-private/cookie-banner-20261112/consent-fr-'+width+'.png'});
   }
   await page.click('.measurement-language');assert.equal(await page.$eval('#measurement-preferences',e=>e.lang),'en-CA');await test.context.close();
   // URL leakage guard, without changing the original address or the form integration.
@@ -150,9 +152,26 @@ const server=http.createServer((req,res)=>{
    assert.ok(!/gtm_debug|_dbg|LOCAL_TEST_AUTOTAG|PRIVATE_/.test(JSON.stringify(conversions)),'No debug/query/form contents in event parameters');
    await test.context.close();
   }
-  for(const query of ['?_dbg=PRIVATE_VALUE','?gtm_debug=PRIVATE_VALUE','?_dbg=1&email=PRIVATE_EMAIL','?_dbg=1&_dbg=PRIVATE_VALUE']){
+  // Only this fixed, public campaign is forwarded; unknown UTM text stays blocked.
+  const campaignQuery='?utm_source=chatgpt&utm_medium=cpc&utm_campaign=google_review_removal_canada';
+  for(const config of [fixtures,null]){
+   test=await open({config,query:campaignQuery});page=test.page;start=google.length;
+   assert.equal((await page.evaluate(()=>ReviewRemovalMeasurement.status())).urlEligible,true);
+   assert.equal((await commands(page)).filter(c=>c[0]==='config').length,0,'Campaign parameters do not grant consent');
+   await choose(page,'accept');await page.waitForSelector('#reviewremoval-google-tag');assert.equal(google.length-start,1);
+   const analyticsPage=config?(await events(page)).find(event=>event[1]==='page_view')?.[2]:(await commands(page)).find(command=>command[0]==='set'&&command[1]?.page_location)?.[1];
+   assert.equal(analyticsPage.page_location,'https://reviewremoval.ca/'+campaignQuery);
+   assert.equal(analyticsPage.page_path,'/','Campaign tags do not alter canonical page grouping');
+   await fillAndSubmit(page);const conversions=(await events(page)).filter(event=>event[1]==='conversion');
+   assert.equal(conversions.length,1);assert.ok(!/PRIVATE_|private\.person|example\.com/.test(JSON.stringify(conversions)));
+   await test.context.close();
+  }
+  for(const query of ['?_dbg=PRIVATE_VALUE','?gtm_debug=PRIVATE_VALUE','?_dbg=1&email=PRIVATE_EMAIL','?_dbg=1&_dbg=PRIVATE_VALUE',
+      campaignQuery+'&email=PRIVATE_EMAIL',campaignQuery+'&utm_campaign=PRIVATE_NAME',
+      campaignQuery.replace('google_review_removal_canada','PRIVATE_NAME'),
+      campaignQuery.replace('utm_medium=cpc','utm_medium=organic')]){
    test=await open({config:null,query});page=test.page;start=google.length;await choose(page,'accept');await fillAndSubmit(page);
-   assert.equal(google.length,start);assert.equal((await events(page)).length,0,'Debug flags do not bypass the private URL guard');
+   assert.equal(google.length,start);assert.equal((await events(page)).length,0,'Debug/campaign flags do not bypass the private URL guard');
    await test.context.close();
   }
   test=await open({query:'?email_address=PRIVATE_EMAIL#PRIVATE_HASH'});page=test.page;start=google.length;await choose(page,'accept');await fillAndSubmit(page);

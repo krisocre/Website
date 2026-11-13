@@ -240,7 +240,7 @@ function doPost(e) {
 // Only fixed labels can enter Sheets/email; never store raw referrer/query values.
 function reviewRemovalTrafficSource(value) {
   var labels = {
-    paid_google: 'Paid - Google Ads', paid_other: 'Paid - Other campaign',
+    paid_google: 'Paid - Google Ads', paid_chatgpt: 'Paid - ChatGPT Ads', paid_other: 'Paid - Other campaign',
     organic_google: 'Organic - Google', organic_bing: 'Organic - Bing',
     organic_other: 'Organic - Other search', referral: 'Referral / other'
   };
