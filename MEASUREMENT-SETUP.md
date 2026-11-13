@@ -1,4 +1,21 @@
-# ReviewRemoval conversion measurement — updated November 12, 2026
+# ReviewRemoval conversion measurement — updated November 13, 2026
+
+## Automatic cookie banner removed — November 13, 2026
+
+The cookie panel now starts hidden on every visit. It opens only when a visitor
+uses Cookie choices in the footer. Existing saved preferences still apply;
+without a saved choice, optional analytics and advertising remain disabled.
+Submitting an enquiry does not require a cookie choice or open the panel.
+Removing the automatic prompt reduces measurement coverage for new visitors
+who do not open the footer settings. No consent is inferred from browsing.
+
+The settings, independent choices, withdrawal, browser privacy signal and
+English/French controls remain available. Forms, security checks, source
+classification rules, tracking IDs and confirmed-lead logic are unchanged.
+Publish the updated HTML and measurement.js together; the runtime cache
+version is `20261113-footer-choices`. CSS retains its current version.
+Nothing was deployed automatically. This section supersedes the earlier
+automatic-banner presentation notes below.
 
 ## ChatGPT Ads campaign — November 12, 2026
 

@@ -10,7 +10,7 @@
   var key = 'reviewremoval.measurement.v1';
   var ttl = 180 * 24 * 60 * 60 * 1000;
   var preferences = { analytics: false, advertising: false };
-  var remembered = false, loaded = false, initialized = false, viewed = false;
+  var loaded = false, initialized = false, viewed = false;
   var managerLoaded = false;
   var configured = new Set(), started = new WeakSet(), confirmed = new WeakSet(), recent = [];
   var privacySignal = window.navigator.globalPrivacyControl === true;
@@ -70,7 +70,7 @@
     var stored = JSON.parse(window.localStorage.getItem(key));
     if (stored && stored.version === 1 && stored.expires > Date.now() && stored.expires <= Date.now() + ttl &&
         typeof stored.analytics === 'boolean' && typeof stored.advertising === 'boolean') {
-      preferences = { analytics: stored.analytics, advertising: stored.advertising && !privacySignal }; remembered = true;
+      preferences = { analytics: stored.analytics, advertising: stored.advertising && !privacySignal };
     }
   } catch (_) { /* A blocked preference store must not break forms or imply consent. */ }
   function baseParameters() {
@@ -150,7 +150,7 @@
     if (preferences.analytics && !viewed && safeVisitorUrl()) { viewed = true; record('page_view'); }
   }
   function savePreferences(analytics, advertising) {
-    preferences = { analytics: analytics === true, advertising: advertising === true && !privacySignal }; remembered = true;
+    preferences = { analytics: analytics === true, advertising: advertising === true && !privacySignal };
     try { window.localStorage.setItem(key, JSON.stringify({ version: 1, analytics: preferences.analytics,
       advertising: preferences.advertising, expires: Date.now() + ttl })); } catch (_) {}
     applyPreferences();
@@ -214,10 +214,10 @@
     recentEvents: function () { return recent.slice(); }
   });
   applyPreferences();
-  // Non-modal first-visit banner; saved choices can be reopened from the footer.
+  // No automatic banner. Visitors can manage optional measurement from the footer.
   var panel = document.createElement('section'); panel.id = 'measurement-preferences'; panel.setAttribute('aria-labelledby', 'measurement-title');
   panel.innerHTML = '<div class="measurement-inner"><h2 id="measurement-title">Cookie choices</h2><p>With your permission, Google tools use cookies and device identifiers to measure visits, enquiries and ads. Your request works without optional tracking. <a href="https://reviewremoval.ca/privacy-policy.html">Privacy policy</a>.</p><div class="measurement-actions"><button type="button" data-choice="accept">Accept optional</button><button type="button" data-choice="reject">Reject optional</button><button type="button" data-choice="customize" aria-expanded="false" aria-controls="measurement-options">Choose settings</button></div><div id="measurement-options" hidden><label><input type="checkbox" data-purpose="analytics"> Visit and enquiry analytics</label><label><input type="checkbox" data-purpose="advertising"> Advertising measurement (no ad personalization)</label><p class="measurement-signal" hidden>Your browser privacy signal keeps advertising measurement off.</p><button type="button" data-choice="save">Save choices</button></div><p class="measurement-status" role="status" aria-live="polite"></p></div>';
-  panel.hidden = remembered;
+  panel.hidden = true;
   var skipLink = document.querySelector('body > .skip-link');
   if (skipLink) skipLink.after(panel); else document.body.prepend(panel);
   var returnFocus = null;
@@ -225,7 +225,7 @@
     if (event.relatedTarget instanceof HTMLElement && event.relatedTarget !== document.body && !panel.contains(event.relatedTarget)) returnFocus = event.relatedTarget;
   });
   var footer = document.querySelector('.footer-bottom') || document.querySelector('footer') || document.body;
-  var settings = document.createElement('button'); settings.type = 'button'; settings.className = 'measurement-settings'; settings.textContent = 'Cookie choices'; settings.setAttribute('aria-controls', panel.id); settings.setAttribute('aria-expanded', String(!remembered)); footer.appendChild(settings);
+  var settings = document.createElement('button'); settings.type = 'button'; settings.className = 'measurement-settings'; settings.textContent = 'Cookie choices'; settings.setAttribute('aria-controls', panel.id); settings.setAttribute('aria-expanded', 'false'); footer.appendChild(settings);
   var live = document.createElement('span'); live.className = 'measurement-live'; live.setAttribute('role', 'status'); live.setAttribute('aria-live', 'polite'); footer.appendChild(live);
   var language = document.createElement('button'); language.type = 'button'; language.className = 'measurement-language'; panel.querySelector('.measurement-inner').prepend(language);
   var french = /^fr\b/i.test(window.navigator.language || '');

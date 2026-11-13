@@ -86,6 +86,7 @@ const server=http.createServer((req,res)=>{
    if(r.url().startsWith(base)&&r.method()==='GET')return r.continue();r.abort();
   });
   await page.goto(base+test.query,{referer:test.referrer,waitUntil:'load'});
+  await page.click('.measurement-settings');
   await page.click('#measurement-preferences [data-choice="'+(test.accept?'accept':'reject')+'"]');
   if(test.accept){
    await page.goto(base+'/blog/index.html',{waitUntil:'load'});

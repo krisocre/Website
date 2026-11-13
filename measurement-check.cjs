@@ -32,7 +32,7 @@ const server=http.createServer((req,res)=>{
   }
   async function commands(page){return page.evaluate(()=>window.dataLayer.map(v=>Array.from(v)));}
   async function events(page){return (await commands(page)).filter(v=>v[0]==='event');}
-  async function choose(page,choice){await page.click('#measurement-preferences [data-choice="'+choice+'"]');}
+  async function choose(page,choice){if(await page.$eval('#measurement-preferences',e=>e.hidden))await page.click('.measurement-settings');await page.click('#measurement-preferences [data-choice="'+choice+'"]');}
   async function fillAndSubmit(page,result='success'){
    await completeSecurityCheck(page);
    await page.evaluate(result=>{
@@ -49,8 +49,13 @@ const server=http.createServer((req,res)=>{
   }
   // Initial visit and explicit rejection never load a Google tag.
   let test=await open(),page=test.page,start=google.length;
-  assert.equal(await page.$eval('#measurement-preferences',e=>e.hidden),false);
+  assert.equal(await page.$eval('#measurement-preferences',e=>e.hidden),true,'No automatic cookie banner on a new visit');
+  assert.equal(await page.$eval('.measurement-settings',e=>e.getAttribute('aria-expanded')),'false');
+  assert.equal(await page.evaluate(()=>localStorage.getItem('reviewremoval.measurement.v1')),null,'Hiding the banner does not save consent');
   assert.equal((await commands(page)).filter(c=>c[0]==='config').length,0);
+  await fillAndSubmit(page);assert.equal(google.length,start);assert.equal((await events(page)).length,0);
+  assert.equal(await page.$eval('#measurement-preferences',e=>e.hidden),true,'A request works without choosing cookies or opening the panel');
+  await test.context.close();test=await open();page=test.page;start=google.length;
   await choose(page,'reject');assert.equal(google.length,start);
   await fillAndSubmit(page);assert.equal((await events(page)).length,0,'No denied lead backfill');
   await page.click('.measurement-settings');await choose(page,'accept');
@@ -120,22 +125,22 @@ const server=http.createServer((req,res)=>{
   assert.ok((await commands(page)).some(c=>c[0]==='config'&&c[1]===fixtures.ga4MeasurementId));assert.ok(!(await commands(page)).some(c=>c[0]==='config'&&c[1]===fixtures.googleAdsId));await test.context.close();
   test=await open();page=test.page;await choose(page,'customize');await page.click('[data-purpose="advertising"]');await choose(page,'save');await fillAndSubmit(page);
   assert.ok(!(await commands(page)).some(c=>c[0]==='config'&&c[1]===fixtures.ga4MeasurementId));assert.equal((await events(page)).filter(e=>e[1]==='generate_lead'||e[1]==='page_view').length,0);assert.equal((await events(page)).filter(e=>e[1]==='conversion').length,1);await test.context.close();
-  // Language, keyboard controls and the non-modal on-screen banner.
+  // Language, keyboard controls and manually opened footer settings.
   test=await open({language:'fr-CA'});page=test.page;
   assert.equal(await page.$eval('#measurement-preferences',e=>e.lang),'fr-CA');
   assert.equal(await page.$eval('#measurement-preferences [data-choice="reject"]',e=>e.textContent),'Refuser les mesures');
   await choose(page,'customize');assert.equal(await page.evaluate(()=>document.activeElement.dataset.purpose),'analytics');
   await page.focus('[data-choice="save"]');await page.keyboard.press('Enter');assert.equal(await page.$eval('#measurement-preferences',e=>e.hidden),true);
-  assert.equal(await page.evaluate(()=>document.activeElement.tagName),'MAIN','First-visit dismissal returns to the page without jumping to footer');
+  assert.equal(await page.evaluate(()=>document.activeElement.classList.contains('measurement-settings')),true,'Dismissal returns to the footer settings opener');
   await page.focus('.measurement-settings');const footerPosition=await page.evaluate(()=>scrollY);await page.keyboard.press('Enter');
   assert.equal(await page.evaluate(()=>scrollY),footerPosition,'Reopening keeps the current scroll position');
   assert.equal(await page.$eval('#measurement-preferences',e=>e.hidden),false);
-  fs.mkdirSync('.seo-private/cookie-banner-20261112',{recursive:true});
+  fs.mkdirSync('.seo-private/no-cookie-banner-20261113',{recursive:true});
   for(const width of [320,1440]){
    await page.setViewport({width,height:900});
    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'No horizontal overflow at '+width);
    assert.equal(await page.$eval('#measurement-preferences',e=>getComputedStyle(e).position),'fixed');
-   await (await page.$('#measurement-preferences')).screenshot({path:'.seo-private/cookie-banner-20261112/consent-fr-'+width+'.png'});
+   await (await page.$('#measurement-preferences')).screenshot({path:'.seo-private/no-cookie-banner-20261113/settings-fr-'+width+'.png'});
   }
   await page.click('.measurement-language');assert.equal(await page.$eval('#measurement-preferences',e=>e.lang),'en-CA');await test.context.close();
   // URL leakage guard, without changing the original address or the form integration.
