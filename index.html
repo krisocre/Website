@@ -188,17 +188,14 @@
                     <div class="form-two"><label>Your name <span>*</span><input name="full_name" type="text" autocomplete="name" required></label><label>Business name <span>*</span><input name="business_name" type="text" autocomplete="organization" required></label></div>
                     <label>Email address <span>*</span><input name="email_address" type="email" autocomplete="email" required></label>
                     <label>Public Google profile or review link<input name="business_url" type="text" autocomplete="url" placeholder="https://maps.app.goo.gl/…" aria-describedby="profile-help"></label>
-                    <p class="field-help" id="profile-help">A public Google Maps link for your business is enough to start. You can add individual review links below.</p>
+                    <p class="field-help" id="profile-help">You can include individual review links or extra details in your comment.</p>
+                    <label for="assessment-comment">Comment <small>(optional)</small><textarea id="assessment-comment" name="reason" rows="3" placeholder="Add any details or review links you'd like us to know."></textarea></label>
                     <div class="review-count-row"><label for="formQuantity">Number of reviews <span>*</span></label>
                         <div class="quantity-control form-quantity"><button type="button" data-qty-step="-1" data-target="formQuantity" aria-label="Decrease review count">−</button><input id="formQuantity" name="review_count" type="number" min="1" max="50" value="1" inputmode="numeric" required>
                             <button
                                 type="button" data-qty-step="1" data-target="formQuantity" aria-label="Increase review count">+</button>
                         </div>
                     </div>
-                    <details class="assessment-extra">
-                        <summary>Add review links or context <small>Optional</small></summary>
-                        <div><label>Specific review link(s)<textarea name="review_links" rows="2" placeholder="One link per line, if you have them."></textarea></label><label>Anything else we should know?<textarea name="reason" rows="3" placeholder="A short, factual explanation is enough."></textarea></label></div>
-                    </details>
                     <!-- submission legal notice start --><input type="hidden" name="terms_version" value="2026-10-27"><input type="hidden" name="terms_url" value="https://reviewremoval.ca/terms-of-service.html"><input type="hidden" name="terms_snapshot_url" value="https://reviewremoval.ca/legal-versions/policies-2026-10-27.json">
                     <input
                         type="hidden" name="privacy_version" value="2026-10-27"><input type="hidden" name="privacy_url" value="https://reviewremoval.ca/privacy-policy.html"><input type="hidden" name="terms_language" value="en-CA"><input type="hidden" name="terms_acknowledgement" value="By submitting, you agree to the Terms of Service and acknowledge the Privacy Policy. Removal is not guaranteed.">

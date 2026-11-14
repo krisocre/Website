@@ -63,7 +63,8 @@ const server=http.createServer((req,res)=>{
    if(width<=680)assert.ok(layout.formTop<layout.summaryTop,'Mobile form precedes summary');
    assert.equal(await page.$eval('.hero-actions .button',e=>e.getAttribute('href')),'#quote');
    assert.equal(await page.$$eval('.assessment-steps>li',e=>e.length),3);
-   assert.equal(await page.$eval('.assessment-extra',e=>e.open),false);
+   assert.equal(await page.$('#assessment-form details'),null,'The comment does not require opening optional details');
+   assert.deepEqual(await page.$eval('#assessment-comment',e=>({required:e.required,name:e.name,visible:e.getClientRects().length>0,afterLink:!!(document.querySelector('[name="business_url"]').compareDocumentPosition(e)&Node.DOCUMENT_POSITION_FOLLOWING),beforeQuantity:!!(e.compareDocumentPosition(document.querySelector('#formQuantity'))&Node.DOCUMENT_POSITION_FOLLOWING)})),{required:false,name:'reason',visible:true,afterLink:true,beforeQuantity:true},'Optional comment is visible immediately after the profile link');
    if([1440,390].includes(width)){
     await page.screenshot({path:path.join(output,'home-'+width+'.png'),fullPage:true});
     await page.screenshot({path:path.join(output,'hero-'+width+'.png')});
@@ -187,7 +188,7 @@ const server=http.createServer((req,res)=>{
   const body=await page.evaluate(()=>{
    const f=document.querySelector('form');f.querySelector('[name="full_name"]').value='Test Person';f.querySelector('[name="business_name"]').value='Test Canadian Business';f.querySelector('[name="email_address"]').value='test@example.com';f.querySelector('[name="business_url"]').value='https://example.com/review';
    document.querySelector('#formQuantity').value='3';document.querySelector('#formQuantity').dispatchEvent(new Event('change',{bubbles:true}));
-   f.querySelector('[name="review_links"]').value='https://example.com/specific-review';f.querySelector('[name="reason"]').value='Documented test concern';
+   f.querySelector('[name="reason"]').value='Documented test concern https://example.com/specific-review';
    window.__attempts=[];window.__mockMode='error';
    window.fetch=async(url,options)=>{window.__attempts.push({url,body:options.body.toString()});if(window.__mockMode==='error')throw Error('mock transport failure');return {ok:true,json:async()=>({result:'success',notification_sent:window.__mockMode!=='notification-failure'})};};
    f.requestSubmit();return {method:f.method,action:f.action};
@@ -201,7 +202,7 @@ const server=http.createServer((req,res)=>{
   await page.waitForSelector('#submission-success:not([hidden])');
   const attempts=await page.evaluate(()=>window.__attempts);assert.equal(attempts.length,2);
   const sent=new URLSearchParams(attempts[1].body);assert.equal(sent.get('review_count'),'3');assert.equal(sent.get('contact_detail'),'test@example.com');
-  assert.equal(sent.get('review_links'),'https://example.com/specific-review');assert.match(sent.get('reason'),/Documented test concern/);assert.match(sent.get('reason'),/\[Submission acknowledgement\]/);assert.equal(sent.get('terms_version'),'2026-10-27');
+  assert.equal(sent.get('review_links'),null);assert.match(sent.get('reason'),/Documented test concern https:\/\/example\.com\/specific-review/);assert.match(sent.get('reason'),/\[Submission acknowledgement\]/);assert.equal(sent.get('terms_version'),'2026-10-27');
   assert.match(sent.get('selected_plan'),/\$150 upfront/);assert.match(sent.get('selected_plan'),/\$525 if all removed/);
   await page.goto(base,{waitUntil:'load'});
   await completeSecurityCheck(page);
