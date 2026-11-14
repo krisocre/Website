@@ -14,7 +14,7 @@ const sharedEndpoint = 'https://script.google.com/macros/s/AKfycby4mQu0BJFu8Jmbw
 const formPages = ['index.html', 'remove-yelp-reviews.html', 'remove-facebook-reviews.html',
     'remove-trustpilot-reviews.html', 'remove-tripadvisor-reviews.html',
     'remove-booking-com-reviews.html', 'remove-glassdoor-reviews.html', 'remove-indeed-reviews.html'];
-const formScript = 'script.js?v=20261112-chatgpt-ads';
+const formScript = 'script.js?v=20261114-input-filters-removed';
 const frontend = fs.readFileSync(path.join(root, 'script.js'), 'utf8');
 const ruleBlock = value => value.match(/\/\/ BEGIN LEAD INPUT RULES[\s\S]*?\/\/ END LEAD INPUT RULES/)[0];
 assert.equal(ruleBlock(frontend), ruleBlock(source), 'Browser and backend input rules must agree');
@@ -117,24 +117,26 @@ function backend({ properties, provider, responseCode = 200, malformed = false, 
 const payload = { 'cf-turnstile-response': 'LOCAL_TOKEN', full_name: '=formula', business_name: 'Test Business', email_address: 'private@example.invalid', reason: 'private review text', selected_plan: 'Existing plan', review_count: '2' };
 
 for (const [overrides, field] of [
-    [{full_name:'$4,000 PROMO https://www.google.com/share.google?q=TEST'},'full_name'],
-    [{full_name:'\uFF04 Bonus'},'full_name'], [{full_name:'\uFE69 Bonus'},'full_name'],
-    [{full_name:'https://example.invalid'},'full_name'], [{full_name:'www.example.invalid'},'full_name'],
-    [{full_name:'John\nSmith'},'full_name'], [{full_name:'12345'},'full_name'],
-    [{full_name:'A'.repeat(151)},'full_name'], [{full_name:' '},'full_name'],
-    [{business_name:'https://example.invalid'},'business_name'], [{business_name:'Shop\nName'},'business_name'],
-    [{business_name:' '},'business_name'], [{business_name:'A'.repeat(251)},'business_name'],
-    [{email_address:'bot@fldubai.com'},'email_address'], [{email_address:' BOT@FLDUBAI.COM '},'email_address'],
-    [{email_address:'bot@sub.fldubai.com'},'email_address'], [{contact_detail:'bot@fldubai.com'},'email_address'],
+    [{full_name:' '},'full_name'], [{business_name:' '},'business_name'],
     [{email_address:'a\u0000b@example.ca'},'email_address'], [{email_address:'invalid-email'},'email_address'],
-    ...['rbka80','2.5','0','51',''].map(review_count=>[{review_count},'review_count']),
-    [{reason:'a'.repeat(20001)},'reason'], [{review_links:'a'.repeat(12001)},'review_links'],
-    [{phone_number:'1'.repeat(81)},'phone_number']
+    ...['rbka80','2.5','0','51',''].map(review_count=>[{review_count},'review_count'])
 ]) {
     const invalid = backend(), result = invalid.post({...payload,...overrides});
     assert.equal(result.code,'invalid_input',JSON.stringify(overrides));
     assert.equal(result.field,field); assert.equal(invalid.calls.sheets,0); assert.equal(invalid.calls.mail,0);
     cases++;
+}
+for (const overrides of [
+    {full_name:'$4,000 PROMO https://www.google.com/share.google?q=TEST'},
+    ...['\uFF04 Bonus','\uFE69 Bonus','https://example.invalid','www.example.invalid','John\nSmith','12345','A'.repeat(151)].map(full_name=>({full_name})),
+    ...['https://example.invalid','Shop\nName','A'.repeat(251)].map(business_name=>({business_name})),
+    ...['bot@fldubai.com',' BOT@FLDUBAI.COM ','bot@sub.fldubai.com'].map(email_address=>({email_address})),
+    {contact_detail:'bot@fldubai.com'}, {phone_number:'1'.repeat(81)},
+    {reason:'a'.repeat(20001)}, {review_links:'a'.repeat(12001)}
+]) {
+    const app=backend(), result=app.post({...payload,...overrides});
+    assert.equal(result.result,'success','Previously filtered text must reach storage and owner notification');
+    assert.equal(app.calls.rows.length,1);assert.equal(app.calls.mail,1);cases++;
 }
 for (const full_name of ["\u00c9lodie O'Neill",'Jean-Luc St. Pierre','\u674e','\u9648\u4f1f','\u0645\u062d\u0645\u062f \u0639\u0644\u064a','\u0906\u0930\u0935 \u0936\u0930\u094d\u092e\u093e','A. Com']) {
     const normal = backend();
@@ -282,7 +284,7 @@ assert.throws(() => backend({ badHeaders: true }).check(), /Traffic Source in M1
 cases++;
 assert.throws(() => backend({ provider: () => ({ success: false, 'error-codes': ['invalid-input-secret'] }) }).check(), /secret check failed/);
 cases++;
-console.log(`PASS: ${cases} backend cases; token/action/hostname checks, spam/domain/input rejection before storage/mail, international names and optional links, replay protection and existing lead handling.`);
+console.log(`PASS: ${cases} backend cases; token/action/hostname checks, required fields/basic formats, previously filtered content accepted with owner notification, international names and optional links, replay protection and existing lead handling.`);
 
 const server = http.createServer((req, res) => {
     if (req.method !== 'GET') { res.writeHead(405).end(); return; }
@@ -337,15 +339,14 @@ const server = http.createServer((req, res) => {
         assert.equal(await page.evaluate(() => window.__turnstileFixture.sitekey), '0x4AAAAAAFy2ZmcJCPhgxNBL');
         assert.equal(await page.evaluate(() => window.__turnstileFixture.action), 'quote_request');
         assert.equal(await page.$$eval('input[name="cf-turnstile-response"]', nodes => nodes.length), 1);
-        for (const [name, bad, good] of [
+        for (const [name, value, restore] of [
             ['full_name','$4,000 PROMO https://example.invalid','Local Test'],
             ['email_address','bot@sub.fldubai.com','local@example.invalid'],
         ]) {
-            await page.evaluate(({name,value})=>{const f=document.querySelector('form'),input=f.elements.namedItem(name);input.value=value;input.dispatchEvent(new Event('input',{bubbles:true}));f.requestSubmit();},{name,value:bad});
-            assert.equal(await page.evaluate(()=>window.__sent.length),0,'Invalid input must not be sent even with a valid token');
-            assert.equal(await page.$eval('[name="'+name+'"]',input=>input.checkValidity()),false);
-            assert.equal(await page.$eval('[name="'+name+'"]',input=>input.value),bad,'Keep invalid answers available to correct');
-            await page.evaluate(({name,value})=>{const input=document.querySelector('form').elements.namedItem(name);input.value=value;input.dispatchEvent(new Event('input',{bubbles:true}));},{name,value:good});
+            await page.evaluate(({name,value})=>{const input=document.querySelector('form').elements.namedItem(name);input.value=value;input.dispatchEvent(new Event('input',{bubbles:true}));},{name,value});
+            assert.equal(await page.$eval('[name="'+name+'"]',input=>input.checkValidity()),true,'Suspicious-looking answers must remain valid');
+            assert.equal(await page.$eval('[name="'+name+'"]',input=>input.value),value);
+            await page.evaluate(({name,value})=>{const input=document.querySelector('form').elements.namedItem(name);input.value=value;input.dispatchEvent(new Event('input',{bubbles:true}));},{name,value:restore});
         }
         await page.evaluate(() => { window.__turnstileFixture.expire();
             document.querySelector('form').requestSubmit(); });
@@ -368,9 +369,11 @@ const server = http.createServer((req, res) => {
         await page.waitForFunction(() => document.querySelector('#form-message').textContent.includes('could not confirm'));
         await completeSecurityCheck(page);
         await page.evaluate(() => { window.__mode = 'success';
+            const f=document.querySelector('form');f.elements.full_name.value='$4,000 PROMO https://example.invalid';f.elements.email_address.value='bot@fldubai.com';
             document.querySelector('form').requestSubmit(); });
         await page.waitForSelector('#submission-success:not([hidden])');
         assert.equal(await page.evaluate(() => window.__leads), 1);
+        assert.deepEqual(await page.evaluate(()=>{const p=new URLSearchParams(window.__sent.at(-1));return [p.get('full_name'),p.get('email_address')];}),['$4,000 PROMO https://example.invalid','bot@fldubai.com'],'Formerly filtered answers reach the backend unchanged');
         assert.ok(await page.evaluate(() => window.__sent.every(body => new URLSearchParams(body).get('business_url') === 'Find our shop on King Street, Toronto. ' + 'x'.repeat(2200))), 'Free text reaches the backend unchanged');
         const tokens = await page.evaluate(() => window.__sent.map(body => new URLSearchParams(body).get('cf-turnstile-response')));
         assert.equal(tokens.length, 4);
