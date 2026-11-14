@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url><loc>https://reviewremoval.ca/</loc><lastmod>2026-11-01</lastmod></url>
-  <url><loc>https://reviewremoval.ca/platforms.html</loc><lastmod>2026-11-05</lastmod></url>
+  <url><loc>https://reviewremoval.ca/platforms.html</loc></url>
   <url><loc>https://reviewremoval.ca/review-removal-canada.html</loc><lastmod>2026-11-05</lastmod></url>
-  <url><loc>https://reviewremoval.ca/about.html</loc><lastmod>2026-11-05</lastmod></url>
+  <url><loc>https://reviewremoval.ca/about.html</loc></url>
   <url><loc>https://reviewremoval.ca/terms-of-service.html</loc></url>
   <url><loc>https://reviewremoval.ca/privacy-policy.html</loc></url>
   <url><loc>https://reviewremoval.ca/editorial-policy.html</loc><lastmod>2026-10-27</lastmod></url>
@@ -14,7 +14,7 @@
   <url><loc>https://reviewremoval.ca/remove-booking-com-reviews.html</loc><lastmod>2026-11-05</lastmod></url>
   <url><loc>https://reviewremoval.ca/remove-glassdoor-reviews.html</loc><lastmod>2026-11-05</lastmod></url>
   <url><loc>https://reviewremoval.ca/remove-indeed-reviews.html</loc><lastmod>2026-11-05</lastmod></url>
-  <url><loc>https://reviewremoval.ca/blog/index.html</loc><lastmod>2026-11-07</lastmod></url>
+  <url><loc>https://reviewremoval.ca/blog/index.html</loc><lastmod>2026-11-13</lastmod></url>
   <url><loc>https://reviewremoval.ca/blog/google-review-moderation-2019-2025.html</loc><lastmod>2026-09-21</lastmod></url>
   <url><loc>https://reviewremoval.ca/blog/trustpilot-fake-reviews-by-star-rating.html</loc><lastmod>2026-09-21</lastmod></url>
   <url><loc>https://reviewremoval.ca/blog/canadian-tourism-google-reviews-2023.html</loc><lastmod>2026-09-26</lastmod></url>
@@ -34,4 +34,5 @@
   <url><loc>https://reviewremoval.ca/blog/google-review-removal-appeals-data.html</loc><lastmod>2026-11-02</lastmod><image:image><image:loc>https://reviewremoval.ca/blog/assets/google-maps-appeals-direction.svg</image:loc></image:image><image:image><image:loc>https://reviewremoval.ca/blog/assets/google-maps-appeals-receipt-share.svg</image:loc></image:image><image:image><image:loc>https://reviewremoval.ca/blog/assets/google-maps-appeals-median-hours.svg</image:loc></image:image></url>
   <url><loc>https://reviewremoval.ca/blog/google-review-removal-time-data.html</loc><lastmod>2026-11-05</lastmod><image:image><image:loc>https://reviewremoval.ca/blog/assets/google-notice-category-medians.svg</image:loc></image:image><image:image><image:loc>https://reviewremoval.ca/blog/assets/google-notice-receipt-mix.svg</image:loc></image:image><image:image><image:loc>https://reviewremoval.ca/blog/assets/google-notice-median-tail-examples.svg</image:loc></image:image></url>
   <url><loc>https://reviewremoval.ca/blog/google-review-removal-local-ranking-study.html</loc><lastmod>2026-11-07</lastmod><image:image><image:loc>https://reviewremoval.ca/blog/assets/google-ranking-rating-bands.svg</image:loc></image:image><image:image><image:loc>https://reviewremoval.ca/blog/assets/google-ranking-high-rating-categories.svg</image:loc></image:image><image:image><image:loc>https://reviewremoval.ca/blog/assets/google-ranking-frames.svg</image:loc></image:image></url>
+  <url><loc>https://reviewremoval.ca/blog/google-reviews-without-text-data-study.html</loc><lastmod>2026-11-13</lastmod><image:image><image:loc>https://reviewremoval.ca/blog/assets/google-text-coverage-ratings.svg</image:loc></image:image><image:image><image:loc>https://reviewremoval.ca/blog/assets/google-text-coverage-frames.svg</image:loc></image:image><image:image><image:loc>https://reviewremoval.ca/blog/assets/google-text-coverage-places.svg</image:loc></image:image></url>
 </urlset>

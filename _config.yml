@@ -1,4 +1,7 @@
 exclude:
+  - build-text-coverage-assets.py
+  - text-coverage-check.cjs
+  - GOOGLE-TEXT-COVERAGE-RESEARCH-NOTES.md
   - acknowledgement-sheet-fixture.cjs
   - acknowledgement-storage.test.cjs
   - lead-source-check.cjs

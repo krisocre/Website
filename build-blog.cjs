@@ -197,6 +197,7 @@ articles.splice(1,0,require('./blog/google-risk-post.cjs'));
 articles.splice(1,0,require('./blog/google-maps-appeals-post.cjs'));
 articles.splice(1,0,require('./blog/google-notice-timing-post.cjs'));
 articles.splice(1,0,require('./blog/google-ranking-post.cjs'));
+articles.splice(1,0,require('./blog/google-text-coverage-post.cjs'));
 
 const escapeHtml = value => String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 function head(title, description, extra = "") { return `<!doctype html>\n<html lang="en-CA">\n<head>\n  <meta charset="utf-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1">\n  <meta name="theme-color" content="#17353e">\n  <meta name="description" content="${escapeHtml(description)}">\n  <meta name="author" content="ReviewRemoval">\n  <title>${escapeHtml(title)} | ReviewRemoval</title>\n  <link rel="icon" href="../favicon.svg" type="image/svg+xml">\n  <link rel="alternate" type="application/rss+xml" title="ReviewRemoval Research and Guides" href="../feed.xml">\n  <link rel="stylesheet" href="../styles.css">\n  <link rel="stylesheet" href="blog.css">\n  <script src="../script.js?v=20261112-chatgpt-ads" defer></script>${extra}\n</head>`; }
@@ -207,7 +208,7 @@ function articlePage(article) { const serviceHref = article.serviceHref || (arti
 
 for (const article of articles) fs.writeFileSync(path.join(root, `${article.slug}.html`), articlePage(article), 'utf8');
 
-const featured = articles.find(article => article.slug === 'google-review-removal-local-ranking-study') || articles[0];
+const featured = articles.find(article => article.slug === 'google-reviews-without-text-data-study') || articles[0];
 const featuredArtwork = featured.featureImage
   ? `<a class="featured-art featured-art-chart" href="${featured.slug}.html"><img src="assets/${escapeHtml(featured.featureImage)}.svg" alt="${escapeHtml(featured.featureAlt)}" width="1200" height="780" loading="lazy" decoding="async"></a>`
   : '<div class="featured-art"><span>GOOGLE MAPS / 2019–2025</span><strong>292m+</strong><small>Google’s published 2025 count of policy-violating reviews blocked or removed</small></div>';

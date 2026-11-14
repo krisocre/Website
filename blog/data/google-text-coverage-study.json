@@ -1,0 +1,212 @@
+{
+  "records": 516281,
+  "places": 6019,
+  "coverage": [
+    {
+      "rating": 1,
+      "with_text": 13992,
+      "without_text": 5314,
+      "total": 19306,
+      "without_text_pct": 27.52512172381643
+    },
+    {
+      "rating": 2,
+      "with_text": 10630,
+      "without_text": 6444,
+      "total": 17074,
+      "without_text_pct": 37.74159540822303
+    },
+    {
+      "rating": 3,
+      "with_text": 27834,
+      "without_text": 28989,
+      "total": 56823,
+      "without_text_pct": 51.01631381658835
+    },
+    {
+      "rating": 4,
+      "with_text": 64885,
+      "without_text": 62562,
+      "total": 127447,
+      "without_text_pct": 49.08864076831938
+    },
+    {
+      "rating": 5,
+      "with_text": 175786,
+      "without_text": 119845,
+      "total": 295631,
+      "without_text_pct": 40.538712110705575
+    }
+  ],
+  "frames": [
+    {
+      "frame": "all_records",
+      "records": 516281,
+      "star_points": 2211866,
+      "mean_rating": 4.284228937342261,
+      "one_star_count": 19306,
+      "one_star_pct": 3.73943646967446
+    },
+    {
+      "frame": "text_only",
+      "records": 293127,
+      "star_points": 1257224,
+      "mean_rating": 4.289007836193869,
+      "one_star_count": 13992,
+      "one_star_pct": 4.773357623146281
+    },
+    {
+      "frame": "no_stored_text",
+      "records": 223154,
+      "star_points": 954642,
+      "mean_rating": 4.277951549154396,
+      "one_star_count": 5314,
+      "one_star_pct": 2.381315145594522
+    }
+  ],
+  "shifts": [
+    {
+      "direction": "higher",
+      "place_count": 2971,
+      "share_of_places_pct": 49.360358863598606
+    },
+    {
+      "direction": "equal",
+      "place_count": 267,
+      "share_of_places_pct": 4.4359528160824055
+    },
+    {
+      "direction": "lower",
+      "place_count": 2781,
+      "share_of_places_pct": 46.20368832031899
+    },
+    {
+      "direction": "no_text_records",
+      "place_count": 0,
+      "share_of_places_pct": 0.0
+    }
+  ],
+  "photos": [
+    {
+      "stored_text": "present",
+      "photo_field": "nonempty",
+      "records": 18432
+    },
+    {
+      "stored_text": "present",
+      "photo_field": "empty",
+      "records": 274695
+    },
+    {
+      "stored_text": "absent",
+      "photo_field": "nonempty",
+      "records": 2047
+    },
+    {
+      "stored_text": "absent",
+      "photo_field": "empty",
+      "records": 221107
+    }
+  ],
+  "places_with_absolute_mean_shift_at_least_0_1": 2378,
+  "title": "Google rating text-coverage audit: Alaska 10-core archive",
+  "version": "1.0.0",
+  "analysis_date": "2026-11-13",
+  "source": {
+    "url": "https://mcauleylab.ucsd.edu/public_datasets/gdrive/googlelocal/review-Alaska_10.json.gz",
+    "page": "https://mcauleylab.ucsd.edu/public_datasets/gdrive/googlelocal/",
+    "sha256": "c2dba3acd27e8d2d661fe4ee9a58bb8f392172af7261a0e42b072f5dfc86de31",
+    "compressed_bytes": 36962271,
+    "source_label": "Google Local Data (2021), Alaska 10-core",
+    "publisher": "UC San Diego McAuley Lab",
+    "accessed": "2026-11-13",
+    "scope": "Historical United States archive; source collection up to September 2021"
+  },
+  "cleaning": {
+    "source_rows": 521515,
+    "distinct_user_place_time_keys": 516289,
+    "repeated_key_occurrences": 5226,
+    "differing_repeated_occurrences": 8,
+    "ambiguous_keys_excluded": 8,
+    "text_value_types_in_source": {
+      "str": 298257,
+      "NoneType": 223258
+    },
+    "rule": "Keep one copy of identical user/place/time records. Exclude every key with differing JSON objects; compare canonical full JSON SHA-256, not just stars/text."
+  },
+  "findings": {
+    "no_text_pct": 43.22336092166863,
+    "one_star_share_change_pp": 1.033921153471821,
+    "one_star_share_relative_change_pct": 27.64911670131489
+  },
+  "raw_sensitivity": {
+    "records": 521515,
+    "frames": [
+      {
+        "frame": "all_records",
+        "records": 521515,
+        "star_points": 2234040,
+        "mean_rating": 4.283750227701984,
+        "one_star_count": 19591,
+        "one_star_pct": 3.756555420265956
+      },
+      {
+        "frame": "text_only",
+        "records": 298257,
+        "star_points": 1278924,
+        "mean_rating": 4.287993240728634,
+        "one_star_count": 14276,
+        "one_star_pct": 4.786476092765635
+      },
+      {
+        "frame": "no_stored_text",
+        "records": 223258,
+        "star_points": 955116,
+        "mean_rating": 4.27808186044845,
+        "one_star_count": 5315,
+        "one_star_pct": 2.380653772765142
+      }
+    ],
+    "no_text_pct": 42.809506917346575
+  },
+  "method": {
+    "text": "A nonempty Python string after str.strip(); null or blank is no nonblank stored text.",
+    "mean": "Sum of archived star values divided by included record count.",
+    "one_star_share": "One-star record count divided by all included records in the same frame.",
+    "profile_direction": "Compare text_star_points * all_count against all_star_points * text_count exactly.",
+    "photo": "Nonempty pics list; no files fetched, counted or inspected.",
+    "weighting": "Record-weighted pooled rating summaries; each distinct place contributes once to direction counts."
+  },
+  "limitations": [
+    "The 10-core selects dense user/place histories, not a random or representative sample.",
+    "US historical archive, not Canadian prevalence or current Google behaviour.",
+    "Null stored text may reflect original absence or collection missingness; these cannot be separated.",
+    "Place IDs describe archived places, not verified active business accounts.",
+    "No removal decisions, authenticity labels, complete live profiles or causal effects are observed.",
+    "No reviewer names, user/place IDs, text, image URLs or raw records are republished."
+  ],
+  "attribution": "Original aggregate calculations: ReviewRemoval. Underlying Google Local Data (2021): Tianyang Zhang and Jiacheng Li, UCSD. Cite the two requested source papers alongside the dataset.",
+  "source_citations": [
+    "https://aclanthology.org/2022.acl-long.426/",
+    "https://arxiv.org/abs/2207.00422"
+  ],
+  "rights": "Original aggregate tables and figures may be cited with attribution and a link to the article. No licence to the underlying Google content is granted or implied.",
+  "distributions": [
+    {
+      "file": "google-text-coverage-ratings.csv",
+      "rows": 5
+    },
+    {
+      "file": "google-text-coverage-frames.csv",
+      "rows": 3
+    },
+    {
+      "file": "google-text-coverage-places.csv",
+      "rows": 4
+    },
+    {
+      "file": "google-text-coverage-photos.csv",
+      "rows": 4
+    }
+  ]
+}

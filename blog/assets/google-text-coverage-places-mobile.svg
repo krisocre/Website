@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="453.6pt" height="612pt" viewBox="0 0 453.6 612" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>ReviewRemoval / Matplotlib</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 612 
+L 453.6 612 
+L 453.6 0 
+L 0 0 
+z
+" style="fill: #f7f3ec"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 104.328 440.64 
+L 362.88 440.64 
+L 362.88 208.08 
+L 104.328 208.08 
+z
+" style="fill: #f7f3ec"/>
+   </g>
+   <g id="matplotlib.axis_1">
+    <g id="xtick_1">
+     <g id="line2d_1">
+      <path d="M 104.328 440.64 
+L 104.328 208.08 
+" clip-path="url(#p232bc9abf5)" style="fill: none; stroke: #dce1d9; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_2"/>
+     <g id="text_1">
+      <text style="font-size: 10px; font-family: 'Arial', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #596d69" x="104.328" y="456.797812" transform="rotate(-0 104.328 456.797812)">0%</text>
+     </g>
+    </g>
+    <g id="xtick_2">
+     <g id="line2d_3">
+      <path d="M 168.966 440.64 
+L 168.966 208.08 
+" clip-path="url(#p232bc9abf5)" style="fill: none; stroke: #dce1d9; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_4"/>
+     <g id="text_2">
+      <text style="font-size: 10px; font-family: 'Arial', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #596d69" x="168.966" y="456.797812" transform="rotate(-0 168.966 456.797812)">25%</text>
+     </g>
+    </g>
+    <g id="xtick_3">
+     <g id="line2d_5">
+      <path d="M 233.604 440.64 
+L 233.604 208.08 
+" clip-path="url(#p232bc9abf5)" style="fill: none; stroke: #dce1d9; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_6"/>
+     <g id="text_3">
+      <text style="font-size: 10px; font-family: 'Arial', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #596d69" x="233.604" y="456.797812" transform="rotate(-0 233.604 456.797812)">50%</text>
+     </g>
+    </g>
+    <g id="xtick_4">
+     <g id="line2d_7">
+      <path d="M 298.242 440.64 
+L 298.242 208.08 
+" clip-path="url(#p232bc9abf5)" style="fill: none; stroke: #dce1d9; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_8"/>
+     <g id="text_4">
+      <text style="font-size: 10px; font-family: 'Arial', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #596d69" x="298.242" y="456.797812" transform="rotate(-0 298.242 456.797812)">75%</text>
+     </g>
+    </g>
+    <g id="xtick_5">
+     <g id="line2d_9">
+      <path d="M 362.88 440.64 
+L 362.88 208.08 
+" clip-path="url(#p232bc9abf5)" style="fill: none; stroke: #dce1d9; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_10"/>
+     <g id="text_5">
+      <text style="font-size: 10px; font-family: 'Arial', 'DejaVu Sans', sans-serif; text-anchor: middle; fill: #596d69" x="362.88" y="456.797812" transform="rotate(-0 362.88 456.797812)">100%</text>
+     </g>
+    </g>
+   </g>
+   <g id="matplotlib.axis_2">
+    <g id="ytick_1">
+     <g id="line2d_11"/>
+     <g id="text_6">
+      <text style="font-size: 12px; font-family: 'Arial', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #17353e" x="95.328" y="258.18196" transform="rotate(-0 95.328 258.18196)">Higher mean</text>
+     </g>
+    </g>
+    <g id="ytick_2">
+     <g id="line2d_12"/>
+     <g id="text_7">
+      <text style="font-size: 12px; font-family: 'Arial', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #17353e" x="95.328" y="328.654688" transform="rotate(-0 95.328 328.654688)">Equal mean</text>
+     </g>
+    </g>
+    <g id="ytick_3">
+     <g id="line2d_13"/>
+     <g id="text_8">
+      <text style="font-size: 12px; font-family: 'Arial', 'DejaVu Sans', sans-serif; text-anchor: end; fill: #17353e" x="95.328" y="399.127415" transform="rotate(-0 95.328 399.127415)">Lower mean</text>
+     </g>
+    </g>
+   </g>
+   <g id="patch_3">
+    <path d="M 104.328 236.973818 
+L 231.950195 236.973818 
+L 231.950195 270.800727 
+L 104.328 270.800727 
+z
+" clip-path="url(#p232bc9abf5)" style="fill: #356c64"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 104.328 307.446545 
+L 115.797245 307.446545 
+L 115.797245 341.273455 
+L 104.328 341.273455 
+z
+" clip-path="url(#p232bc9abf5)" style="fill: #87968e"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 104.328 377.919273 
+L 223.78856 377.919273 
+L 223.78856 411.746182 
+L 104.328 411.746182 
+z
+" clip-path="url(#p232bc9abf5)" style="fill: #a94e32"/>
+   </g>
+   <g id="text_9">
+    <text style="font-weight: 700; font-size: 15px; font-family: 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #17353e" x="238.413995" y="254.956645" transform="rotate(-0 238.413995 254.956645)">49.4%</text>
+   </g>
+   <g id="text_10">
+    <text style="font-size: 11px; font-family: 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #596d69" x="104.328" y="286.396521" transform="rotate(-0 104.328 286.396521)">2,971 of 6,019 places</text>
+   </g>
+   <g id="text_11">
+    <text style="font-weight: 700; font-size: 15px; font-family: 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #17353e" x="122.261045" y="325.429372" transform="rotate(-0 122.261045 325.429372)">4.4%</text>
+   </g>
+   <g id="text_12">
+    <text style="font-size: 11px; font-family: 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #596d69" x="104.328" y="356.869249" transform="rotate(-0 104.328 356.869249)">267 of 6,019 places</text>
+   </g>
+   <g id="text_13">
+    <text style="font-weight: 700; font-size: 15px; font-family: 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #17353e" x="230.25236" y="395.902099" transform="rotate(-0 230.25236 395.902099)">46.2%</text>
+   </g>
+   <g id="text_14">
+    <text style="font-size: 11px; font-family: 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #596d69" x="104.328" y="427.341976" transform="rotate(-0 104.328 427.341976)">2,781 of 6,019 places</text>
+   </g>
+  </g>
+  <g id="text_15">
+   <text style="font-weight: 700; font-size: 10px; font-family: 'Arial', 'DejaVu Sans', sans-serif; text-anchor: start; fill: #a94e32" x="36.288" y="30.6" transform="rotate(-0 36.288 30.6)">REVIEWREMOVAL  /  ORIGINAL DATA ANALYSIS</text>
+  </g>
+  <g id="text_16">
+   <text style="font-weight: 700; font-size: 22px; font-family: 'Arial', 'DejaVu Sans', sans-serif; fill: #17353e" transform="translate(36.288 83.067187)">The pooled average hides</text>
+   <text style="font-weight: 700; font-size: 22px; font-family: 'Arial', 'DejaVu Sans', sans-serif; fill: #17353e" transform="translate(36.288 108.168844)">opposite directions</text>
+  </g>
+  <g id="text_17">
+   <text style="font-size: 12px; font-family: 'Arial', 'DejaVu Sans', sans-serif; fill: #596d69" transform="translate(36.288 143.229375)">Text-only mean versus all-record mean,</text>
+   <text style="font-size: 12px; font-family: 'Arial', 'DejaVu Sans', sans-serif; fill: #596d69" transform="translate(36.288 156.06225)">within each place</text>
+  </g>
+  <g id="text_18">
+   <text style="font-size: 10px; font-family: 'Arial', 'DejaVu Sans', sans-serif; fill: #17353e" transform="translate(36.288 490.759688)">Pooled means: 4.2842 (all) and 4.2890 (text only).</text>
+   <text style="font-size: 10px; font-family: 'Arial', 'DejaVu Sans', sans-serif; fill: #17353e" transform="translate(36.288 504.511875)">Place-level directions differ despite</text>
+   <text style="font-size: 10px; font-family: 'Arial', 'DejaVu Sans', sans-serif; fill: #17353e" transform="translate(36.288 517.951875)">the similar pooled means.</text>
+  </g>
+  <g id="text_19">
+   <text style="font-size: 8px; font-family: 'Arial', 'DejaVu Sans', sans-serif; fill: #596d69" transform="translate(36.288 551.585625)">Source: UCSD Google Local Data (2021), Alaska 10-core.</text>
+   <text style="font-size: 8px; font-family: 'Arial', 'DejaVu Sans', sans-serif; fill: #596d69" transform="translate(36.288 562.005)">Historical US subset; not Canadian prevalence or removal odds.</text>
+   <text style="font-size: 8px; font-family: 'Arial', 'DejaVu Sans', sans-serif; fill: #596d69" transform="translate(36.288 572.22)">ReviewRemoval analysis, 13 November 2026.</text>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p232bc9abf5">
+   <rect x="104.328" y="208.08" width="258.552" height="232.56"/>
+  </clipPath>
+ </defs>
+</svg>

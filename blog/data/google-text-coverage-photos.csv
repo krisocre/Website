@@ -1,0 +1,5 @@
+stored_text,photo_field,records
+present,nonempty,18432
+present,empty,274695
+absent,nonempty,2047
+absent,empty,221107

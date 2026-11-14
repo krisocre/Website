@@ -1,0 +1,47 @@
+GOOGLE REVIEW EXPORT COVERAGE CHECKLIST
+ReviewRemoval | 13 November 2026 | v1.0.0
+https://reviewremoval.ca/blog/google-reviews-without-text-data-study.html
+
+Purpose: identify gaps before analysing a review file or requesting an assessment.
+This checklist is not an eligibility score, legal opinion or removal guarantee.
+
+1. RECORD THE SCOPE
+Date observed:
+Source/export tool:
+Listing or location covered:
+Does this include all observed ratings, only written comments, or selected concerns?
+Time window and any pagination limit:
+Known missing records or fields:
+
+2. KEEP EMPTY TEXT FIELDS VISIBLE
+Total included records:
+Records with nonblank stored text:
+Records without nonblank stored text:
+Records with attachment metadata:
+Does any tool automatically discard blank/null text?
+Are duplicate records or conflicting versions documented?
+
+3. LABEL EVERY DENOMINATOR
+One-star count / all included records:
+One-star count / text-bearing records (if used):
+Are the counts and means sample calculations or live Google listing observations?
+Have different populations been kept separate in comparisons?
+
+4. DOCUMENT A CONCERN WITHOUT INVENTING A VIOLATION
+Public review reference, if available:
+Star value and date observed:
+Written text/attachment presence:
+Specific policy concern and relevant supporting context:
+Evidence gaps or alternative explanations:
+Do not include passwords or private customer files in a general enquiry.
+
+5. KEEP REPORTING STATUS SEPARATE
+Report reference and date:
+Status shown in the applicable reporting tool:
+Appeal reference and date, if applicable:
+Outcome observed and date:
+A missing row in an export is not proof that Google removed a review.
+
+The research sample is a selected historical US archive, not Canadian prevalence.
+Google decides whether a contribution violates its policies. The absence of
+written text alone does not establish a violation or a fake review.
