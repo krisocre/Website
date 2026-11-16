@@ -36,6 +36,9 @@ const turnstileApiFixture = '(' + fixture.toString() + ')();';
 const isTurnstileApi = url => url.startsWith('https://challenges.cloudflare.com/turnstile/v0/api.js');
 async function completeSecurityCheck(page) {
   await page.focus('#assessment-form [name="full_name"]');
+  // General form checks also run against the owner's temporary pause.
+  const paused = await page.evaluate(() => typeof TURNSTILE_PAUSED !== 'undefined' && TURNSTILE_PAUSED === true);
+  if (paused) return;
   await page.waitForFunction(() => Boolean(window.__turnstileFixture?.token));
 }
 module.exports = {turnstileApiFixture, isTurnstileApi, completeSecurityCheck};

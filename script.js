@@ -291,7 +291,12 @@ form?.addEventListener('change', refreshLeadInputValidity);
 
 // Load only on pages with a quote form, when the visitor approaches or uses it.
 // The server independently verifies the token; this UI is not a security boundary.
-const assessmentVerification = form ? setupAssessmentVerification() : null;
+// Temporary owner-requested pause. Restore this frontend first, then the backend.
+const TURNSTILE_PAUSED = true;
+const assessmentVerification = form && !TURNSTILE_PAUSED ? setupAssessmentVerification() : null;
+if (form && TURNSTILE_PAUSED) {
+  document.querySelector('.form-verification')?.setAttribute('hidden', '');
+}
 
 function setupAssessmentVerification() {
   const container = document.querySelector('#assessment-verification');
@@ -422,10 +427,11 @@ form?.addEventListener('submit', async event => {
   }
   updateQuote(document.querySelector('#formQuantity').value);
 
-  const verificationToken = assessmentVerification.getToken();
-  if (!verificationToken) { assessmentVerification.prompt(); return; }
+  const verificationToken = assessmentVerification?.getToken() || '';
+  if (!TURNSTILE_PAUSED && !verificationToken) { assessmentVerification.prompt(); return; }
   const payload = new FormData(form);
-  payload.set('cf-turnstile-response', verificationToken);
+  if (TURNSTILE_PAUSED) payload.delete('cf-turnstile-response');
+  else payload.set('cf-turnstile-response', verificationToken);
   const trafficSource = leadTrafficSource.get();
   payload.set('traffic_source', trafficSource);
   window.SubmissionTerms?.prepare(payload);
@@ -498,7 +504,7 @@ form?.addEventListener('submit', async event => {
   } finally {
     window.clearTimeout(timer);
     // Tokens are single-use, including when a request fails after verification.
-    assessmentVerification.reset();
+    assessmentVerification?.reset();
   }
 });
 

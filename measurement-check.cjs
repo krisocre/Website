@@ -37,7 +37,7 @@ const server=http.createServer((req,res)=>{
    await completeSecurityCheck(page);
    await page.evaluate(result=>{
     const f=document.querySelector('#assessment-form');
-    const values={full_name:'PRIVATE_PERSON',business_name:'PRIVATE_BUSINESS',email_address:'private.person@example.com',business_url:'https://example.com/PRIVATE_PROFILE',review_links:'https://example.com/PRIVATE_REVIEW',reason:'PRIVATE_REVIEW_TEXT'};
+    const values={full_name:'PRIVATE_PERSON',business_name:'PRIVATE_BUSINESS',email_address:'private.person@example.com',business_url:'https://example.com/PRIVATE_PROFILE',reason:'PRIVATE_REVIEW_TEXT https://example.com/PRIVATE_REVIEW'};
     for(const [name,value] of Object.entries(values))f.elements[name].value=value;
     window.fetch=async()=>{
       if(result==='network')throw Error('PRIVATE_NETWORK_ERROR');

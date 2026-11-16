@@ -1,5 +1,34 @@
 # ReviewRemoval quote forms - verified standalone backend
 
+## November 15: temporary Turnstile pause
+
+The owner requested a pause on the live ReviewRemoval form. The local frontend
+and complete `google-apps-script.gs` now both set `TURNSTILE_PAUSED = true`.
+The browser hides the check, loads no Turnstile script and sends no token.
+The backend skips Siteverify and the token replay claim while paused. Required
+fields, basic formats, formula protection, attribution, storage, notification
+emails and acknowledgement archiving continue. No new Script Property is needed.
+
+Apply the backend first: replace ALL of Code.gs in the EXISTING separate
+ReviewRemoval project with this folder's complete `google-apps-script.gs`.
+Keep the existing Script Properties and /exec URL. Save, optionally run
+`checkReviewRemovalSetup` (it reports `turnstile: paused` without contacting
+Cloudflare), then Deploy > Manage deployments > existing deployment > Edit >
+New version > Deploy. Do not use New deployment or the ReviewsBoost project.
+
+Then publish `script.js` and all eight form pages together. Their runtime
+version is `20261115-turnstile-paused`; the platform generator retains that
+version too. Test the live form in a private window and confirm one labelled
+test reaches the sheet and owner inbox. Cloudflare's widget and keys remain.
+
+To restore verification, set the flag to `false` in script.js and publish it
+with a fresh form-page cache version FIRST. Then set the flag to `false` in
+Code.gs and deploy a New version of the same backend deployment. The retained
+verification and replay checks resume. During the pause there is no Turnstile
+spam protection. No live website or Apps Script deployment was performed here.
+
+This section supersedes the historical Turnstile enforcement instructions below.
+
 ## November 14: suspicious-content filters removed
 
 This supersedes the earlier input-restriction instructions below. The browser and

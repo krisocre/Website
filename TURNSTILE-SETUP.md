@@ -1,5 +1,22 @@
 # ReviewRemoval: separate Apps Script project and Turnstile setup
 
+## November 15: temporary pause prepared locally
+
+Turnstile is paused by the owner-controlled `TURNSTILE_PAUSED = true` setting in
+both script.js and the COMPLETE google-apps-script.gs replacement. No additional
+Script Property is required. Publish the backend first, then the website.
+The existing Cloudflare widget, site key and secret should be retained.
+
+Current installation, test and restoration steps are in the November 15 section
+of [FORM-SETUP.md](FORM-SETUP.md). While paused, the browser does not load the
+widget and the backend accepts otherwise valid requests without a token.
+The normal input, storage and mail paths remain. The setup diagnostic checks
+the sheet and required storage/mail properties and reports that verification is
+paused; it does not contact Cloudflare. No production deployment was performed.
+
+The enforcement details and earlier owner-reported tests below describe the
+retained verification path when it is restored, rather than the current pause.
+
 ## November 14 input-filter update
 
 Turnstile is unchanged. Suspicious-text and email-domain filters have been removed

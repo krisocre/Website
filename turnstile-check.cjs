@@ -14,7 +14,7 @@ const sharedEndpoint = 'https://script.google.com/macros/s/AKfycby4mQu0BJFu8Jmbw
 const formPages = ['index.html', 'remove-yelp-reviews.html', 'remove-facebook-reviews.html',
     'remove-trustpilot-reviews.html', 'remove-tripadvisor-reviews.html',
     'remove-booking-com-reviews.html', 'remove-glassdoor-reviews.html', 'remove-indeed-reviews.html'];
-const formScript = 'script.js?v=20261114-input-filters-removed';
+const formScript = 'script.js?v=20261115-turnstile-paused';
 const frontend = fs.readFileSync(path.join(root, 'script.js'), 'utf8');
 const ruleBlock = value => value.match(/\/\/ BEGIN LEAD INPUT RULES[\s\S]*?\/\/ END LEAD INPUT RULES/)[0];
 assert.equal(ruleBlock(frontend), ruleBlock(source), 'Browser and backend input rules must agree');
@@ -33,7 +33,7 @@ for (const file of formPages) {
 assert.ok(fs.readFileSync(path.join(root, 'build-platform-pages.cjs'), 'utf8').includes('src="' + formScript + '"'), 'Generated forms must retain the cache version');
 let cases = 0;
 
-function backend({ properties, provider, responseCode = 200, malformed = false, mailFailure = false, missingSheet = false, badHeaders = false, sharedState, lockUnavailable = false, propertyFailure = false, onClaim, clock = {now: Date.now()} } = {}) {
+function backend({ verificationEnabled = true, properties, provider, responseCode = 200, malformed = false, mailFailure = false, missingSheet = false, badHeaders = false, sharedState, lockUnavailable = false, propertyFailure = false, onClaim, clock = {now: Date.now()} } = {}) {
     const calls = { verify: [], sheets: 0, rows: [], mail: 0, mailBodies: [], claims: [], releases: 0 };
     const book = workbookFixture({brand:'ReviewRemoval', rows:calls.rows, width:13});
     const used = new Set();
@@ -112,9 +112,38 @@ function backend({ properties, provider, responseCode = 200, malformed = false, 
     };
     vm.createContext(context);
     vm.runInContext(source, context);
+    // Existing security cases exercise restoration; pause cases use the file as shipped.
+    if (verificationEnabled) context.TURNSTILE_PAUSED = false;
     return { calls, state, book, post: parameter => context.doPost({ parameter }), check: () => context.checkReviewRemovalSetup() };
 }
 const payload = { 'cf-turnstile-response': 'LOCAL_TOKEN', full_name: '=formula', business_name: 'Test Business', email_address: 'private@example.invalid', reason: 'private review text', selected_plan: 'Existing plan', review_count: '2' };
+
+for (const token of [undefined, '', 'expired-token']) {
+    const paused = backend({verificationEnabled:false, provider:() => {throw Error('Cloudflare must not be contacted while paused');}});
+    assert.equal(paused.post({...payload, 'cf-turnstile-response':token}).result, 'success');
+    assert.equal(paused.calls.verify.length, 0);
+    assert.equal(paused.calls.claims.length, 0);
+    assert.equal(paused.calls.rows.length, 1);
+    assert.equal(paused.calls.mail, 1);
+    assert.equal(paused.calls.rows[0][2], "'=formula", 'Formula protection remains active while paused');
+    cases++;
+}
+const pausedConfig = {SPREADSHEET_ID:'LOCAL_SHEET_ID', SHEET_NAME:'Leads', NOTIFICATION_EMAIL:'test@example.invalid'};
+const pausedSetup = backend({verificationEnabled:false, properties:pausedConfig});
+assert.equal(pausedSetup.check().turnstile, 'paused');
+assert.equal(pausedSetup.calls.verify.length, 0);
+assert.equal(pausedSetup.calls.rows.length, 0);
+assert.equal(pausedSetup.calls.mail, 0);
+for (const field of ['full_name', 'business_name', 'email_address', 'review_count']) {
+    const paused = backend({verificationEnabled:false, properties:pausedConfig});
+    assert.equal(paused.post({...payload, [field]:''}).code, 'invalid_input');
+    assert.equal(paused.calls.rows.length, 0);
+    assert.equal(paused.calls.mail, 0);
+    cases++;
+}
+const forgedPause = backend();
+assert.equal(forgedPause.post({...payload, 'cf-turnstile-response':'', TURNSTILE_PAUSED:'true', turnstilePaused:true}).code, 'verification_failed', 'Submitted fields cannot change the server setting');
+cases++;
 
 for (const [overrides, field] of [
     [{full_name:' '},'full_name'], [{business_name:' '},'business_name'],
@@ -284,14 +313,17 @@ assert.throws(() => backend({ badHeaders: true }).check(), /Traffic Source in M1
 cases++;
 assert.throws(() => backend({ provider: () => ({ success: false, 'error-codes': ['invalid-input-secret'] }) }).check(), /secret check failed/);
 cases++;
-console.log(`PASS: ${cases} backend cases; token/action/hostname checks, required fields/basic formats, previously filtered content accepted with owner notification, international names and optional links, replay protection and existing lead handling.`);
+console.log(`PASS: ${cases} backend cases; pause accepts token-free leads without Cloudflare or replay claims; required fields/formula protection remain; restoration retains token/action/hostname and replay checks.`);
 
+let verificationEnabled = false;
 const server = http.createServer((req, res) => {
     if (req.method !== 'GET') { res.writeHead(405).end(); return; }
     const file = path.resolve(root, '.' + (new URL(req.url, 'http://local').pathname === '/' ? '/index.html' : new URL(req.url, 'http://local').pathname));
     if (!file.startsWith(root + path.sep)) { res.writeHead(403).end(); return; }
     fs.readFile(file, (error, bytes) => {
         if (error) { res.writeHead(404).end(); return; }
+        // Exercise the retained verification code without changing production files.
+        if (verificationEnabled && file === path.join(root, 'script.js')) bytes = bytes.toString().replace('const TURNSTILE_PAUSED = true;', 'const TURNSTILE_PAUSED = false;');
         res.writeHead(200, { 'Content-Type': ({ '.html': 'text/html;charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.webp': 'image/webp', '.svg': 'image/svg+xml' })[path.extname(file)] || 'application/octet-stream' }).end(bytes);
     });
 });
@@ -306,15 +338,52 @@ const server = http.createServer((req, res) => {
             externalPosts = [];
         let blocked = false,
             apiLoads = 0;
+        const pausedApp = backend({verificationEnabled:false}), pausedPosts = [];
         await page.setViewport({ width: 390, height: 844 });
         await page.setRequestInterception(true);
         page.on('pageerror', error => errors.push(error.message));
         page.on('request', request => {
-            if (request.method() !== 'GET') { externalPosts.push(request.url());
+            if (!verificationEnabled && request.method() === 'POST' && request.url() === protectedEndpoint) {
+                const data = Object.fromEntries(new URLSearchParams(request.postData()));
+                pausedPosts.push(data);
+                const result = pausedApp.post(data);
+                request.respond({status:200, contentType:'application/json', headers:{'Access-Control-Allow-Origin':'*'}, body:JSON.stringify(result)});
+            } else if (request.method() !== 'GET') { externalPosts.push(request.url());
                 request.abort(); } else if (isTurnstileApi(request.url())) { apiLoads++;
                 blocked ? request.abort() : request.respond({ status: 200, contentType: 'text/javascript', body: turnstileApiFixture }); } else if (request.url().startsWith(base)) request.continue();
             else request.abort();
         });
+        for (const [index, file] of formPages.entries()) {
+            await page.setViewport({width: index % 2 ? 1440 : 320, height:900});
+            await page.goto(base + file, {waitUntil:'load'});
+            await page.focus('[name="full_name"]');
+            assert.equal(await page.$eval('.form-verification', node => node.hidden && node.getClientRects().length === 0), true, file + ': no security-check placeholder');
+            assert.equal(apiLoads, 0, 'No Turnstile script is requested while paused');
+            await page.evaluate(() => document.querySelector('form').requestSubmit());
+            assert.equal(pausedPosts.length, index, 'Required fields still prevent empty submissions');
+            await page.evaluate(() => {
+                window.__leads = 0;
+                window.ReviewRemovalMeasurement = {confirmedLead() {window.__leads++;}};
+                const form = document.querySelector('form');
+                for (const [name, value] of Object.entries({full_name:'$4,000 PROMO https://example.invalid', business_name:'Test Business', email_address:'bot@fldubai.com', business_url:'Find us on King Street', reason:'Keep customer notes.'})) form.elements[name].value = value;
+                form.requestSubmit();
+            });
+            await page.waitForSelector('#submission-success:not([hidden])');
+            assert.equal(pausedPosts.length, index + 1, 'One token-free request per form');
+            assert.equal(Object.hasOwn(pausedPosts[index], 'cf-turnstile-response'), false, 'No dummy verification tokens');
+            assert.equal(pausedPosts[index].business_url, 'Find us on King Street');
+            assert.equal(await page.evaluate(() => window.__leads), 1, 'Confirmed leads still record once');
+            assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true);
+        }
+        assert.equal(pausedApp.calls.rows.length, formPages.length);
+        assert.equal(pausedApp.calls.mail, formPages.length);
+        assert.equal(pausedApp.calls.verify.length, 0);
+        assert.equal(pausedApp.calls.claims.length, 0);
+        assert.equal(apiLoads, 0);
+        assert.deepEqual(errors, []);
+        console.log('PASS: all eight paused forms save/notify through the mocked complete backend without loading Cloudflare or posting a token; required fields, attribution fields, mobile layout and lead tracking remain.');
+        verificationEnabled = true;
+        await page.setViewport({width:390, height:844});
         await page.goto(base, { waitUntil: 'load' });
         assert.equal(apiLoads, 0, 'Widget must not load on the first screen');
         await page.evaluate(() => {

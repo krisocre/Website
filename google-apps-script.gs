@@ -7,9 +7,14 @@
  *
  * Maintain this file as Code.gs in the existing separate ReviewRemoval project.
  * Script Properties: SPREADSHEET_ID, SHEET_NAME, NOTIFICATION_EMAIL,
- * TURNSTILE_SECRET, TURNSTILE_HOSTNAMES. See TURNSTILE-SETUP.md.
+ * TURNSTILE_SECRET, TURNSTILE_HOSTNAMES (retained for resuming verification).
+ * Turnstile is temporarily paused. No new Script Property is required.
+ * See TURNSTILE-SETUP.md.
  * Do not paste into or update the existing ReviewsBoost/shared deployment.
  */
+// Owner-requested pause, 2026-11-15. Set false only after the website check is restored.
+var TURNSTILE_PAUSED = true;
+
 // BEGIN ACKNOWLEDGEMENT STORAGE
 function submissionAcknowledgements(value) {
   var text = String(value == null ? '' : value);
@@ -113,10 +118,11 @@ function cleanExistingAcknowledgements() { return processExistingAcknowledgement
 function doPost(e) {
   try {
     var data = (e && e.parameter) || {};
-    // Gate every request before accessing Sheets or sending notifications.
-    // Never exempt a request using a submitted brand, URL, action or plan field.
-    if (!verifyTurnstile(data['cf-turnstile-response']) ||
-        !claimVerifiedTurnstileToken(data['cf-turnstile-response'])) {
+    // The pause is a server-side setting; submitted fields cannot change it.
+    // When restored, verify and claim the token before accessing Sheets or mail.
+    if (TURNSTILE_PAUSED !== true &&
+        (!verifyTurnstile(data['cf-turnstile-response']) ||
+         !claimVerifiedTurnstileToken(data['cf-turnstile-response']))) {
       return ContentService.createTextOutput(JSON.stringify({
         result: 'error',
         code: 'verification_failed',
@@ -313,23 +319,27 @@ function claimVerifiedTurnstileToken(token) {
 }
 
 /**
- * Run manually in the new project's editor before creating a test deployment.
- * Reads configuration and headers; sends one dummy token to Cloudflare.
+ * Run manually in the existing ReviewRemoval project's editor before deployment.
+ * Reads configuration and headers; skips Cloudflare while Turnstile is paused.
  * Does not write a row, send an email, expose the secret or accept a lead.
  * This is a configuration check, not proof of a real-token success or replay test.
  */
 function checkReviewRemovalSetup() {
   var properties = PropertiesService.getScriptProperties();
-  ['SPREADSHEET_ID', 'SHEET_NAME', 'NOTIFICATION_EMAIL', 'TURNSTILE_SECRET', 'TURNSTILE_HOSTNAMES']
+  var required = ['SPREADSHEET_ID', 'SHEET_NAME', 'NOTIFICATION_EMAIL'];
+  if (TURNSTILE_PAUSED !== true) required = required.concat(['TURNSTILE_SECRET', 'TURNSTILE_HOSTNAMES']);
+  required
     .forEach(function (name) {
       var value = properties.getProperty(name);
       if (!value || !value.trim()) throw new Error('Missing Script Property: ' + name);
     });
-  var hostnames = properties.getProperty('TURNSTILE_HOSTNAMES').split(',')
-    .map(function (hostname) { return hostname.trim(); }).filter(Boolean);
-  if (!hostnames.length || hostnames.some(function (hostname) {
-    return ['reviewremoval.ca', 'www.reviewremoval.ca'].indexOf(hostname) === -1;
-  })) throw new Error('TURNSTILE_HOSTNAMES must contain only ReviewRemoval production hostnames.');
+  if (TURNSTILE_PAUSED !== true) {
+    var hostnames = properties.getProperty('TURNSTILE_HOSTNAMES').split(',')
+      .map(function (hostname) { return hostname.trim(); }).filter(Boolean);
+    if (!hostnames.length || hostnames.some(function (hostname) {
+      return ['reviewremoval.ca', 'www.reviewremoval.ca'].indexOf(hostname) === -1;
+    })) throw new Error('TURNSTILE_HOSTNAMES must contain only ReviewRemoval production hostnames.');
+  }
 
   var sheet = SpreadsheetApp.openById(properties.getProperty('SPREADSHEET_ID'))
     .getSheetByName(properties.getProperty('SHEET_NAME'));
@@ -339,6 +349,12 @@ function checkReviewRemovalSetup() {
   var headers = sheet.getRange(1, 1, 1, expected.length).getValues()[0];
   if (expected.some(function (header, index) { return headers[index] !== header; })) {
     throw new Error('Keep the existing 12 headers in A1:L1 and add Traffic Source in M1. See FORM-SETUP.md.');
+  }
+  if (TURNSTILE_PAUSED === true) {
+    var pausedSummary = {configuration: 'passed', spreadsheet_headers: 'matched', turnstile: 'paused',
+      secret_probe: 'skipped', real_token_validation: 'skipped while paused', email_delivery: 'not tested'};
+    console.log(JSON.stringify(pausedSummary));
+    return pausedSummary;
   }
   var validSecret = false;
   try {

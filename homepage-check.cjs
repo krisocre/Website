@@ -216,7 +216,7 @@ const server=http.createServer((req,res)=>{
   assert.equal(await page.$$eval('.reviewer-slide',e=>e.length),3,'Reviews remain in static HTML');
   assert.equal(await page.$$eval('.platform-list',e=>e.length),1,'One list without JavaScript');
   assert.equal(await page.$$eval('.platform-list a',e=>e.length),8,'All platforms remain accessible without JavaScript');
-  assert.equal(await page.$eval('form',f=>f.method),'post');assert.equal(await page.$eval('form',f=>f.noValidate),false);assert.match(await page.$eval('noscript',n=>n.textContent),/enable JavaScript to complete the security check/);
+  assert.equal(await page.$eval('form',f=>f.method),'post');assert.equal(await page.$eval('form',f=>f.noValidate),false);assert.match(await page.$eval('noscript',n=>n.textContent),/enable JavaScript to send your request/);
   assert.equal(await page.$$eval('title',n=>n.length),1);assert.equal(await page.$$eval('link[rel="canonical"]',n=>n.length),1);
   assert.deepEqual(errors,[]);assert.deepEqual(posts,[],'Never send a real POST');
   fs.writeFileSync(path.join(output,'layout-results.json'),JSON.stringify(results,null,2));

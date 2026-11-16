@@ -37,6 +37,7 @@ function fixture(options = {}) {
     ContentService:{MimeType:{JSON:'json'},createTextOutput:text=>({text,setMimeType(){return this;}})}
   };
   vm.runInNewContext(source,api);
+  if (options.verificationEnabled) api.TURNSTILE_PAUSED = false;
   const payload={full_name:'Local Test',business_name:'Local Shop',email_address:'local@example.invalid',
     selected_plan:'Google Review Removal',form_type:'remove_reviews',review_count:'1',reason:notes,traffic_source:'paid_google'};
   return {api,book,emails,errors,props,locked:()=>locked,opens:()=>opens,
@@ -55,8 +56,8 @@ test(brand + ': future lead archives the full block before cleaning email/main n
   assert.equal(f.emails.length,1);assert.equal(f.locked(),false);
 });
 
-test(brand + ': invalid verification cannot open sheets, create an audit tab or send mail',()=>{
-  const f=fixture(),result=f.post({'cf-turnstile-response':''});assert.equal(result.code,'verification_failed');
+test(brand + ': restored verification rejects invalid tokens before sheets, audit or mail',()=>{
+  const f=fixture({verificationEnabled:true}),result=f.post({'cf-turnstile-response':''});assert.equal(result.code,'verification_failed');
   assert.equal(f.opens(),0);assert.equal(f.book.audit(),undefined);assert.equal(f.emails.length,0);
 });
 
