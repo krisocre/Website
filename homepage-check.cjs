@@ -126,6 +126,8 @@ const server=http.createServer((req,res)=>{
   // Actual timer callbacks run at the requested 5-second interval without sleeps.
   const automatic=await newPage(1440);
   await automatic.goto(base,{waitUntil:'load'});
+  const showTestimonial=()=>automatic.$eval('.hero-testimonial',e=>e.scrollIntoView({behavior:'instant',block:'center'}));
+  await showTestimonial();
   const tick=ms=>automatic.evaluate(ms=>window.__reviewerClock.tick(ms),ms);
   const active=()=>automatic.$eval('.reviewer-slide[aria-hidden="false"]',e=>e.dataset.reviewer);
   const rotating=()=>automatic.waitForFunction(()=>window.__reviewerClock.pending()===1);
@@ -145,7 +147,7 @@ const server=http.createServer((req,res)=>{
   await automatic.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,value:false});document.dispatchEvent(new Event('visibilitychange'));});await rotating();
   await automatic.$eval('#quote',e=>e.scrollIntoView({behavior:'instant',block:'start'}));
   await stopped();await tick(10000);assert.equal(await active(),'Michelle Carter','Offscreen cards do not advance');
-  await automatic.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));await rotating();
+  await showTestimonial();await rotating();
   await automatic.focus('.reviewer-window');await stopped();
   await automatic.$eval('.reviewer-window',e=>e.blur());await tick(10000);
   assert.equal(await active(),'Michelle Carter','Keyboard interaction keeps automatic rotation stopped');
@@ -153,10 +155,10 @@ const server=http.createServer((req,res)=>{
   await automatic.click('.reviewer-dot[aria-label="Show review from Daniel Chen"]');await automaticReview('Daniel Chen');
   await automatic.mouse.move(0,0);await stopped();await tick(10000);
   assert.equal(await active(),'Daniel Chen','Dots remain usable and manual selection stops automatic rotation');
-  await automatic.goto(base,{waitUntil:'load'});await rotating();
+  await automatic.goto(base,{waitUntil:'load'});await showTestimonial();await rotating();
   await automatic.emulateMediaFeatures([{name:'prefers-reduced-motion',value:'reduce'}]);await stopped();
   await tick(10000);assert.equal(await active(),'Luke Hapher','Reduced motion stops automatic rotation');
-  await automatic.goto(base,{waitUntil:'load'});await stopped();
+  await automatic.goto(base,{waitUntil:'load'});await showTestimonial();await stopped();
   await tick(10000);assert.equal(await active(),'Luke Hapher','Reduced motion disables initial autoplay');
   await automatic.close();
   // The banner has no visible control; hover/focus and reduced motion keep links usable.
