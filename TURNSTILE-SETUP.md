@@ -1,5 +1,18 @@
 # ReviewRemoval: separate Apps Script project and Turnstile setup
 
+## November 17: protection restored locally
+
+Both script.js and google-apps-script.gs now set **TURNSTILE_PAUSED = false**.
+False enables verification; true pauses it. Publish the website with form runtime
+`20261117-turnstile-enabled` FIRST, confirm its widget appears, then change that
+one line in the EXISTING separate ReviewRemoval Code.gs and deploy a New version
+of the SAME web app. The endpoint, widget, secret and other properties stay the
+same. ReviewsBoost and the old shared deployment are not part of this change.
+
+See the current restoration section in [FORM-SETUP.md](FORM-SETUP.md).
+No website or Apps Script deployment was performed by the agent. The earlier
+pause instructions below are historical; local verification tests use mocks.
+
 ## November 15: temporary pause prepared locally
 
 Turnstile is paused by the owner-controlled `TURNSTILE_PAUSED = true` setting in

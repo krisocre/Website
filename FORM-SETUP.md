@@ -1,5 +1,62 @@
 # ReviewRemoval quote forms - verified standalone backend
 
+## November 17: restore Cloudflare Turnstile
+
+Verification is prepared as enabled in both local files: **TURNSTILE_PAUSED = false**.
+The name means "paused": setting it to true DISABLES protection. It is a code
+constant in script.js and Code.gs, not a new Script Property.
+
+1. Publish the updated script.js and all eight form pages FIRST. Their fresh
+   runtime is `20261117-turnstile-enabled`; the source-label/measurement update
+   remains included. Confirm the existing security widget appears at the form.
+2. In the EXISTING separate ReviewRemoval Apps Script project, change just
+   `var TURNSTILE_PAUSED = true;` to `var TURNSTILE_PAUSED = false;` in Code.gs.
+   The complete local google-apps-script.gs also contains the enabled setting.
+   Keep the existing TURNSTILE_SECRET, TURNSTILE_HOSTNAMES and storage/email
+   properties. Do not edit the ReviewsBoost or old shared project.
+3. Save. Run checkReviewRemovalSetup if checking the existing configuration,
+   then Deploy > Manage deployments > existing deployment > Edit > New version >
+   Deploy. Keep the existing /exec URL; do not create a new deployment.
+4. Confirm one clearly labelled owner test reaches the expected Sheet and inbox.
+   Local regression checks use mocks, so they do not establish live delivery.
+
+The existing site key, quote_request action, hostname checks, server Siteverify
+and replay protection resume. Pricing, fields, traffic-source labels and Google
+Ads conversion triggers are unchanged. No website or Apps Script deployment was
+performed here. These steps supersede the November 15 pause instructions below.
+Cloudflare requires server verification in addition to displaying its widget:
+https://developers.cloudflare.com/turnstile/get-started/server-side-validation/.
+
+## November 17: Google Ads versus organic on new leads
+
+The private form record now recognises valid `gclid`, `gbraid`, `wbraid`,
+`gad_source` and `gad_campaignid` tags, or Google paid UTM tags, as
+**Paid - Google Ads**. A Google search referrer without an ad/campaign signal
+is **Organic - Google**. Untagged direct/ambiguous visits remain **Direct / unknown**.
+Google documents the aggregate tags at
+https://support.google.com/google-ads/answer/16193746?hl=en.
+
+Look at the START of the existing **Reason/Notes** cell in column L:
+`[Traffic Source: Paid - Google Ads]` or `[Traffic Source: Organic - Google]`.
+The same line reaches the owner email. **No Apps Script update or new Sheet
+column is required for that label.** If the optional column-M backend is already
+installed, its Traffic Source column receives the matching label too.
+
+Publish the eight updated form pages, script.js and measurement.js together;
+their runtime version is `20261117-lead-source`. No deployment was performed.
+The endpoint, Sheet layout, notifications, pricing and temporary Turnstile pause
+remain unchanged. This section supersedes older statements that every source
+label requires optional analytics consent.
+
+Before a visitor makes an optional measurement choice, only the current page's
+coarse source can accompany a deliberate submission. It sets no cookie, stores
+no source in the browser, enables no Google tracking and forwards no click ID,
+raw query, search term or referrer URL. An explicit opt-out or browser Global
+Privacy Control keeps the source unknown. Existing consented, 30-minute per-tab
+carryover remains available; without consent, internal navigation that loses the
+landing context can be unknown. Never infer organic solely from a missing ad tag.
+These are inferred labels, not verified Ads billing or historical attribution.
+
 ## November 15: temporary Turnstile pause
 
 The owner requested a pause on the live ReviewRemoval form. The local frontend

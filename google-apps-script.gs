@@ -7,13 +7,13 @@
  *
  * Maintain this file as Code.gs in the existing separate ReviewRemoval project.
  * Script Properties: SPREADSHEET_ID, SHEET_NAME, NOTIFICATION_EMAIL,
- * TURNSTILE_SECRET, TURNSTILE_HOSTNAMES (retained for resuming verification).
- * Turnstile is temporarily paused. No new Script Property is required.
+ * TURNSTILE_SECRET, TURNSTILE_HOSTNAMES.
+ * Turnstile verification is enabled. Existing Script Properties are retained.
  * See TURNSTILE-SETUP.md.
  * Do not paste into or update the existing ReviewsBoost/shared deployment.
  */
-// Owner-requested pause, 2026-11-15. Set false only after the website check is restored.
-var TURNSTILE_PAUSED = true;
+// Restoration, 2026-11-17. Publish the restored website check before deploying.
+var TURNSTILE_PAUSED = false;
 
 // BEGIN ACKNOWLEDGEMENT STORAGE
 function submissionAcknowledgements(value) {

@@ -14,8 +14,10 @@ const sharedEndpoint = 'https://script.google.com/macros/s/AKfycby4mQu0BJFu8Jmbw
 const formPages = ['index.html', 'remove-yelp-reviews.html', 'remove-facebook-reviews.html',
     'remove-trustpilot-reviews.html', 'remove-tripadvisor-reviews.html',
     'remove-booking-com-reviews.html', 'remove-glassdoor-reviews.html', 'remove-indeed-reviews.html'];
-const formScript = 'script.js?v=20261115-turnstile-paused';
+const formScript = 'script.js?v=20261117-turnstile-enabled';
 const frontend = fs.readFileSync(path.join(root, 'script.js'), 'utf8');
+assert.match(frontend, /const TURNSTILE_PAUSED = false;/, 'Production browser verification must be enabled');
+assert.match(source, /var TURNSTILE_PAUSED = false;/, 'Production backend verification must be enabled');
 const ruleBlock = value => value.match(/\/\/ BEGIN LEAD INPUT RULES[\s\S]*?\/\/ END LEAD INPUT RULES/)[0];
 assert.equal(ruleBlock(frontend), ruleBlock(source), 'Browser and backend input rules must agree');
 assert.ok(frontend.includes("const endpoint = '" + protectedEndpoint + "';"), 'Requests must use the tested ReviewRemoval deployment');
@@ -112,8 +114,8 @@ function backend({ verificationEnabled = true, properties, provider, responseCod
     };
     vm.createContext(context);
     vm.runInContext(source, context);
-    // Existing security cases exercise restoration; pause cases use the file as shipped.
-    if (verificationEnabled) context.TURNSTILE_PAUSED = false;
+    // Both modes are explicit fixtures; production ships with verification enabled.
+    context.TURNSTILE_PAUSED = !verificationEnabled;
     return { calls, state, book, post: parameter => context.doPost({ parameter }), check: () => context.checkReviewRemovalSetup() };
 }
 const payload = { 'cf-turnstile-response': 'LOCAL_TOKEN', full_name: '=formula', business_name: 'Test Business', email_address: 'private@example.invalid', reason: 'private review text', selected_plan: 'Existing plan', review_count: '2' };
@@ -322,8 +324,8 @@ const server = http.createServer((req, res) => {
     if (!file.startsWith(root + path.sep)) { res.writeHead(403).end(); return; }
     fs.readFile(file, (error, bytes) => {
         if (error) { res.writeHead(404).end(); return; }
-        // Exercise the retained verification code without changing production files.
-        if (verificationEnabled && file === path.join(root, 'script.js')) bytes = bytes.toString().replace('const TURNSTILE_PAUSED = true;', 'const TURNSTILE_PAUSED = false;');
+        // Exercise both modes without changing the enabled production source.
+        if (file === path.join(root, 'script.js')) bytes = bytes.toString().replace(/const TURNSTILE_PAUSED = (?:true|false);/, 'const TURNSTILE_PAUSED = ' + !verificationEnabled + ';');
         res.writeHead(200, { 'Content-Type': ({ '.html': 'text/html;charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.webp': 'image/webp', '.svg': 'image/svg+xml' })[path.extname(file)] || 'application/octet-stream' }).end(bytes);
     });
 });

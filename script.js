@@ -14,6 +14,10 @@ const leadTrafficSource = (() => {
       for (const key of ['gclid', 'dclid', 'gbraid', 'wbraid']) {
         if (params.has(key)) return /^[A-Za-z0-9_-]{1,256}$/.test(params.get(key) || '') ? (key === 'dclid' ? 'paid_other' : 'paid_google') : 'unknown';
       }
+      // Google also uses aggregate campaign indicators when a click ID is absent.
+      for (const key of ['gad_source', 'gad_campaignid']) {
+        if (params.has(key)) return /^[1-9]\d{0,19}$/.test(params.get(key) || '') ? 'paid_google' : 'unknown';
+      }
       const medium = String(params.get('utm_medium') || '').trim().toLowerCase();
       const source = String(params.get('utm_source') || '').trim().toLowerCase();
       if (params.has('utm_medium')) {
@@ -50,8 +54,16 @@ const leadTrafficSource = (() => {
   function get() {
     let consent;
     try { consent = window.ReviewRemovalMeasurement?.status(); } catch (_) { /* Fail closed for measurement, not the form. */ }
-    if (!consent || (!consent.analyticsConsent && !consent.advertisingConsent)) { clear(); return 'unknown'; }
+    if (window.navigator?.globalPrivacyControl === true) { clear(); return 'unknown'; }
     const now = Date.now();
+    // A source hint attached to a deliberate enquiry is separate from Google
+    // tracking. Before a choice, use only this page's context, without storage.
+    // Explicit opt-outs still use the existing purpose checks below.
+    if (consent?.choiceRecorded === false) {
+      clear();
+      return sources.includes(entry) && now < enteredAt + lifetime ? entry : 'unknown';
+    }
+    if (!consent || (!consent.analyticsConsent && !consent.advertisingConsent)) { clear(); return 'unknown'; }
     if (sources.includes(entry)) {
       if (!allowed(entry, consent) || now >= enteredAt + lifetime) { clear(); return 'unknown'; }
       active = { source: entry, expires: enteredAt + lifetime };
@@ -291,8 +303,8 @@ form?.addEventListener('change', refreshLeadInputValidity);
 
 // Load only on pages with a quote form, when the visitor approaches or uses it.
 // The server independently verifies the token; this UI is not a security boundary.
-// Temporary owner-requested pause. Restore this frontend first, then the backend.
-const TURNSTILE_PAUSED = true;
+// Protection restored. Publish this frontend before enabling the backend check.
+const TURNSTILE_PAUSED = false;
 const assessmentVerification = form && !TURNSTILE_PAUSED ? setupAssessmentVerification() : null;
 if (form && TURNSTILE_PAUSED) {
   document.querySelector('.form-verification')?.setAttribute('hidden', '');

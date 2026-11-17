@@ -6,8 +6,8 @@ const {turnstileApiFixture,isTurnstileApi,completeSecurityCheck}=require('./turn
 const root=__dirname;
 const source=fs.readFileSync(path.join(root,'script.js'),'utf8').match(/\/\/ BEGIN LEAD TRAFFIC SOURCE[\s\S]*?\/\/ END LEAD TRAFFIC SOURCE/)[0];
 let checks=0;
-function visit({url='https://reviewremoval.ca/',referrer='',consent={analyticsConsent:true,advertisingConsent:true},store=new Map(),blocked=false,now=1000000}={}){
- const events={},context={URL,Date:class extends Date{static now(){return now;}},window:{location:{href:url},
+function visit({url='https://reviewremoval.ca/',referrer='',consent={analyticsConsent:true,advertisingConsent:true},store=new Map(),blocked=false,now=1000000,gpc=false}={}){
+ const events={},context={URL,Date:class extends Date{static now(){return now;}},window:{location:{href:url},navigator:{globalPrivacyControl:gpc},
   sessionStorage:{getItem(k){if(blocked)throw Error();return store.get(k)||null;},setItem(k,v){if(blocked)throw Error();store.set(k,v);},removeItem(k){if(blocked)throw Error();store.delete(k);}},
   ReviewRemovalMeasurement:{status:()=>consent},addEventListener:(type,fn)=>{events[type]=fn;}},
   document:{referrer,addEventListener:(type,fn)=>{events['document:'+type]=fn;}}};
@@ -33,7 +33,8 @@ for(const [url,referrer,expected] of [
  ['','','unknown'],['','https://reviewremoval.ca/blog/index.html','unknown'],
  ['?gclid=','https://google.com/','unknown'],['?gclid=not%20an%20id','https://google.com/','unknown'],
  ['?utm_source=google','https://google.com/','unknown'],['?utm_medium=unrecognised','https://google.com/','unknown'],
- ['?gad_campaignid=123','https://google.com/','unknown'],['?utm_medium=email','','referral'],
+ ['?gad_source=1','https://google.com/','paid_google'],['?gad_campaignid=123','https://google.com/','paid_google'],
+ ['?gad_source=bad','https://google.com/','unknown'],['?gad_campaignid=0','','unknown'],['?utm_medium=email','','referral'],
  ['?utm_source=PRIVATE_EMAIL&utm_medium=organic','','unknown']
 ]){
  const test=visit({url:'https://reviewremoval.ca/'+url,referrer});assert.equal(test.get(),expected,url+' '+referrer);
@@ -41,6 +42,11 @@ for(const [url,referrer,expected] of [
 }
 const noConsent=visit({url:'https://reviewremoval.ca/?gclid=LOCAL_CLICK',consent:{analyticsConsent:false,advertisingConsent:false}});
 assert.equal(noConsent.get(),'unknown');assert.equal(noConsent.store.size,0);
+for (const [url,referrer,want] of [['?gclid=LOCAL_CLICK','','paid_google'],['?gad_source=1','','paid_google'],['','https://www.google.ca/','organic_google']]) {
+ const pending=visit({url:'https://reviewremoval.ca/'+url,referrer,consent:{choiceRecorded:false,analyticsConsent:false,advertisingConsent:false}});
+ assert.equal(pending.get(),want);assert.equal(pending.store.size,0,'No source storage before an optional measurement choice');checks++;
+}
+const privateVisit=visit({url:'https://reviewremoval.ca/?gad_source=1',gpc:true});assert.equal(privateVisit.get(),'unknown');assert.equal(privateVisit.store.size,0);checks++;
 noConsent.consent.advertisingConsent=true;assert.equal(noConsent.get(),'paid_google');
 const carried=visit({url:'https://reviewremoval.ca/remove-yelp-reviews.html',referrer:'https://reviewremoval.ca/',store:noConsent.store});
 assert.equal(carried.get(),'paid_google');
@@ -67,6 +73,10 @@ const server=http.createServer((req,res)=>{
  await new Promise(r=>server.listen(0,'127.0.0.1',r));const base='http://127.0.0.1:'+server.address().port;
  browser=await puppeteer.launch({headless:true,executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe'});
  for(const test of [{query:'?gclid=LOCAL_CLICK',referrer:'https://www.google.com/',accept:true,want:'paid_google'},
+                   {query:'?gad_source=1',referrer:'https://www.google.com/',want:'paid_google'},
+                   {query:'?gad_campaignid=123456789',referrer:'https://www.google.com/',want:'paid_google'},
+                   {query:'?gclid=LOCAL_CLICK',referrer:'https://www.google.com/',want:'paid_google'},
+                   {query:'',referrer:'https://www.google.ca/',want:'organic_google'},
                    {query:'?utm_source=chatgpt&utm_medium=cpc&utm_campaign=google_review_removal_canada',referrer:'https://chatgpt.com/',accept:true,want:'paid_chatgpt'},
                    {query:'',referrer:'https://www.google.ca/',accept:true,want:'organic_google'},
                    {query:'?utm_source=chatgpt&utm_medium=cpc&utm_campaign=google_review_removal_canada',referrer:'https://chatgpt.com/',accept:false,want:'unknown'},
@@ -86,8 +96,17 @@ const server=http.createServer((req,res)=>{
    if(r.url().startsWith(base)&&r.method()==='GET')return r.continue();r.abort();
   });
   await page.goto(base+test.query,{referer:test.referrer,waitUntil:'load'});
-  await page.click('.measurement-settings');
-  await page.click('#measurement-preferences [data-choice="'+(test.accept?'accept':'reject')+'"]');
+  if(typeof test.accept==='boolean'){
+   await page.click('.measurement-settings');
+   await page.click('#measurement-preferences [data-choice="'+(test.accept?'accept':'reject')+'"]');
+  }
+  const measurement=await page.evaluate(()=>window.ReviewRemovalMeasurement.status());
+  assert.equal(measurement.choiceRecorded,typeof test.accept==='boolean');
+  if(typeof test.accept!=='boolean'){
+   assert.equal(measurement.analyticsConsent,false);assert.equal(measurement.advertisingConsent,false);
+   assert.equal(measurement.googleTagRequested,false);assert.equal(measurement.tagManagerRequested,false);
+   assert.equal(await page.evaluate(()=>sessionStorage.getItem('reviewremoval.lead-source.v1')),null);
+  }
   if(test.accept){
    await page.goto(base+'/blog/index.html',{waitUntil:'load'});
    await page.goto(base+'/',{waitUntil:'load'});
@@ -111,5 +130,5 @@ const server=http.createServer((req,res)=>{
   assert.ok(!JSON.stringify(payload).includes('LOCAL_CLICK'),'Raw advertising ID is not sent with lead');
   assert.deepEqual(errors,[]);await context.close();checks++;
  }
- console.log('PASS: '+checks+' source/consent/storage cases, including five mocked successful form submissions, Google/ChatGPT/organic navigation carryover and consent rejection. No real leads or Google collection.');
+ console.log('PASS: '+checks+' source/consent/storage cases, including nine mocked successful form submissions, Google aggregate tags, default-state private lead labels, Google/ChatGPT navigation carryover and explicit rejection. No real leads or Google collection.');
 }finally{if(browser)await browser.close();server.closeAllConnections();server.close();}})().catch(e=>{console.error(e);process.exitCode=1;});
