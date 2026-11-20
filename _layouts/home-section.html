@@ -1,0 +1,7 @@
+{%- comment -%}Render the existing homepage at a homepage section URL.{%- endcomment -%}
+{%- capture homepage -%}{% include_relative index.html %}{%- endcapture -%}
+{%- capture section_head -%}
+<head>
+    <script src="/home-section.js" data-section="{{ page.section | escape }}" defer></script>
+{%- endcapture -%}
+{{- homepage | replace_first: "<head>", section_head -}}
