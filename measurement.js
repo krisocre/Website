@@ -41,13 +41,20 @@
   if (!platforms.includes(platform)) platform = 'other';
   var pageType = pagePath === '/' ? 'homepage' : pagePath === '/blog/index.html' ? 'blog_index' : pagePath.startsWith('/blog/') ? 'article' : document.body.dataset.platform ? 'platform' : 'other';
   // Avoid forwarding accidental form-data URLs through a provider's automatic collection.
-  function safeVisitorUrl() {
+  function safeVisitorUrl(forReplay) {
     var url = new URL(window.location.href);
     if (pagePath === '/404.html') return false;
     var knownCampaign = hasChatgptCampaign(url.searchParams);
+    var googleReplayCampaign = forReplay && url.searchParams.get('utm_source')?.toLowerCase() === 'google' &&
+      ['cpc','ppc','paid','paidsearch','paid_search'].includes(url.searchParams.get('utm_medium')?.toLowerCase());
     var allowed = ['gclid','dclid','gbraid','wbraid','gad_source','gad_campaignid'];
     for (var entry of url.searchParams) {
       if (knownCampaign && Object.prototype.hasOwnProperty.call(chatgptCampaign, entry[0])) continue;
+      // Replay may see standard Google Ads labels and numeric campaign IDs. Keep free text out.
+      if (googleReplayCampaign && url.searchParams.getAll(entry[0]).length === 1 &&
+        (entry[0] === 'utm_source' || entry[0] === 'utm_medium' ||
+          (['utm_campaign','utm_id'].includes(entry[0]) && /^[1-9]\d{0,19}$/.test(entry[1])) ||
+          (entry[0] === 'utm_campaign' && entry[1] === chatgptCampaign.utm_campaign))) continue;
       // Tag Assistant adds these debug flags. They never grant consent or become event data.
       if (entry[0] === '_dbg' && entry[1] === '1') continue;
       if (entry[0] === 'gtm_debug' && /^\d{10,16}$/.test(entry[1])) continue;
@@ -149,9 +156,11 @@
     if (clarityReady) window.clarity('stop');
     try { window.sessionStorage.removeItem('_cltk'); } catch (_) {}
   }
+  function safeReplayUrl() {
+    return window.location.origin === canonical.origin && safeVisitorUrl(true);
+  }
   function applySessionReplay() {
-    var enable = clarityId && preferences.replay && !privacySignal &&
-      window.location.origin === canonical.origin && safeVisitorUrl();
+    var enable = clarityId && preferences.replay && !privacySignal && safeReplayUrl();
     if (Boolean(enable) === replayActive) return;
     replayActive = Boolean(enable);
     if (!replayActive) {
@@ -260,7 +269,7 @@
     status: function () { return { analyticsConsent: preferences.analytics, advertisingConsent: preferences.advertising, choiceRecorded: choiceRecorded,
       ga4Configured: !!ga4, adsLeadConfigured: !!(ads && label), googleTagRequested: loaded,
       tagManagerConfigured: !!gtm, tagManagerRequested: managerLoaded, urlEligible: safeVisitorUrl(),
-      sessionReplayConsent: preferences.replay, clarityTagRequested: !!clarityScript }; },
+      sessionReplayConsent: preferences.replay, clarityTagRequested: !!clarityScript, clarityUrlEligible: safeReplayUrl() }; },
     recentEvents: function () { return recent.slice(); }
   });
   applyPreferences();

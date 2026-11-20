@@ -1,4 +1,18 @@
-# ReviewRemoval conversion measurement — updated November 19, 2026
+# ReviewRemoval conversion measurement — updated November 20, 2026
+
+## Clarity installation verified — November 20, 2026
+
+The live homepage loaded project `zgfh10ebvj` after the separate replay choice
+and received HTTP 204 from Microsoft's `/collect` endpoint. A fresh visit
+made no Clarity requests until that choice was recorded. In DevTools Network,
+use **All** and filter for `clarity.ms` to see the tag GET and the collector POST.
+Test on the plain homepage with the matching project open in Clarity.
+
+The runtime update `20261120-clarity-campaign` also accepts a standard Google
+paid campaign source and medium for Clarity, with an optional numeric campaign
+ID or the fixed public `google_review_removal_canada` campaign name. It still
+blocks unknown query values and keeps the existing Google Analytics and Ads
+URL rules. Visitors still control replay from the footer.
 
 ## Microsoft Clarity session replay — November 19, 2026
 
