@@ -48,13 +48,13 @@ for (const [url,referrer,want] of [['?gclid=LOCAL_CLICK','','paid_google'],['?ga
 }
 const privateVisit=visit({url:'https://reviewremoval.ca/?gad_source=1',gpc:true});assert.equal(privateVisit.get(),'unknown');assert.equal(privateVisit.store.size,0);checks++;
 noConsent.consent.advertisingConsent=true;assert.equal(noConsent.get(),'paid_google');
-const carried=visit({url:'https://reviewremoval.ca/remove-yelp-reviews.html',referrer:'https://reviewremoval.ca/',store:noConsent.store});
+const carried=visit({url:'https://reviewremoval.ca/remove-fake-google-reviews.html',referrer:'https://reviewremoval.ca/',store:noConsent.store});
 assert.equal(carried.get(),'paid_google');
 carried.consent.advertisingConsent=false;assert.equal(carried.get(),'unknown');assert.equal(carried.store.size,0);checks+=5;
 const analyticOnly=visit({url:'https://reviewremoval.ca/?gclid=LOCAL_CLICK',referrer:'https://google.com/',consent:{analyticsConsent:true,advertisingConsent:false}});
 assert.equal(analyticOnly.get(),'unknown');checks++;
 const chatgpt=visit({url:'https://reviewremoval.ca/?utm_source=chatgpt&utm_medium=cpc&utm_campaign=google_review_removal_canada'});
-const chatgptCarried=visit({url:'https://reviewremoval.ca/remove-yelp-reviews.html',referrer:'https://reviewremoval.ca/',store:chatgpt.store});
+const chatgptCarried=visit({url:'https://reviewremoval.ca/remove-fake-google-reviews.html',referrer:'https://reviewremoval.ca/',store:chatgpt.store});
 assert.equal(chatgptCarried.get(),'paid_chatgpt');
 chatgptCarried.consent.advertisingConsent=false;assert.equal(chatgptCarried.get(),'unknown');assert.equal(chatgptCarried.store.size,0);checks+=3;
 const late=visit({referrer:'https://google.com/'});late.tick(30*60*1000);assert.equal(late.get(),'unknown');assert.equal(late.store.size,0);checks++;

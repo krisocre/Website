@@ -39,13 +39,12 @@ change('review-removal-canada.html',html=>{
   html=metadata(html,'Google Review Removal Across Canada | Service Areas','Google review removal across Canada: Toronto, Calgary, Montréal, Vancouver and other communities. Remote support, CAD pricing and listing-specific preparation.');
   html=html.replace('Review removal in Canada, <em>handled from the first link.</em>','Google review removal for <em>Canadian businesses.</em>');
   html=html.replace('<h3>Toronto, the GTA and beyond</h3>','<h3>Google review removal in Toronto and Ontario</h3>').replace('<h3>Montréal and Québec communities</h3>','<h3>Google review support in Montréal and Québec</h3>').replace('<h3>Vancouver and the West Coast</h3>','<h3>Google review removal in Vancouver and BC</h3>');
-  html=html.replace('<a href="remove-booking-com-reviews.html">Booking.com review support →</a>','<a href="index.html#quote">Get a Google review quote for BC →</a>').replace('Review removal questions from Canadian businesses','Google review removal questions across Canada');
   return addSection(html,'','    <section class="canada-platforms','canada');
 });
 change('blog/index.html',html=>{
   html=metadata(html,'Google Review Removal Guides &amp; Research | ReviewRemoval','Google review removal guides for Canada: pricing, fake reviews, reporting, appeals and evidence preparation, plus original platform research and useful tools.');
   html=html.replace('Better decisions start with <em>better information.</em>','Google review removal,<br><em>clearly explained.</em>');
-  html=html.replace('Canadian and platform-sourced research on review moderation, plus practical guides for business owners. Read the methods, check the citations and use the charts.','Start with Google review pricing, evidence and reporting guidance for Canadian businesses. Explore our original research on Google and other review platforms, with cited data and clear methods.');
+  html=html.replace('Canadian and platform-sourced research on review moderation, plus practical guides for business owners. Read the methods, check the citations and use the charts.','Start with Google review pricing, evidence and reporting guidance for Canadian businesses. Explore our original research on Google review moderation, with cited data and clear methods.');
   html=html.replace(/<script type="application\/ld\+json">([^<]+)<\/script>/g,(tag,json)=>{
     const schema=JSON.parse(json);if(schema['@type']!=='CollectionPage')return tag;
     schema.name='Google Review Removal Guides and Research';schema.dateModified=[schema.dateModified||'', '2026-10-13'].sort().at(-1);

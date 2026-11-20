@@ -17,10 +17,9 @@ const root = __dirname;
 require('./build-editorial-page.cjs')();
 require('./build-legal-pages.cjs')(origin);
 const pages = [
-  'index.html', 'platforms.html', 'review-removal-canada.html', 'about.html', 'terms-of-service.html', 'privacy-policy.html', 'editorial-policy.html',
-  'remove-facebook-reviews.html', 'remove-yelp-reviews.html', 'remove-trustpilot-reviews.html', 'remove-tripadvisor-reviews.html', 'remove-booking-com-reviews.html', 'remove-glassdoor-reviews.html', 'remove-indeed-reviews.html',
-  'blog/index.html', 'blog/google-review-moderation-2019-2025.html', 'blog/trustpilot-fake-reviews-by-star-rating.html',
-  'blog/canadian-tourism-google-reviews-2023.html', 'blog/review-removal-questions-answered.html', 'blog/review-report-evidence-checklist.html', 'blog/yelp-reviews-disappear-reappear-data.html', 'blog/tripadvisor-fake-review-statistics-removal-rates.html', 'blog/trustpilot-appeal-outcomes-2025.html', 'blog/google-review-removal-rating-impact-study.html',
+  'index.html', 'review-removal-canada.html', 'about.html', 'terms-of-service.html', 'privacy-policy.html', 'editorial-policy.html',
+  'blog/index.html', 'blog/google-review-moderation-2019-2025.html',
+  'blog/canadian-tourism-google-reviews-2023.html', 'blog/review-removal-questions-answered.html', 'blog/review-report-evidence-checklist.html', 'blog/google-review-removal-rating-impact-study.html',
   ...require('./google-guides.cjs').map(guide => guide.file),
   'blog/google-review-removal-denominator-audit.html', 'blog/google-review-risk-score-denominator-study.html',
   'blog/google-review-removal-appeals-data.html', 'blog/google-review-removal-time-data.html',
@@ -39,11 +38,7 @@ const shareImages = {
   'blog/google-review-risk-score-denominator-study.html':'blog/assets/google-risk-identification-bounds.png',
   'blog/google-review-removal-denominator-audit.html': 'blog/assets/google-removal-reasons-denominators.png',
   'blog/google-review-removal-rating-impact-study.html': 'blog/assets/rating-removal-uncertainty.png',
-  'blog/trustpilot-appeal-outcomes-2025.html': 'blog/assets/trustpilot-appeals-2025.png',
-  'blog/yelp-reviews-disappear-reappear-data.html': 'blog/assets/yelp-review-transitions.png',
-  'blog/tripadvisor-fake-review-statistics-removal-rates.html': 'blog/assets/tripadvisor-fraud-series.png',
   'blog/google-review-moderation-2019-2025.html': 'blog/assets/google-moderation-2019-2025.png',
-  'blog/trustpilot-fake-reviews-by-star-rating.html': 'blog/assets/trustpilot-fake-reviews-by-star.png',
   'blog/canadian-tourism-google-reviews-2023.html': 'blog/assets/canadian-sme-online-activities-2023.png'
 };
 const shareImageAlts = {
@@ -54,18 +49,14 @@ const shareImageAlts = {
   'blog/google-review-risk-score-denominator-study.html':'Constructed identification ranges show why deleted-review percentages cannot identify a whole-profile five-star share',
   'blog/google-review-removal-denominator-audit.html': 'Google removal-reason rates for 2024 and 2025, as a share of all contributed reviews',
   'blog/google-review-removal-rating-impact-study.html': 'Original mathematical ranges for star ratings after removing one one-star Google review',
-  'blog/trustpilot-appeal-outcomes-2025.html': 'Trustpilot 2025 reversal counts separated by the decision being challenged',
-  'blog/yelp-reviews-disappear-reappear-data.html': 'Historical Yelp review recommendation transitions in a matched sample of 66,922 reviews',
-  'blog/tripadvisor-fake-review-statistics-removal-rates.html': 'Tripadvisor detected fraud figures for four activity years, with a calculated 2024 ratio',
   'blog/google-review-moderation-2019-2025.html': 'Chart of published Google Maps review moderation figures from 2019 to 2025',
-  'blog/trustpilot-fake-reviews-by-star-rating.html': 'Chart of Trustpilot fake review removals by star rating in 2024',
   'blog/canadian-tourism-google-reviews-2023.html': 'Chart comparing online activities of Canadian tourism and all-industry SMEs in 2023'
 };
 const decodeEntities = value => value.replaceAll('&amp;', '&').replaceAll('&quot;', '"').replaceAll('&#39;', "'").replaceAll('&lt;', '<').replaceAll('&gt;', '>');
 const organization = {
   '@type': 'Organization', '@id': `${origin}/#organization`, name: 'ReviewRemoval', url: origin,
   logo: `${origin}/assets/reviewremoval-logo.svg`,
-  description: 'Independent review reporting service for businesses in Canada.'
+  description: 'Google review removal assistance for businesses across Canada.'
 };
 
 for (const relative of pages) {
@@ -126,7 +117,7 @@ for (const relative of pages) {
         }] }
       : { '@context': 'https://schema.org', '@graph': [service, {
           '@type': 'BreadcrumbList', itemListElement: [
-            { '@type': 'ListItem', position: 1, name: 'All platforms', item: `${origin}/platforms.html` },
+            { '@type': 'ListItem', position: 1, name: 'Google review removal', item: `${origin}/` },
             { '@type': 'ListItem', position: 2, name: platform, item: canonical }
           ]
         }] };
@@ -208,14 +199,14 @@ for (const relative of pages) {
         publisher: { '@id': `${origin}/#organization` } }).replaceAll('<', '\\u003c')}</script>`;
     }
   }
-  if (['about.html','platforms.html','editorial-policy.html'].includes(relative)) {
-    const pageSchema={'@context':'https://schema.org','@graph':[organization,{'@type':relative==='about.html'?'AboutPage':relative==='platforms.html'?'CollectionPage':'WebPage','@id':canonical+'#webpage',url:canonical,name:decodeEntities(title),description:decodeEntities(description),inLanguage:'en-CA',isPartOf:{'@id':origin+'/#website'},about:{'@id':origin+'/#organization'},...(relative==='editorial-policy.html'?{datePublished:'2026-10-27',dateModified:'2026-10-27'}:{})},{'@type':'BreadcrumbList',itemListElement:[{'@type':'ListItem',position:1,name:'Home',item:origin+'/'},{'@type':'ListItem',position:2,name:decodeEntities(title.replace(/ \| ReviewRemoval$/,'')),item:canonical}]}]};
+  if (['about.html','editorial-policy.html'].includes(relative)) {
+    const pageSchema={'@context':'https://schema.org','@graph':[organization,{'@type':relative==='about.html'?'AboutPage':'WebPage','@id':canonical+'#webpage',url:canonical,name:decodeEntities(title),description:decodeEntities(description),inLanguage:'en-CA',isPartOf:{'@id':origin+'/#website'},about:{'@id':origin+'/#organization'},...(relative==='editorial-policy.html'?{datePublished:'2026-10-27',dateModified:'2026-10-27'}:{})},{'@type':'BreadcrumbList',itemListElement:[{'@type':'ListItem',position:1,name:'Home',item:origin+'/'},{'@type':'ListItem',position:2,name:decodeEntities(title.replace(/ \| ReviewRemoval$/,'')),item:canonical}]}]};
     // The editorial source shell supplies dates; the production graph supplies its canonical identity.
     if(relative==='editorial-policy.html')html=html.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/g,'');
     schemaTag=`\n  <script type="application/ld+json">${JSON.stringify(pageSchema).replaceAll('<','\\u003c')}</script>`;
   }
   const imageAlt = shareImageAlts[relative] || 'ReviewRemoval: review concerns, handled for you';
-  const tags = `\n  <!-- production URL metadata start -->\n  <link rel="canonical" href="${escapeAttr(canonical)}">\n  <meta name="robots" content="index, follow, max-image-preview:large">\n  <meta property="og:type" content="${isArticle ? 'article' : 'website'}">\n  <meta property="og:site_name" content="ReviewRemoval">\n  <meta property="og:locale" content="en_CA">\n  <meta property="og:url" content="${escapeAttr(canonical)}">\n  <meta property="og:title" content="${title}">\n  <meta property="og:description" content="${description}">\n  <meta property="og:image" content="${escapeAttr(shareImage)}">\n  <meta property="og:image:width" content="1200">\n  <meta property="og:image:height" content="${['blog/google-review-risk-score-denominator-study.html','blog/google-review-removal-appeals-data.html','blog/google-review-removal-time-data.html'].includes(relative)?'780':['blog/trustpilot-appeal-outcomes-2025.html','blog/google-review-removal-denominator-audit.html'].includes(relative)?'720':['blog/google-review-removal-local-ranking-study.html','blog/google-reviews-without-text-data-study.html'].includes(relative)?'630':shareImages[relative]?'672':'630'}">\n  <meta property="og:image:alt" content="${escapeAttr(imageAlt)}">\n  <meta name="twitter:card" content="summary_large_image">\n  <meta name="twitter:title" content="${title}">\n  <meta name="twitter:description" content="${description}">\n  <meta name="twitter:image" content="${escapeAttr(shareImage)}">\n  <meta name="twitter:image:alt" content="${escapeAttr(imageAlt)}">${articleTimeTags}${schemaTag}\n  <!-- production URL metadata end -->`;
+  const tags = `\n  <!-- production URL metadata start -->\n  <link rel="canonical" href="${escapeAttr(canonical)}">\n  <meta name="robots" content="index, follow, max-image-preview:large">\n  <meta property="og:type" content="${isArticle ? 'article' : 'website'}">\n  <meta property="og:site_name" content="ReviewRemoval">\n  <meta property="og:locale" content="en_CA">\n  <meta property="og:url" content="${escapeAttr(canonical)}">\n  <meta property="og:title" content="${title}">\n  <meta property="og:description" content="${description}">\n  <meta property="og:image" content="${escapeAttr(shareImage)}">\n  <meta property="og:image:width" content="1200">\n  <meta property="og:image:height" content="${['blog/google-review-risk-score-denominator-study.html','blog/google-review-removal-appeals-data.html','blog/google-review-removal-time-data.html'].includes(relative)?'780':['blog/google-review-removal-denominator-audit.html'].includes(relative)?'720':['blog/google-review-removal-local-ranking-study.html','blog/google-reviews-without-text-data-study.html'].includes(relative)?'630':shareImages[relative]?'672':'630'}">\n  <meta property="og:image:alt" content="${escapeAttr(imageAlt)}">\n  <meta name="twitter:card" content="summary_large_image">\n  <meta name="twitter:title" content="${title}">\n  <meta name="twitter:description" content="${description}">\n  <meta name="twitter:image" content="${escapeAttr(shareImage)}">\n  <meta name="twitter:image:alt" content="${escapeAttr(imageAlt)}">${articleTimeTags}${schemaTag}\n  <!-- production URL metadata end -->`;
   html = applyMeasurement(html.replace('</head>', `${tags}\n</head>`), relative);
   fs.writeFileSync(file, applyPositioning(relative,html), 'utf8');
 }

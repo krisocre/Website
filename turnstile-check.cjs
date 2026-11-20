@@ -11,9 +11,7 @@ const root = __dirname;
 const source = fs.readFileSync(path.join(root, 'google-apps-script.gs'), 'utf8');
 const protectedEndpoint = 'https://script.google.com/macros/s/AKfycbzK_hATDZaXApgEUITdZ1kgF6VirBLCpcK1q3tmiFoWhG2AZpy_B6uOy5CFjTejVo8T/exec';
 const sharedEndpoint = 'https://script.google.com/macros/s/AKfycby4mQu0BJFu8Jmbw_zZPzrBb9TF_YRw4j0Ayu3PFvwgicSN5vtzynX0ASet2utzxtlnMw/exec';
-const formPages = ['index.html', 'remove-yelp-reviews.html', 'remove-facebook-reviews.html',
-    'remove-trustpilot-reviews.html', 'remove-tripadvisor-reviews.html',
-    'remove-booking-com-reviews.html', 'remove-glassdoor-reviews.html', 'remove-indeed-reviews.html'];
+const formPages = ['index.html'];
 const formScript = 'script.js?v=20261117-turnstile-enabled';
 const frontend = fs.readFileSync(path.join(root, 'script.js'), 'utf8');
 assert.match(frontend, /const TURNSTILE_PAUSED = false;/, 'Production browser verification must be enabled');
@@ -32,7 +30,6 @@ for (const file of formPages) {
     assert.ok(!html.includes(sharedEndpoint), file + ': no old form destination');
     if (file === 'index.html') assert.ok(html.includes('action="' + protectedEndpoint + '"'), 'Native action and JavaScript must agree');
 }
-assert.ok(fs.readFileSync(path.join(root, 'build-platform-pages.cjs'), 'utf8').includes('src="' + formScript + '"'), 'Generated forms must retain the cache version');
 let cases = 0;
 
 function backend({ verificationEnabled = true, properties, provider, responseCode = 200, malformed = false, mailFailure = false, missingSheet = false, badHeaders = false, sharedState, lockUnavailable = false, propertyFailure = false, onClaim, clock = {now: Date.now()} } = {}) {

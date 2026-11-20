@@ -6,8 +6,8 @@ const {spawnSync} = require('node:child_process');
 const workspace = __dirname;
 const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'reviewremoval-launch-'));
 const pages = [
-  'index.html','platforms.html','review-removal-canada.html','about.html','terms-of-service.html','privacy-policy.html','editorial-policy.html','remove-facebook-reviews.html','remove-yelp-reviews.html','remove-trustpilot-reviews.html','remove-tripadvisor-reviews.html','remove-booking-com-reviews.html','remove-glassdoor-reviews.html','remove-indeed-reviews.html',
-  'blog/index.html','blog/google-review-moderation-2019-2025.html','blog/trustpilot-fake-reviews-by-star-rating.html','blog/canadian-tourism-google-reviews-2023.html','blog/review-removal-questions-answered.html','blog/review-report-evidence-checklist.html', 'blog/yelp-reviews-disappear-reappear-data.html', 'blog/tripadvisor-fake-review-statistics-removal-rates.html', 'blog/trustpilot-appeal-outcomes-2025.html', 'blog/google-review-removal-rating-impact-study.html',
+  'index.html','review-removal-canada.html','about.html','terms-of-service.html','privacy-policy.html','editorial-policy.html',
+  'blog/index.html','blog/google-review-moderation-2019-2025.html','blog/canadian-tourism-google-reviews-2023.html','blog/review-removal-questions-answered.html','blog/review-report-evidence-checklist.html', 'blog/google-review-removal-rating-impact-study.html',
   ...require('./google-guides.cjs').map(guide => guide.file),
   'blog/google-review-removal-denominator-audit.html', 'blog/google-review-risk-score-denominator-study.html',
   'blog/google-review-removal-appeals-data.html', 'blog/google-review-removal-time-data.html',
@@ -49,12 +49,6 @@ try {
   if((quoteButton.match(/\baria-describedby=/g)||[]).length!==1 || !quoteButton.includes('submission-legal assessment-help')) throw new Error('Quote button must preserve legal/help descriptions without duplicate attributes');
   const homeSchema = JSON.parse(home.match(/<script type="application\/ld\+json">([^<]+)<\/script>/)?.[1]);
   if (homeSchema['@graph']?.[0]?.['@type'] !== 'Organization' || !homeSchema['@graph']?.[0]?.logo?.endsWith('reviewremoval-logo.svg') || homeSchema['@graph']?.[1]?.['@type'] !== 'WebSite' || homeSchema['@graph']?.[2]?.['@type'] !== 'Service' || homeSchema['@graph']?.[2]?.areaServed?.name !== 'Canada') throw new Error('Home service schema is incomplete');
-  const facebook = fs.readFileSync(path.join(tempRoot, 'remove-facebook-reviews.html'), 'utf8');
-  const facebookSchema = JSON.parse(facebook.match(/<script type="application\/ld\+json">([^<]+)<\/script>/)?.[1]);
-  if (facebookSchema['@graph']?.[0]?.['@type'] !== 'WebPage' || !facebookSchema['@graph']?.[0]?.description.includes('no longer offers Facebook') || facebookSchema['@graph']?.[1]?.['@type'] !== 'BreadcrumbList') throw new Error('Discontinued platform must describe availability rather than an active service');
-  const booking = fs.readFileSync(path.join(tempRoot, 'remove-booking-com-reviews.html'), 'utf8');
-  const bookingSchema = JSON.parse(booking.match(/<script type="application\/ld\+json">([^<]+)<\/script>/)?.[1]);
-  if (bookingSchema['@graph']?.[0]?.['@type'] !== 'WebPage' || bookingSchema['@graph']?.[1]?.itemListElement?.[1]?.name !== 'Booking.com service availability') throw new Error('Booking.com availability schema is incomplete');
   const canada = fs.readFileSync(path.join(tempRoot, 'review-removal-canada.html'), 'utf8');
   const canadaSchema = JSON.parse(canada.match(/<script type="application\/ld\+json">([^<]+)<\/script>/)?.[1]);
   if (canadaSchema['@graph']?.[0]?.name !== 'Google review removal service across Canada' || canadaSchema['@graph']?.[0]?.areaServed?.name !== 'Canada') throw new Error('Canada Google service schema is incomplete');
@@ -64,7 +58,7 @@ try {
   const sitemap = fs.readFileSync(path.join(tempRoot, 'sitemap.xml'), 'utf8');
   if ((sitemap.match(/<loc>/g) || []).length !== pages.length) throw new Error('Sitemap does not list every page');
   if(!sitemap.includes('<loc>https://example.com/blog/google-review-removal-rating-impact-study.html</loc><lastmod>2026-10-08</lastmod>')) throw new Error('Rating study sitemap date or URL is incorrect');
-  if(!sitemap.includes('<loc>https://example.com/blog/index.html</loc><lastmod>2026-11-13</lastmod>')) throw new Error('Blog index sitemap date is incorrect');
+  if(!sitemap.includes('<loc>https://example.com/blog/index.html</loc><lastmod>2026-11-19</lastmod>')) throw new Error('Blog index sitemap date is incorrect');
   const timingHtml = fs.readFileSync(path.join(tempRoot,'blog/google-review-removal-time-data.html'),'utf8');
   const timingSchemas = [...timingHtml.matchAll(/<script type="application\/ld\+json">([^<]+)<\/script>/g)].map(match=>JSON.parse(match[1]));
   const timingArticle = timingSchemas.find(schema=>schema['@type']==='BlogPosting');

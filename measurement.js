@@ -36,7 +36,7 @@
   if (hasChatgptCampaign(new URL(window.location.href).searchParams)) {
     pageLocation += '?' + new URLSearchParams(chatgptCampaign).toString();
   }
-  var platforms = ['google','facebook','yelp','trustpilot','tripadvisor','booking.com','glassdoor','indeed'];
+  var platforms = ['google'];
   var platform = String(document.body.dataset.platform || (pagePath === '/' ? 'google' : 'other')).toLowerCase();
   if (!platforms.includes(platform)) platform = 'other';
   var pageType = pagePath === '/' ? 'homepage' : pagePath === '/blog/index.html' ? 'blog_index' : pagePath.startsWith('/blog/') ? 'article' : document.body.dataset.platform ? 'platform' : 'other';
@@ -243,9 +243,8 @@
     try {
       var url = new URL(href, window.location.href);
       if (url.origin === window.location.origin && url.hash === '#quote') {
-        var targetPlatform = url.pathname === '/' || url.pathname === '/index.html' ? 'google' :
-          url.pathname.match(/^\/remove-(facebook|yelp|trustpilot|tripadvisor|glassdoor|indeed|booking-com)-reviews\.html$/)?.[1];
-        record('quote_cta_click', { cta_location: locationFor(link), service_platform: targetPlatform === 'booking-com' ? 'booking.com' : targetPlatform || platform });
+        var targetPlatform = url.pathname === '/' || url.pathname === '/index.html' ? 'google' : platform;
+        record('quote_cta_click', { cta_location: locationFor(link), service_platform: targetPlatform });
       }
     } catch (_) {}
   });

@@ -7,8 +7,8 @@ const root = __dirname;
 const previewRoot=path.resolve(root,process.env.SITE_CHECK_PREVIEWS||'previews');
 fs.mkdirSync(previewRoot,{recursive:true});
 const pages = [
-  'index.html', 'platforms.html', 'review-removal-canada.html', 'about.html', 'terms-of-service.html', 'privacy-policy.html', 'editorial-policy.html', 'remove-facebook-reviews.html', 'remove-yelp-reviews.html', 'remove-trustpilot-reviews.html', 'remove-tripadvisor-reviews.html', 'remove-booking-com-reviews.html', 'remove-glassdoor-reviews.html', 'remove-indeed-reviews.html',
-  'blog/index.html', 'blog/google-review-moderation-2019-2025.html', 'blog/trustpilot-fake-reviews-by-star-rating.html', 'blog/canadian-tourism-google-reviews-2023.html', 'blog/review-removal-questions-answered.html', 'blog/review-report-evidence-checklist.html', 'blog/yelp-reviews-disappear-reappear-data.html', 'blog/tripadvisor-fake-review-statistics-removal-rates.html', 'blog/trustpilot-appeal-outcomes-2025.html', 'blog/google-review-removal-rating-impact-study.html',
+  'index.html', 'review-removal-canada.html', 'about.html', 'terms-of-service.html', 'privacy-policy.html', 'editorial-policy.html',
+  'blog/index.html', 'blog/google-review-moderation-2019-2025.html', 'blog/canadian-tourism-google-reviews-2023.html', 'blog/review-removal-questions-answered.html', 'blog/review-report-evidence-checklist.html', 'blog/google-review-removal-rating-impact-study.html',
   ...require('./google-guides.cjs').map(guide => guide.file),
   'blog/google-review-removal-denominator-audit.html', 'blog/google-review-risk-score-denominator-study.html',
   'blog/google-review-removal-appeals-data.html', 'blog/google-review-removal-time-data.html'
@@ -121,11 +121,8 @@ for (const name of ['google-moderation-2019-2025.png', 'trustpilot-fake-reviews-
         if (name === 'index.html' && width === 390) await page.screenshot({path: path.join(previewRoot, 'home-mobile-top.png')});
         if (name === 'about.html' && width === 1440) await page.screenshot({path: path.join(previewRoot, 'about-desktop.png'), fullPage: true});
         if (name === 'about.html' && width === 390) await page.screenshot({path: path.join(previewRoot, 'about-mobile-top.png')});
-        if (name === 'platforms.html' && width === 1440) await page.screenshot({path: path.join(previewRoot, 'platforms-desktop.png'), fullPage: true});
         if (name === 'review-removal-canada.html' && width === 1440) await page.screenshot({path: path.join(previewRoot, 'canada-desktop.png'), fullPage: true});
         if (name === 'review-removal-canada.html' && width === 390) await page.screenshot({path: path.join(previewRoot, 'canada-mobile.png'), fullPage: true});
-        if (name === 'remove-facebook-reviews.html' && width === 1440) await page.screenshot({path: path.join(previewRoot, 'facebook-desktop.png'), fullPage: true});
-        if (name === 'remove-trustpilot-reviews.html' && width === 390) await page.screenshot({path: path.join(previewRoot, 'trustpilot-mobile.png'), fullPage: true});
         if (name === 'blog/index.html' && width === 1440) await page.screenshot({path: path.join(previewRoot, 'blog-desktop.png'), fullPage: true});
         if (name === 'blog/google-review-moderation-2019-2025.html' && width === 1440) await page.screenshot({path: path.join(previewRoot, 'google-study-desktop.png'), fullPage: true});
         if (name === 'blog/trustpilot-fake-reviews-by-star-rating.html' && width === 390) await page.screenshot({path: path.join(previewRoot, 'trustpilot-study-mobile.png'), fullPage: true});
