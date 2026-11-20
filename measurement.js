@@ -7,12 +7,14 @@
   var ga4 = /^G-[A-Z0-9]+$/.test(config.ga4MeasurementId || '') ? config.ga4MeasurementId : null;
   var ads = /^AW-\d+$/.test(config.googleAdsId || '') ? config.googleAdsId : null;
   var label = /^[A-Za-z0-9_-]+$/.test(config.googleAdsLeadConversionLabel || '') ? config.googleAdsLeadConversionLabel : null;
+  var clarityId = /^[a-z0-9]{6,24}$/.test(config.clarityProjectId || '') ? config.clarityProjectId : null;
   var key = 'reviewremoval.measurement.v1';
   var ttl = 180 * 24 * 60 * 60 * 1000;
-  var preferences = { analytics: false, advertising: false };
+  var preferences = { analytics: false, advertising: false, replay: false };
   var choiceRecorded = false;
   var loaded = false, initialized = false, viewed = false;
   var managerLoaded = false;
+  var clarityScript, clarityReady = false, replayActive = false;
   var configured = new Set(), started = new WeakSet(), confirmed = new WeakSet(), recent = [];
   var privacySignal = window.navigator.globalPrivacyControl === true;
   var canonical;
@@ -71,7 +73,8 @@
     var stored = JSON.parse(window.localStorage.getItem(key));
     if (stored && stored.version === 1 && stored.expires > Date.now() && stored.expires <= Date.now() + ttl &&
         typeof stored.analytics === 'boolean' && typeof stored.advertising === 'boolean') {
-      preferences = { analytics: stored.analytics, advertising: stored.advertising && !privacySignal };
+      preferences = { analytics: stored.analytics, advertising: stored.advertising && !privacySignal,
+        replay: stored.replay === true && !privacySignal };
       choiceRecorded = true;
     }
   } catch (_) { /* A blocked preference store must not break forms or imply consent. */ }
@@ -135,27 +138,71 @@
   function clearOptionalCookies() {
     document.cookie.split(';').forEach(function (cookie) {
       var name = cookie.split('=')[0].trim();
-      if (!((!preferences.analytics && /^_(?:ga(?:_|$)|gid$|gat)/.test(name)) || (!preferences.advertising && /^_gcl_/.test(name)))) return;
+      if (!((!preferences.analytics && /^_(?:ga(?:_|$)|gid$|gat)/.test(name)) ||
+        (!preferences.advertising && /^_gcl_/.test(name)) || (!replayActive && /^_cl(?:ck|sk)$/.test(name)))) return;
       ['', window.location.hostname, '.' + window.location.hostname].forEach(function (domain) {
         document.cookie = name + '=; Max-Age=0; path=/' + (domain ? '; domain=' + domain : '') + '; SameSite=Lax';
       });
     });
+  }
+  function stopSessionReplay() {
+    if (clarityReady) window.clarity('stop');
+    try { window.sessionStorage.removeItem('_cltk'); } catch (_) {}
+  }
+  function applySessionReplay() {
+    var enable = clarityId && preferences.replay && !privacySignal &&
+      window.location.origin === canonical.origin && safeVisitorUrl();
+    if (Boolean(enable) === replayActive) return;
+    replayActive = Boolean(enable);
+    if (!replayActive) {
+      stopSessionReplay();
+      return;
+    }
+    if (clarityScript) {
+      if (clarityReady) window.clarity('start', {});
+      return;
+    }
+    // Mask each lead form and its feedback before loading the recorder.
+    document.querySelectorAll('#assessment-form, #submission-success').forEach(function (element) {
+      element.setAttribute('data-clarity-mask', 'true');
+    });
+    window.clarity = window.clarity || function () { (window.clarity.q = window.clarity.q || []).push(arguments); };
+    window.clarity('metadata', function () {
+      clarityReady = true;
+      if (replayActive) {
+        window.clarity('consentv2', { analytics_Storage: 'granted', ad_Storage: 'denied' });
+      } else {
+        // A withdrawal may arrive while the vendor script is still loading.
+        queueMicrotask(function () {
+          if (!replayActive) {
+            stopSessionReplay();
+            clearOptionalCookies();
+          }
+        });
+      }
+    }, false, true);
+    clarityScript = document.createElement('script');
+    clarityScript.async = true;
+    clarityScript.src = 'https://www.clarity.ms/tag/' + clarityId;
+    document.head.appendChild(clarityScript);
   }
   function applyPreferences() {
     if (privacySignal) preferences.advertising = false;
     if (ga4) window['ga-disable-' + ga4] = !preferences.analytics;
     if (managerGa4) window['ga-disable-' + managerGa4] = !preferences.analytics;
     window.gtag('consent', 'update', consent(preferences.analytics, preferences.advertising));
+    applySessionReplay();
     clearOptionalCookies();
     initializeDestinations();
     initializeTagManager();
     if (preferences.analytics && !viewed && safeVisitorUrl()) { viewed = true; record('page_view'); }
   }
-  function savePreferences(analytics, advertising) {
+  function savePreferences(analytics, advertising, replay) {
     choiceRecorded = true;
-    preferences = { analytics: analytics === true, advertising: advertising === true && !privacySignal };
+    preferences = { analytics: analytics === true, advertising: advertising === true && !privacySignal,
+      replay: replay === true && !privacySignal };
     try { window.localStorage.setItem(key, JSON.stringify({ version: 1, analytics: preferences.analytics,
-      advertising: preferences.advertising, expires: Date.now() + ttl })); } catch (_) {}
+      advertising: preferences.advertising, replay: preferences.replay, expires: Date.now() + ttl })); } catch (_) {}
     applyPreferences();
   }
   function formStart(form) {
@@ -213,7 +260,8 @@
     confirmedLead: confirmedLead,
     status: function () { return { analyticsConsent: preferences.analytics, advertisingConsent: preferences.advertising, choiceRecorded: choiceRecorded,
       ga4Configured: !!ga4, adsLeadConfigured: !!(ads && label), googleTagRequested: loaded,
-      tagManagerConfigured: !!gtm, tagManagerRequested: managerLoaded, urlEligible: safeVisitorUrl() }; },
+      tagManagerConfigured: !!gtm, tagManagerRequested: managerLoaded, urlEligible: safeVisitorUrl(),
+      sessionReplayConsent: preferences.replay, clarityTagRequested: !!clarityScript }; },
     recentEvents: function () { return recent.slice(); }
   });
   applyPreferences();
@@ -221,6 +269,11 @@
   var panel = document.createElement('section'); panel.id = 'measurement-preferences'; panel.setAttribute('aria-labelledby', 'measurement-title');
   panel.innerHTML = '<div class="measurement-inner"><h2 id="measurement-title">Cookie choices</h2><p>With your permission, Google tools use cookies and device identifiers to measure visits, enquiries and ads. Your request works without optional tracking. <a href="https://reviewremoval.ca/privacy-policy.html">Privacy policy</a>.</p><div class="measurement-actions"><button type="button" data-choice="accept">Accept optional</button><button type="button" data-choice="reject">Reject optional</button><button type="button" data-choice="customize" aria-expanded="false" aria-controls="measurement-options">Choose settings</button></div><div id="measurement-options" hidden><label><input type="checkbox" data-purpose="analytics"> Visit and enquiry analytics</label><label><input type="checkbox" data-purpose="advertising"> Advertising measurement (no ad personalization)</label><p class="measurement-signal" hidden>Your browser privacy signal keeps advertising measurement off.</p><button type="button" data-choice="save">Save choices</button></div><p class="measurement-status" role="status" aria-live="polite"></p></div>';
   panel.hidden = true;
+  if (clarityId) {
+    var replayOption = document.createElement('label');
+    replayOption.innerHTML = '<input type="checkbox" data-purpose="replay"> Session replay (Microsoft Clarity)';
+    panel.querySelector('.measurement-signal').before(replayOption);
+  }
   var skipLink = document.querySelector('body > .skip-link');
   if (skipLink) skipLink.after(panel); else document.body.prepend(panel);
   var returnFocus = null;
@@ -236,17 +289,29 @@
     panel.lang = french ? 'fr-CA' : 'en-CA'; language.textContent = french ? 'English' : 'Français';
     settings.textContent = french ? 'Choix des témoins' : 'Cookie choices';
     panel.querySelector('h2').textContent = french ? 'Vos choix de témoins' : 'Cookie choices';
-    panel.querySelector('p').innerHTML = french ? 'Avec votre accord, les outils Google utilisent des témoins et des identifiants d’appareil pour mesurer les visites, les demandes et la publicité. Votre demande fonctionne sans suivi facultatif. <a href="https://reviewremoval.ca/privacy-policy.html#confidentialite-fr">Confidentialité</a>.' : 'With your permission, Google tools use cookies and device identifiers to measure visits, enquiries and ads. Your request works without optional tracking. <a href="https://reviewremoval.ca/privacy-policy.html">Privacy policy</a>.';
+    var replayNotice = clarityId ? (french ? ' Microsoft Clarity peut enregistrer les clics et le défilement pour analyser la navigation. Les champs du formulaire sont masqués.' : ' Microsoft Clarity can replay clicks and scrolling to help us improve the site. Form fields are masked.') : '';
+    panel.querySelector('p').innerHTML = french ? 'Avec votre accord, les outils Google mesurent les visites, les demandes et la publicité.' + replayNotice + ' <a href="https://reviewremoval.ca/privacy-policy.html#confidentialite-fr">Confidentialité</a>.' : 'With your permission, Google tools measure visits, enquiries and ads.' + replayNotice + ' <a href="https://reviewremoval.ca/privacy-policy.html">Privacy policy</a>.';
     var labels = french ? { accept: 'Accepter les mesures', reject: 'Refuser les mesures', customize: 'Choisir les paramètres', save: 'Enregistrer' } :
       { accept: 'Accept optional', reject: 'Reject optional', customize: 'Choose settings', save: 'Save choices' };
     Object.keys(labels).forEach(function (choice) { panel.querySelector('[data-choice="' + choice + '"]').textContent = labels[choice]; });
     panel.querySelector('[data-purpose="analytics"]').parentElement.lastChild.textContent = french ? ' Mesure des visites et des demandes' : ' Visit and enquiry analytics';
     panel.querySelector('[data-purpose="advertising"]').parentElement.lastChild.textContent = french ? ' Mesure publicitaire (sans personnalisation)' : ' Advertising measurement (no ad personalization)';
-    panel.querySelector('.measurement-signal').textContent = french ? 'Le signal de confidentialité de votre navigateur désactive la mesure publicitaire.' : 'Your browser privacy signal keeps advertising measurement off.';
+    if (clarityId) replayOption.lastChild.textContent = french ? ' Relecture des visites (Microsoft Clarity)' : ' Session replay (Microsoft Clarity)';
+    panel.querySelector('.measurement-signal').textContent = french ? 'Le signal de confidentialité de votre navigateur désactive la mesure publicitaire' + (clarityId ? ' et la relecture des visites.' : '.') : 'Your browser privacy signal keeps advertising measurement' + (clarityId ? ' and session replay off.' : ' off.');
   }
   language.addEventListener('click', function () { french = !french; translate(); }); translate();
   var analyticsInput = panel.querySelector('[data-purpose="analytics"]'), adsInput = panel.querySelector('[data-purpose="advertising"]');
-  function syncInputs() { analyticsInput.checked = preferences.analytics; adsInput.checked = preferences.advertising; adsInput.disabled = privacySignal; panel.querySelector('.measurement-signal').hidden = !privacySignal; }
+  var replayInput = panel.querySelector('[data-purpose="replay"]');
+  function syncInputs() {
+    analyticsInput.checked = preferences.analytics;
+    adsInput.checked = preferences.advertising;
+    adsInput.disabled = privacySignal;
+    if (replayInput) {
+      replayInput.checked = preferences.replay;
+      replayInput.disabled = privacySignal;
+    }
+    panel.querySelector('.measurement-signal').hidden = !privacySignal;
+  }
   function focusPanelControl(control) {
     control.focus({ preventScroll: true });
     var fieldBounds = control.getBoundingClientRect(), panelBounds = panel.getBoundingClientRect();
@@ -274,15 +339,17 @@
   panel.addEventListener('click', function (event) {
     var action = event.target.closest('[data-choice]'); if (!action) return;
     if (action.dataset.choice === 'customize') { syncInputs(); panel.querySelector('#measurement-options').hidden = false; action.setAttribute('aria-expanded', 'true'); focusPanelControl(analyticsInput); return; }
-    if (action.dataset.choice === 'accept') savePreferences(true, true);
-    else if (action.dataset.choice === 'reject') savePreferences(false, false);
-    else savePreferences(analyticsInput.checked, adsInput.checked);
+    if (action.dataset.choice === 'accept') savePreferences(true, true, !!clarityId);
+    else if (action.dataset.choice === 'reject') savePreferences(false, false, false);
+    else savePreferences(analyticsInput.checked, adsInput.checked, replayInput?.checked === true);
     closePanel();
   });
   window.addEventListener('storage', function (event) {
     if (event.key !== key) return;
     try { var value = JSON.parse(event.newValue); preferences = value && value.version === 1 && value.expires > Date.now() ?
-      { analytics: value.analytics === true, advertising: value.advertising === true && !privacySignal } : { analytics: false, advertising: false }; } catch (_) { preferences = { analytics: false, advertising: false }; }
+      { analytics: value.analytics === true, advertising: value.advertising === true && !privacySignal,
+        replay: value.replay === true && !privacySignal } : { analytics: false, advertising: false, replay: false }; }
+    catch (_) { preferences = { analytics: false, advertising: false, replay: false }; }
     applyPreferences(); syncInputs();
   });
 })(window, document);

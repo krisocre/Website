@@ -5,5 +5,6 @@ window.ReviewRemovalMeasurementConfig = Object.freeze({
   tagManagerGa4MeasurementId: 'G-9LFJWP87F0',
   ga4MeasurementId: null,
   googleAdsId: 'AW-18449308865',
-  googleAdsLeadConversionLabel: 'EVurCIn11LQdEMG5qN1E'
+  googleAdsLeadConversionLabel: 'EVurCIn11LQdEMG5qN1E',
+  clarityProjectId: 'zgfh10ebvj'
 });

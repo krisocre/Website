@@ -1,4 +1,24 @@
-# ReviewRemoval conversion measurement — updated November 13, 2026
+# ReviewRemoval conversion measurement — updated November 19, 2026
+
+## Microsoft Clarity session replay — November 19, 2026
+
+ReviewRemoval uses project `zgfh10ebvj`. The website loads the tag after
+visitors enable **Session replay (Microsoft Clarity)** in **Cookie choices**,
+either through **Choose settings** or **Accept optional**. Existing saved Google
+analytics and advertising choices do not enable replay. The form and its
+confirmation are explicitly masked before the recorder loads.
+
+In the Clarity project, go to **Settings → Setup → Advanced Settings** and turn
+**Cookies** off to enable [Clarity Consent Mode](https://learn.microsoft.com/en-us/clarity/setup-and-installation/consent-mode).
+The website sends the Clarity API analytics permission after replay opt-in,
+along with an advertising storage denial. The website handles installation, so
+keep the Clarity tag out of Google Tag Manager.
+
+After publishing the updated website, visit `https://reviewremoval.ca/`, enable
+session replay in the footer, then scroll through pricing and the form. In the
+Clarity project, open **Recordings** to find the visit or **Heatmaps → Scroll**
+to compare section reach once sessions are collected. Only visits that enable
+replay on a supported page can contribute data.
 
 ## Automatic cookie banner removed — November 13, 2026
 
