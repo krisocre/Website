@@ -117,14 +117,13 @@ navigation?.querySelectorAll('a').forEach(link => link.addEventListener('click',
 const platformBanner = document.querySelector('.home-page .platform-banner');
 const platformList = platformBanner?.querySelector('.platform-list');
 if (platformList) {
-  // One accessible list; an inert visual copy keeps the single row looping.
+  // Keep both visual runs clickable while exposing one set of links to keyboard and screen reader users.
   const loopCopy = platformList.cloneNode(true);
   loopCopy.setAttribute('aria-hidden', 'true');
-  loopCopy.setAttribute('inert', '');
-  loopCopy.querySelectorAll('a').forEach(link => {
-    const label = document.createElement('span');
-    label.textContent = link.textContent;
-    link.replaceWith(label);
+  loopCopy.querySelectorAll('a').forEach(link => { link.tabIndex = -1; });
+  platformBanner.addEventListener('mousedown', event => {
+    // Pointer focus would stop the loop and move the link between press and release.
+    if (event.target.closest('a')) event.preventDefault();
   });
   platformList.after(loopCopy);
   platformBanner.classList.add('is-ready');

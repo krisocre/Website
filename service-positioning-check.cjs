@@ -32,5 +32,8 @@ for(const file of fs.readdirSync(path.join(root,'blog')).filter(file=>file.endsW
 }
 for(const file of ['sitemap.xml','feed.xml'])assert.ok(!retired.test(read(file)),file+': retired entry');
 const links=read('index.html').match(/<ul class="platform-list">([\s\S]*?)<\/ul>/)?.[1]||'';
-assert.equal((links.match(/<li>/g)||[]).length,8,'The homepage keeps the eight-topic scrolling banner');
-console.log('PASS: Google-only public pages, schema, sitemap and feed; preserved eight-topic homepage banner.');
+assert.equal((links.match(/<li>/g)||[]).length,7,'The homepage displays one curated press list');
+const timesDomains = new Set(["mtltimes.ca", "otttimes.ca", "totimes.ca"]);
+const outlets = [...links.matchAll(/href="([^"]+)"/g)].map(link => new URL(link[1]).hostname);
+assert.equal(outlets.filter(outlet => timesDomains.has(outlet)).length, 2, "Only two Times publications appear");
+console.log('PASS: Google-only public pages, schema, sitemap and feed; curated homepage press banner.');

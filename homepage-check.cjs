@@ -58,8 +58,8 @@ const server=http.createServer((req,res)=>{
    const portrait=await page.$eval('.testimonial-avatar',e=>{const img=e.querySelector('img');return {loaded:img.complete&&img.naturalWidth===480&&img.naturalHeight===600,circle:getComputedStyle(e).borderRadius,width:e.getBoundingClientRect().width,height:e.getBoundingClientRect().height};});
    assert.equal(portrait.loaded,true,'Luke’s portrait is loaded');assert.equal(portrait.circle,'50%');assert.equal(portrait.width,portrait.height,'Portrait frame stays circular at every viewport');
    assert.equal(await page.evaluate(()=>performance.getEntriesByType('resource').filter(r=>/shop-owner.*\.(?:webp|jpg)/.test(r.name)).length),0,'Retired hero photograph is not downloaded');
-   const banner=await page.$eval('.platform-banner',e=>({height:e.getBoundingClientRect().height,links:e.querySelectorAll('.platform-list a').length,rows:new Set([...e.querySelectorAll('.platform-list li')].map(n=>Math.round(n.getBoundingClientRect().top))).size,lists:e.querySelectorAll('.platform-list:not([aria-hidden])').length}));
-   assert.equal(await page.$$eval('.platform-banner',e=>e.length),1);assert.equal(banner.lists,1);assert.equal(banner.links,8);assert.equal(banner.rows,1,'Banner remains one row');assert.ok(banner.height<=72,'No stacked banner');
+   const banner=await page.$eval('.platform-banner',e=>({height:e.getBoundingClientRect().height,links:e.querySelectorAll('.platform-list:not([aria-hidden]) a').length,rows:new Set([...e.querySelectorAll('.platform-list li')].map(n=>Math.round(n.getBoundingClientRect().top))).size,lists:e.querySelectorAll('.platform-list:not([aria-hidden])').length}));
+   assert.equal(await page.$$eval('.platform-banner',e=>e.length),1);assert.equal(banner.lists,1);assert.equal(banner.links,7);assert.equal(banner.rows,1,'Banner remains one row');assert.ok(banner.height<=72,'No stacked banner');
    if(width<=680)assert.ok(layout.formTop<layout.summaryTop,'Mobile form precedes summary');
    assert.equal(await page.$eval('.hero-actions .button',e=>e.getAttribute('href')),'#quote');
    assert.equal(await page.$$eval('.assessment-steps>li',e=>e.length),3);
@@ -168,6 +168,12 @@ const server=http.createServer((req,res)=>{
   assert.equal(await page.$('.platform-toggle'),null,'Pause button is removed');
   await page.$eval('.platform-banner',e=>e.scrollIntoView({block:'center',behavior:'instant'}));
   await page.hover('.platform-banner');assert.ok(Math.abs(await tickerDelta())<.1,'Hover pauses movement');
+  const duplicateLink = await page.$('.platform-list[aria-hidden] a');
+  assert.equal(await duplicateLink.evaluate(link=>link.tabIndex),-1,'Repeated press links are outside the tab order');
+  await page.$eval('.platform-track',track=>{const animation=track.getAnimations()[0];animation.currentTime=animation.effect.getTiming().duration-800;});
+  await duplicateLink.evaluate(link=>link.addEventListener('click',event=>{event.preventDefault();link.dataset.clicked='true';},{once:true}));
+  await duplicateLink.click();
+  assert.equal(await duplicateLink.evaluate(link=>link.dataset.clicked),'true','The article link opens from the visible loop copy');
   await page.mouse.move(0,0);assert.ok(await tickerDelta() < -1,'Leaving the banner resumes movement');
   await page.$eval('.platform-track',e=>{e.getAnimations()[0].currentTime=20000;});
   await page.focus('.platform-list a');
@@ -217,7 +223,7 @@ const server=http.createServer((req,res)=>{
   assert.equal(await page.$eval('.reviewer-controls',e=>e.hidden),true,'No inert buttons without JavaScript');
   assert.equal(await page.$$eval('.reviewer-slide',e=>e.length),3,'Reviews remain in static HTML');
   assert.equal(await page.$$eval('.platform-list',e=>e.length),1,'One list without JavaScript');
-  assert.equal(await page.$$eval('.platform-list a',e=>e.length),8,'All platforms remain accessible without JavaScript');
+  assert.equal(await page.$$eval('.platform-list a',e=>e.length),7,'All press links remain accessible without JavaScript');
   assert.equal(await page.$eval('form',f=>f.method),'post');assert.equal(await page.$eval('form',f=>f.noValidate),false);assert.match(await page.$eval('noscript',n=>n.textContent),/enable JavaScript to send your request/);
   assert.equal(await page.$$eval('title',n=>n.length),1);assert.equal(await page.$$eval('link[rel="canonical"]',n=>n.length),1);
   assert.deepEqual(errors,[]);assert.deepEqual(posts,[],'Never send a real POST');
