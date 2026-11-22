@@ -30,6 +30,7 @@ const escapeAttr = value => value.replaceAll('&','&amp;').replaceAll('"','&quot;
 const marker = /\n[ \t]*<!-- production URL metadata start -->[\s\S]*?<!-- production URL metadata end -->/g;
 const googleTagMarker = /\n  <!-- Google tag \(gtag\.js\) -->[\s\S]*?<!-- \/Google tag \(gtag\.js\) -->/;
 const {applyToHtml: applyMeasurement} = require('./install-measurement.cjs');
+const assessmentShortcut = '<a class="assessment-shortcut" href="/#quote"><span>Free Assessment</span><span aria-hidden="true">→</span></a>';
 const shareImages = {
   'blog/google-reviews-without-text-data-study.html':'blog/assets/google-text-coverage-cover.png',
   'blog/google-review-removal-local-ranking-study.html':'blog/assets/google-ranking-study-cover.png',
@@ -208,6 +209,9 @@ for (const relative of pages) {
   const imageAlt = shareImageAlts[relative] || 'ReviewRemoval: review concerns, handled for you';
   const tags = `\n  <!-- production URL metadata start -->\n  <link rel="canonical" href="${escapeAttr(canonical)}">\n  <meta name="robots" content="index, follow, max-image-preview:large">\n  <meta property="og:type" content="${isArticle ? 'article' : 'website'}">\n  <meta property="og:site_name" content="ReviewRemoval">\n  <meta property="og:locale" content="en_CA">\n  <meta property="og:url" content="${escapeAttr(canonical)}">\n  <meta property="og:title" content="${title}">\n  <meta property="og:description" content="${description}">\n  <meta property="og:image" content="${escapeAttr(shareImage)}">\n  <meta property="og:image:width" content="1200">\n  <meta property="og:image:height" content="${['blog/google-review-risk-score-denominator-study.html','blog/google-review-removal-appeals-data.html','blog/google-review-removal-time-data.html'].includes(relative)?'780':['blog/google-review-removal-denominator-audit.html'].includes(relative)?'720':['blog/google-review-removal-local-ranking-study.html','blog/google-reviews-without-text-data-study.html'].includes(relative)?'630':shareImages[relative]?'672':'630'}">\n  <meta property="og:image:alt" content="${escapeAttr(imageAlt)}">\n  <meta name="twitter:card" content="summary_large_image">\n  <meta name="twitter:title" content="${title}">\n  <meta name="twitter:description" content="${description}">\n  <meta name="twitter:image" content="${escapeAttr(shareImage)}">\n  <meta name="twitter:image:alt" content="${escapeAttr(imageAlt)}">${articleTimeTags}${schemaTag}\n  <!-- production URL metadata end -->`;
   html = applyMeasurement(html.replace('</head>', `${tags}\n</head>`), relative);
+  if (relative !== 'index.html' && relative !== 'google-review-removal-cost-canada.html' && !html.includes('class="assessment-shortcut"')) {
+    html = html.replace(/\n?[ \t]*<\/body>/, `\n  ${assessmentShortcut}\n</body>`);
+  }
   fs.writeFileSync(file, applyPositioning(relative,html), 'utf8');
 }
 

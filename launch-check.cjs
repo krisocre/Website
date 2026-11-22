@@ -29,6 +29,8 @@ try {
   }
   for (const relative of pages) {
     const html = fs.readFileSync(path.join(tempRoot, relative), 'utf8');
+    const expectedShortcuts = ['index.html','google-review-removal-cost-canada.html'].includes(relative) ? 0 : 1;
+    if ((html.match(/class="assessment-shortcut" href="\/#quote"/g) || []).length !== expectedShortcuts) throw new Error(`${relative}: incorrect fixed assessment shortcut count`);
     for(const file of ['measurement-config.js','measurement.js','measurement.css'])if((html.match(new RegExp('(?:src|href)="[^"\\s]*'+file.replace('.','\\.')+'(?:\\?v=[A-Za-z0-9-]+)?"','g'))||[]).length!==1)throw new Error(`${relative}: measurement bootstrap missing or duplicated: ${file}`);
     if(/googletagmanager\.com\/(?:gtag\/js|gtm\.js)/.test(html.split('</head>')[0]))throw new Error(`${relative}: direct tag bypasses consent`);
     if (['about.html','blog/index.html'].includes(relative) && (html.match(/<section class="wrap editorial-disclosure">/g)||[]).length !== 1) throw new Error(`${relative}: research disclosure duplicated by rebuild`);
