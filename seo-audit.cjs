@@ -53,7 +53,8 @@ for (const url of pages) {
   if (!desc || descriptions.has(desc) || desc.length < 80 || desc.length > 185) errors.push(`${relative}: missing, duplicate, or poorly sized description (${desc?.length || 0})`);
   if ((html.match(/<h1\b/g) || []).length !== 1) errors.push(`${relative}: expected one H1`);
   if ((html.match(/rel="canonical"/g) || []).length !== 1 || canonical !== url || ogUrl !== url) errors.push(`${relative}: canonical and OG URL mismatch`);
-  if (!html.includes('property="og:site_name" content="ReviewRemoval"') || !html.includes('property="og:locale" content="en_CA"')) errors.push(`${relative}: missing site social metadata`);
+  const socialLocale = /<html\b[^>]*\blang="fr-CA"/.test(html) ? 'fr_CA' : 'en_CA';
+  if (!html.includes('property="og:site_name" content="ReviewRemoval"') || !html.includes(`property="og:locale" content="${socialLocale}"`)) errors.push(`${relative}: missing site social metadata`);
   if (!ogImage?.startsWith(`${origin}/`) || ogImage !== twitterImage || !fs.existsSync(path.join(root, ogImage?.slice(origin.length + 1) || ''))) errors.push(`${relative}: missing social image`);
   if (!html.includes('name="twitter:card" content="summary_large_image"')) errors.push(`${relative}: missing large social card`);
   if (html.includes('name="keywords"')) errors.push(`${relative}: obsolete keyword meta tag`);

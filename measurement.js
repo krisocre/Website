@@ -43,7 +43,7 @@
   // Avoid forwarding accidental form-data URLs through a provider's automatic collection.
   function safeVisitorUrl(forReplay) {
     var url = new URL(window.location.href);
-    if (pagePath === '/404.html') return false;
+    if (pagePath === '/404.html' || pagePath === '/google-review-removal-checker.html') return false;
     var knownCampaign = hasChatgptCampaign(url.searchParams);
     var googleReplayCampaign = forReplay && url.searchParams.get('utm_source')?.toLowerCase() === 'google' &&
       ['cpc','ppc','paid','paidsearch','paid_search'].includes(url.searchParams.get('utm_medium')?.toLowerCase());
@@ -273,10 +273,10 @@
     recentEvents: function () { return recent.slice(); }
   });
   applyPreferences();
-  // No automatic banner. Visitors can manage optional measurement from the footer.
+  // Show the prompt until a choice is saved. The footer reopens it on demand.
   var panel = document.createElement('section'); panel.id = 'measurement-preferences'; panel.setAttribute('aria-labelledby', 'measurement-title');
   panel.innerHTML = '<div class="measurement-inner"><h2 id="measurement-title">Cookie choices</h2><p>With your permission, Google tools use cookies and device identifiers to measure visits, enquiries and ads. Your request works without optional tracking. <a href="https://reviewremoval.ca/privacy-policy.html">Privacy policy</a>.</p><div class="measurement-actions"><button type="button" data-choice="accept">Accept optional</button><button type="button" data-choice="reject">Reject optional</button><button type="button" data-choice="customize" aria-expanded="false" aria-controls="measurement-options">Choose settings</button></div><div id="measurement-options" hidden><label><input type="checkbox" data-purpose="analytics"> Visit and enquiry analytics</label><label><input type="checkbox" data-purpose="advertising"> Advertising measurement (no ad personalization)</label><p class="measurement-signal" hidden>Your browser privacy signal keeps advertising measurement off.</p><button type="button" data-choice="save">Save choices</button></div><p class="measurement-status" role="status" aria-live="polite"></p></div>';
-  panel.hidden = true;
+  panel.hidden = choiceRecorded;
   if (clarityId) {
     var replayOption = document.createElement('label');
     replayOption.innerHTML = '<input type="checkbox" data-purpose="replay"> Session replay (Microsoft Clarity)';
@@ -289,16 +289,16 @@
     if (event.relatedTarget instanceof HTMLElement && event.relatedTarget !== document.body && !panel.contains(event.relatedTarget)) returnFocus = event.relatedTarget;
   });
   var footer = document.querySelector('.footer-bottom') || document.querySelector('footer') || document.body;
-  var settings = document.createElement('button'); settings.type = 'button'; settings.className = 'measurement-settings'; settings.textContent = 'Cookie choices'; settings.setAttribute('aria-controls', panel.id); settings.setAttribute('aria-expanded', 'false'); footer.appendChild(settings);
+  var settings = document.createElement('button'); settings.type = 'button'; settings.className = 'measurement-settings'; settings.textContent = 'Cookie choices'; settings.setAttribute('aria-controls', panel.id); settings.setAttribute('aria-expanded', String(!panel.hidden)); footer.appendChild(settings);
   var live = document.createElement('span'); live.className = 'measurement-live'; live.setAttribute('role', 'status'); live.setAttribute('aria-live', 'polite'); footer.appendChild(live);
   var language = document.createElement('button'); language.type = 'button'; language.className = 'measurement-language'; panel.querySelector('.measurement-inner').prepend(language);
-  var french = /^fr\b/i.test(window.navigator.language || '');
+  var french = document.documentElement.lang === 'fr-CA' || /^fr\b/i.test(window.navigator.language || '');
   function translate() {
     panel.lang = french ? 'fr-CA' : 'en-CA'; language.textContent = french ? 'English' : 'Français';
     settings.textContent = french ? 'Choix des témoins' : 'Cookie choices';
     panel.querySelector('h2').textContent = french ? 'Vos choix de témoins' : 'Cookie choices';
-    var replayNotice = clarityId ? (french ? ' Microsoft Clarity peut enregistrer les clics et le défilement pour analyser la navigation. Les champs du formulaire sont masqués.' : ' Microsoft Clarity can replay clicks and scrolling to help us improve the site. Form fields are masked.') : '';
-    panel.querySelector('p').innerHTML = french ? 'Avec votre accord, les outils Google mesurent les visites, les demandes et la publicité.' + replayNotice + ' <a href="https://reviewremoval.ca/privacy-policy.html#confidentialite-fr">Confidentialité</a>.' : 'With your permission, Google tools measure visits, enquiries and ads.' + replayNotice + ' <a href="https://reviewremoval.ca/privacy-policy.html">Privacy policy</a>.';
+    var replayNotice = clarityId ? (french ? ' Microsoft Clarity peut rejouer les clics et le défilement.' : ' Microsoft Clarity can replay clicks and scrolling.') : '';
+    panel.querySelector('p').innerHTML = french ? 'Les témoins facultatifs aident à mesurer les visites et la publicité.' + replayNotice + ' <a href="https://reviewremoval.ca/privacy-policy.html#confidentialite-fr">Confidentialité</a>.' : 'Optional cookies help measure visits and ads.' + replayNotice + ' <a href="https://reviewremoval.ca/privacy-policy.html">Privacy policy</a>.';
     var labels = french ? { accept: 'Accepter les mesures', reject: 'Refuser les mesures', customize: 'Choisir les paramètres', save: 'Enregistrer' } :
       { accept: 'Accept optional', reject: 'Reject optional', customize: 'Choose settings', save: 'Save choices' };
     Object.keys(labels).forEach(function (choice) { panel.querySelector('[data-choice="' + choice + '"]').textContent = labels[choice]; });
@@ -320,6 +320,7 @@
     }
     panel.querySelector('.measurement-signal').hidden = !privacySignal;
   }
+  syncInputs();
   function focusPanelControl(control) {
     control.focus({ preventScroll: true });
     var fieldBounds = control.getBoundingClientRect(), panelBounds = panel.getBoundingClientRect();

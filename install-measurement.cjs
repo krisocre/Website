@@ -4,7 +4,8 @@ const legacy=/\s*<!-- Google tag \(gtag\.js\) -->[\s\S]*?<!-- \/Google tag \(gta
 const marker=/\s*<!-- measurement bootstrap start -->[\s\S]*?<!-- measurement bootstrap end -->/g;
 function applyToHtml(html,file){
  const prefix=file==='404.html'?'/':file.startsWith('blog/')?'../':'';
- const version='20261120-clarity-campaign',cssVersion='20261112-cookie-banner';
+ const cssVersion='20261122-cookie-prompt';
+ const version=file==='google-review-removal-checker.html'?'20261122-review-checker':file==='suppression-avis-google.html'?'20261122-fr-ca':cssVersion;
  const block=`\n  <!-- measurement bootstrap start -->\n  <link rel="stylesheet" href="${prefix}measurement.css?v=${cssVersion}">\n  <script src="${prefix}measurement-config.js" defer></script>\n  <script src="${prefix}measurement.js?v=${version}" defer></script>\n  <!-- measurement bootstrap end -->`;
  return html.replace(legacy,'').replace(marker,'').replace(/(<head\b[^>]*>)(?:[ \t]*\r?\n)*/,(_,head)=>head+block+'\n');
 }

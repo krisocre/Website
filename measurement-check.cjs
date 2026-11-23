@@ -49,12 +49,12 @@ const server=http.createServer((req,res)=>{
   }
   // Initial visit and explicit rejection never load a Google tag.
   let test=await open(),page=test.page,start=google.length;
-  assert.equal(await page.$eval('#measurement-preferences',e=>e.hidden),true,'No automatic cookie banner on a new visit');
-  assert.equal(await page.$eval('.measurement-settings',e=>e.getAttribute('aria-expanded')),'false');
-  assert.equal(await page.evaluate(()=>localStorage.getItem('reviewremoval.measurement.v1')),null,'Hiding the banner does not save consent');
+  assert.equal(await page.$eval('#measurement-preferences',e=>e.hidden),false,'A new visitor sees the cookie prompt');
+  assert.equal(await page.$eval('.measurement-settings',e=>e.getAttribute('aria-expanded')),'true');
+  assert.equal(await page.evaluate(()=>localStorage.getItem('reviewremoval.measurement.v1')),null,'Showing the prompt does not save consent');
   assert.equal((await commands(page)).filter(c=>c[0]==='config').length,0);
   await fillAndSubmit(page);assert.equal(google.length,start);assert.equal((await events(page)).length,0);
-  assert.equal(await page.$eval('#measurement-preferences',e=>e.hidden),true,'A request works without choosing cookies or opening the panel');
+  assert.equal(await page.$eval('#measurement-preferences',e=>e.hidden),false,'A request works while the cookie choice is pending');
   await test.context.close();test=await open();page=test.page;start=google.length;
   await choose(page,'reject');assert.equal(google.length,start);
   await fillAndSubmit(page);assert.equal((await events(page)).length,0,'No denied lead backfill');
@@ -129,6 +129,7 @@ const server=http.createServer((req,res)=>{
   test=await open({language:'fr-CA'});page=test.page;
   assert.equal(await page.$eval('#measurement-preferences',e=>e.lang),'fr-CA');
   assert.equal(await page.$eval('#measurement-preferences [data-choice="reject"]',e=>e.textContent),'Refuser les mesures');
+  await choose(page,'reject');
   await choose(page,'customize');assert.equal(await page.evaluate(()=>document.activeElement.dataset.purpose),'analytics');
   await page.focus('[data-choice="save"]');await page.keyboard.press('Enter');assert.equal(await page.$eval('#measurement-preferences',e=>e.hidden),true);
   assert.equal(await page.evaluate(()=>document.activeElement.classList.contains('measurement-settings')),true,'Dismissal returns to the footer settings opener');
@@ -140,6 +141,9 @@ const server=http.createServer((req,res)=>{
    await page.setViewport({width,height:900});
    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'No horizontal overflow at '+width);
    assert.equal(await page.$eval('#measurement-preferences',e=>getComputedStyle(e).position),'fixed');
+   const panel=await page.$eval('#measurement-preferences',e=>{const r=e.getBoundingClientRect();return {width:r.width,right:innerWidth-r.right,bottom:innerHeight-r.bottom,left:r.left};});
+   if(width===320)assert.deepEqual(panel,{width:320,right:0,bottom:0,left:0});
+   else assert.deepEqual(panel,{width:390,right:20,bottom:20,left:1030});
    await (await page.$('#measurement-preferences')).screenshot({path:'.seo-private/no-cookie-banner-20261113/settings-fr-'+width+'.png'});
   }
   await page.click('.measurement-language');assert.equal(await page.$eval('#measurement-preferences',e=>e.lang),'en-CA');await test.context.close();

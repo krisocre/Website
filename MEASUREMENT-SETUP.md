@@ -1,4 +1,12 @@
-# ReviewRemoval conversion measurement — updated November 20, 2026
+# ReviewRemoval conversion measurement — updated November 22, 2026
+
+## Cookie prompt restored — November 22, 2026
+
+Visitors without a saved choice see a compact card at the bottom right on
+desktop and a bottom bar on phones. Saved choices take effect immediately.
+The footer’s **Cookie choices** button reopens the settings. Analytics,
+advertising and Clarity still follow the existing consent rules. The shared
+prompt assets use `20261122-cookie-prompt`.
 
 ## Clarity installation verified — November 20, 2026
 

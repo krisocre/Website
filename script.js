@@ -100,18 +100,22 @@ const leadTrafficSource = (() => {
 
 const menuButton = document.querySelector('.menu-toggle');
 const navigation = document.querySelector('.primary-nav');
+const frenchPage = document.documentElement.lang === 'fr-CA';
+const pageText = (english, french) => frenchPage ? french : english;
+const openMenu = pageText('Open menu', 'Ouvrir le menu');
+const closeMenu = pageText('Close menu', 'Fermer le menu');
 
 menuButton?.addEventListener('click', () => {
   const open = menuButton.getAttribute('aria-expanded') !== 'true';
   menuButton.setAttribute('aria-expanded', String(open));
-  menuButton.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+  menuButton.setAttribute('aria-label', open ? closeMenu : openMenu);
   navigation.classList.toggle('is-open', open);
 });
 
 navigation?.querySelectorAll('a').forEach(link => link.addEventListener('click', () => {
   navigation.classList.remove('is-open');
   menuButton.setAttribute('aria-expanded', 'false');
-  menuButton.setAttribute('aria-label', 'Open menu');
+  menuButton.setAttribute('aria-label', openMenu);
 }));
 
 const platformBanner = document.querySelector('.home-page .platform-banner');
@@ -130,36 +134,50 @@ if (platformList) {
 }
 
 const quantityInputs = [...document.querySelectorAll('#priceQuantity, #formQuantity')];
+const quantitySteps = [...document.querySelectorAll('[data-qty-step]')];
+const quantityPresets = [...document.querySelectorAll('[data-review-count]')];
 const platformName = document.body.dataset.platform || 'Google';
 const reviewNoun = document.body.dataset.reviewNoun || 'review';
 const reviewNounPlural = document.body.dataset.reviewNounPlural || 'reviews';
-const dollars = value => `$${value.toLocaleString('en-CA')}`;
+const frenchDollars = frenchPage ? new Intl.NumberFormat('fr-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 }) : null;
+const dollars = value => frenchDollars ? frenchDollars.format(value) : `$${value.toLocaleString('en-CA', { useGrouping: true })}`;
 const clamp = value => Math.max(1, Math.min(50, Math.round(Number(value) || 1)));
+let selectedCount;
 
-function updateQuote(value) {
+function updateQuote(value, editingInput) {
   const count = clamp(value);
-  quantityInputs.forEach(input => { input.value = String(count); });
+  quantityInputs.forEach(input => {
+    if (input !== editingInput && input.value !== String(count)) input.value = String(count);
+  });
+  if (count === selectedCount) return;
+  selectedCount = count;
+  quantitySteps.forEach(button => { button.disabled = count === (Number(button.dataset.qtyStep) < 0 ? 1 : 50); });
+  quantityPresets.forEach(button => button.setAttribute('aria-pressed', String(Number(button.dataset.reviewCount) === count)));
   document.querySelectorAll('[data-count]').forEach(node => { node.textContent = String(count); });
   document.querySelectorAll('[data-quote="start"]').forEach(node => { node.textContent = dollars(count * 50); });
   document.querySelectorAll('[data-quote="success"]').forEach(node => { node.textContent = dollars(count * 125); });
   document.querySelectorAll('[data-quote="total"]').forEach(node => { node.textContent = dollars(count * 175); });
   const label = document.querySelector('[data-review-label]');
-  if (label) label.textContent = `${count} ${count === 1 ? reviewNoun : reviewNounPlural}`;
+  if (label) label.textContent = `${count} ${pageText(count === 1 ? reviewNoun : reviewNounPlural, 'avis')}`;
   const plan = document.querySelector('#selectedPlan');
   if (plan) plan.value = `ReviewRemoval - ${platformName} Review Removal - ${count} ${count === 1 ? reviewNoun : reviewNounPlural} - CAD $${count * 50} upfront + CAD $125 per successful removal (CAD $${count * 175} if all removed)`;
 }
 
 quantityInputs.forEach(input => {
   input.addEventListener('input', () => {
-    if (input.value !== '' && input.checkValidity()) updateQuote(input.value);
+    const count = input.valueAsNumber;
+    if (Number.isInteger(count) && count >= 1 && count <= 50) updateQuote(count, input);
   });
-  input.addEventListener('change', () => updateQuote(input.value));
+  input.addEventListener('change', () => updateQuote(input.value || selectedCount));
+  input.addEventListener('blur', () => {
+    if (input.value === '') updateQuote(selectedCount);
+  });
 });
 
-document.querySelectorAll('[data-qty-step]').forEach(button => button.addEventListener('click', () => {
-  const input = document.getElementById(button.dataset.target);
-  updateQuote(clamp(input.value) + Number(button.dataset.qtyStep));
+quantitySteps.forEach(button => button.addEventListener('click', () => {
+  updateQuote(selectedCount + Number(button.dataset.qtyStep));
 }));
+quantityPresets.forEach(button => button.addEventListener('click', () => updateQuote(button.dataset.reviewCount)));
 
 // BEGIN LEAD INPUT RULES
 // Required fields and basic field formats only; do not judge lead content.
@@ -196,9 +214,18 @@ let submitting = false;
 if (form) form.noValidate = true;
 
 const leadFields = ['full_name', 'business_name', 'email_address', 'phone_number', 'business_url', 'review_count', 'review_links', 'reason'];
+const frenchInputMessages = {
+  full_name: 'Indiquez votre nom.',
+  business_name: 'Indiquez le nom de votre entreprise.',
+  email_address: 'Indiquez une adresse courriel valide.',
+  review_count: 'Inscrivez un nombre entier de 1 à 50 avis.'
+};
+function fieldMessage(name, english) {
+  return english && frenchPage ? frenchInputMessages[name] || english : english;
+}
 function refreshLeadInputValidity() {
   const errors = leadInputErrors(Object.fromEntries(new FormData(form)), true);
-  leadFields.forEach(name => form.elements.namedItem(name)?.setCustomValidity(errors[name] || ''));
+  leadFields.forEach(name => form.elements.namedItem(name)?.setCustomValidity(fieldMessage(name, errors[name]) || ''));
   return errors;
 }
 form?.addEventListener('input', refreshLeadInputValidity);
@@ -222,6 +249,7 @@ function setupAssessmentVerification() {
   let loader = null;
   let loadTimer = 0;
   let size = '';
+  const checking = pageText('Checking your browser securely…', 'Vérification de votre navigateur…');
 
   function showStatus(text, failed = false) {
     status.textContent = text;
@@ -229,7 +257,7 @@ function setupAssessmentVerification() {
   }
   function failed() {
     token = '';
-    showStatus('The security check could not finish. Please retry the check.', true);
+    showStatus(pageText('The security check could not finish. Please retry the check.', 'La vérification de sécurité n’a pas abouti. Veuillez réessayer.'), true);
   }
   function render() {
     if (widgetId !== null || !window.turnstile) return;
@@ -240,14 +268,15 @@ function setupAssessmentVerification() {
         sitekey: container.dataset.sitekey,
         action: 'quote_request',
         theme: 'light',
+        language: pageText('auto', 'fr'),
         size,
         callback(value) {
           token = value;
-          showStatus('Security check complete.');
+          showStatus(pageText('Security check complete.', 'Vérification de sécurité terminée.'));
         },
         'expired-callback'() {
           token = '';
-          showStatus('Security check expired. Please retry the check.', true);
+          showStatus(pageText('Security check expired. Please retry the check.', 'La vérification de sécurité a expiré. Veuillez réessayer.'), true);
         },
         'error-callback'() { failed(); return true; },
         'timeout-callback': failed,
@@ -259,7 +288,7 @@ function setupAssessmentVerification() {
     if (!container || !status || !retry) return;
     if (window.turnstile) { render(); return; }
     if (loader) return;
-    showStatus('Checking your browser securely…');
+    showStatus(checking);
     loader = document.createElement('script');
     loader.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
     loader.async = true;
@@ -277,7 +306,7 @@ function setupAssessmentVerification() {
   function reset() {
     token = '';
     if (widgetId !== null && window.turnstile) {
-      showStatus('Checking your browser securely…');
+      showStatus(checking);
       // A visitor can rotate their phone while the submission is in flight.
       if (!form.hidden && (container.clientWidth < 300 ? 'compact' : 'flexible') !== size) {
         window.turnstile.remove(widgetId);
@@ -321,7 +350,7 @@ function setupAssessmentVerification() {
       load();
       container?.focus();
       message.className = 'form-message is-error';
-      message.textContent = 'Please complete the security check before sending your request.';
+      message.textContent = pageText('Please complete the security check before sending your request.', 'Terminez la vérification de sécurité avant d’envoyer votre demande.');
     }
   };
 }
@@ -336,7 +365,7 @@ form?.addEventListener('submit', async event => {
     firstInvalid.setAttribute('aria-invalid', 'true');
     firstInvalid.focus();
     message.className = 'form-message is-error';
-    message.textContent = firstInvalid.validationMessage || 'Please check the highlighted details.';
+    message.textContent = firstInvalid.validationMessage || pageText('Please check the highlighted details.', 'Vérifiez les champs indiqués.');
     firstInvalid.reportValidity();
     return;
   }
@@ -360,9 +389,9 @@ form?.addEventListener('submit', async event => {
   const timer = window.setTimeout(() => controller.abort(), 60000);
   submitting = true;
   submitButton.disabled = true;
-  submitButton.textContent = 'Sending your request…';
+  submitButton.textContent = pageText('Sending your request…', 'Envoi de votre demande…');
   message.className = 'form-message';
-  message.textContent = 'Sending your request…';
+  message.textContent = submitButton.textContent;
 
   try {
     const response = await fetch(endpoint, {
@@ -385,10 +414,10 @@ form?.addEventListener('submit', async event => {
     if (result.result !== 'success' && !notificationFailed) throw new Error('unconfirmed');
 
     document.querySelector('#success-copy').textContent = notificationFailed
-      ? `Your request for ${count} ${count === 1 ? reviewNoun : reviewNounPlural} was saved, but the notification email was not sent.`
-      : `We have your review details and the quote for ${count} ${count === 1 ? reviewNoun : reviewNounPlural}. We'll contact you at the email you provided with the next step.`;
+      ? pageText(`Your request for ${count} ${count === 1 ? reviewNoun : reviewNounPlural} was saved, but the notification email was not sent.`, `Votre demande pour ${count} avis a été enregistrée. Le courriel de notification n’a pas pu être envoyé.`)
+      : pageText(`We have your review details and the quote for ${count} ${count === 1 ? reviewNoun : reviewNounPlural}. We'll contact you at the email you provided with the next step.`, `Nous avons reçu les renseignements concernant vos ${count} avis. Nous vous indiquerons la prochaine étape par courriel.`);
     document.querySelector('#success-note').textContent = notificationFailed
-      ? 'Please keep a copy of your details and follow up with us if needed.'
+      ? pageText('Please keep a copy of your details and follow up with us if needed.', 'Gardez une copie de vos renseignements pour pouvoir faire un suivi au besoin.')
       : '';
     form.hidden = true;
     successPanel.hidden = false;
@@ -401,14 +430,14 @@ form?.addEventListener('submit', async event => {
   } catch (error) {
     message.className = 'form-message is-error';
     message.textContent = error.message === 'verification_failed'
-      ? 'The security check was not accepted. Your details are still here; complete the new check and try again.'
+      ? pageText('The security check was not accepted. Your details are still here; complete the new check and try again.', 'La vérification de sécurité a échoué. Vos renseignements sont toujours dans le formulaire. Terminez la nouvelle vérification, puis réessayez.')
       : error.message === 'invalid_input'
-      ? 'Please check your details and try again. Your answers are still here.'
-      : 'We could not confirm your request. Your details are still here; please wait a few minutes before trying again.';
+      ? pageText('Please check your details and try again. Your answers are still here.', 'Vérifiez vos renseignements, puis réessayez. Vos réponses sont toujours dans le formulaire.')
+      : pageText('We could not confirm your request. Your details are still here; please wait a few minutes before trying again.', 'Nous n’avons pas pu confirmer votre demande. Vos renseignements sont toujours dans le formulaire. Attendez quelques minutes avant de réessayer.');
     if (error.message === 'invalid_input' && error.field) {
       const invalid = form.elements.namedItem(error.field);
       const errors = leadInputErrors(Object.fromEntries(new FormData(form)), true);
-      invalid?.setCustomValidity(errors[error.field] || message.textContent);
+      invalid?.setCustomValidity(fieldMessage(error.field, errors[error.field]) || message.textContent);
       invalid?.setAttribute('aria-invalid', 'true');
       invalid?.focus();
       invalid?.reportValidity();

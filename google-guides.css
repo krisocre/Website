@@ -68,6 +68,24 @@
 .google-evidence-result h3{margin-top:0}
 .google-evidence-result li{font-size:15px}
 .google-evidence-result .tool-download{margin-top:14px}
+.policy-check{padding:clamp(18px,4vw,28px);border:1px solid #bdcec4;background:#f7f3ec;border-radius:6px}
+.policy-check [hidden]{display:none!important}
+.policy-check #checker{margin:0 0 18px;font-size:clamp(24px,4vw,34px)}
+.policy-check fieldset{border:0;padding:0;margin:0;min-inline-size:0}
+.policy-check label{display:block;margin-bottom:8px;font-weight:700}
+.policy-check textarea{display:block;width:100%;max-width:100%;resize:vertical;min-height:115px;padding:12px;border:1px solid #7d9287;border-radius:4px;background:#fff;color:var(--ink);font:inherit}
+.policy-check textarea:focus-visible,.policy-check-result:focus-visible{outline:2px solid var(--accent-dark);outline-offset:3px}
+.policy-check textarea[aria-invalid=true]{border-color:#93452d}
+.policy-check .policy-check-help,.policy-check .policy-check-error,.policy-check-links{margin:10px 0 14px;font-size:14px}
+.policy-check .policy-check-error{color:#7b3524;margin-bottom:0}
+.policy-check-error:empty{display:none}
+.policy-check .button{display:inline-flex;min-height:44px;text-align:center}
+.policy-check-result{margin-top:22px;padding:clamp(14px,3vw,22px);border:1px solid #bdcec4;border-left:3px solid #537769;background:#fffdf8}
+.policy-check-result h3{margin:0 0 10px;font-size:clamp(19px,3vw,24px);line-height:1.25}
+.policy-check-result p{margin:0 0 12px}
+.policy-check-actions,.policy-check-links{display:flex;flex-wrap:wrap;gap:4px 16px;align-items:center}
+.policy-check-actions a,.policy-check-links a{display:inline-flex;align-items:center;min-height:44px}
+.assessment-shortcut.policy-dock-obscured{visibility:hidden}
 .google-guide-page .sources-checked{font-size:13px;color:var(--muted)}
 @media(max-width:900px){.google-guide-cards{grid-template-columns:repeat(2,minmax(0,1fr))}.google-guides-head{display:block}}
 @media(max-width:680px){.google-guide-cards,.google-evidence-tool .tool-fields{grid-template-columns:1fr}.google-guide-card{padding:23px}.google-evidence-tool{padding:20px}.google-guide-page .article-hero h1{font-size:42px}}

@@ -1,0 +1,30 @@
+.case-tracker-page .case-hero{padding:clamp(36px,6vw,72px) 0;background:#f7f3ec;border-bottom:1px solid var(--line)}
+.case-hero h1{max-width:740px;margin:0 0 16px;font-size:clamp(37px,5.5vw,66px)}
+.case-hero p:last-child{max-width:615px;margin:0;color:var(--muted);font-size:17px}
+.case-workspace{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:26px;padding:36px 0 44px}
+.case-form-panel,.case-list-panel{min-width:0;padding:clamp(18px,3vw,28px);border:1px solid #d1dad4;border-radius:7px}
+.case-form-panel{background:#f8faf7}
+.case-workspace h2,.case-help h2{margin:0 0 12px;font-size:clamp(26px,3vw,36px)}
+.case-workspace p,.case-help p{margin:0 0 13px;color:var(--muted)}
+.case-form-panel fieldset{margin:16px 0 0;padding:0;border:0;min-width:0}
+.case-form-panel label{display:block;margin:0 0 14px;font-size:14px;font-weight:700}
+.case-form-panel label span{color:var(--muted);font-weight:400}
+.case-form-panel input,.case-form-panel select{display:block;width:100%;min-width:0;min-height:46px;margin-top:5px;padding:7px 10px;border:1px solid #adbbb5;border-radius:4px;background:#fff;color:var(--ink);font:inherit;font-size:16px;font-weight:400}
+.case-form-actions,.case-row-actions{display:flex;gap:9px;flex-wrap:wrap}
+.case-tracker-page button.case-secondary,.case-row-actions button{min-height:44px;padding:8px 14px;border:1px solid #abbab5;border-radius:4px;background:#fff;color:var(--navy);font-size:14px}
+.case-tracker-page button:disabled{opacity:.55;cursor:default}
+.case-tracker-page [hidden]{display:none}
+.case-list-header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.case-list-header h2{margin:0}
+.case-list-header p{margin:0}
+.case-records{display:grid;gap:12px;list-style:none;margin:0;padding:0}
+.case-row{border:1px solid #dbe4de;border-radius:5px;padding:14px}
+.case-row-header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px}
+.case-stage{color:#72412f;background:#f6eee6;border-radius:4px;padding:3px 8px;font-size:12px}
+.case-row p{margin-bottom:6px;font-size:14px}
+.case-row .case-elapsed{color:var(--ink);font-weight:700}
+.case-row-actions{margin-top:10px}
+.case-form-panel #case-message{margin:12px 0 0;font-size:13px}
+.case-help{max-width:780px;padding:0 0 50px}
+.case-help a{color:var(--accent-dark);text-decoration:underline;text-underline-offset:3px}
+@media(max-width:760px){.case-workspace{grid-template-columns:1fr;gap:14px;padding-block:24px 32px}}

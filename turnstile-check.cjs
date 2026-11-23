@@ -11,8 +11,11 @@ const root = __dirname;
 const source = fs.readFileSync(path.join(root, 'google-apps-script.gs'), 'utf8');
 const protectedEndpoint = 'https://script.google.com/macros/s/AKfycbzK_hATDZaXApgEUITdZ1kgF6VirBLCpcK1q3tmiFoWhG2AZpy_B6uOy5CFjTejVo8T/exec';
 const sharedEndpoint = 'https://script.google.com/macros/s/AKfycby4mQu0BJFu8Jmbw_zZPzrBb9TF_YRw4j0Ayu3PFvwgicSN5vtzynX0ASet2utzxtlnMw/exec';
-const formPages = ['index.html'];
-const formScript = 'script.js?v=20261117-turnstile-enabled';
+const formScripts = {
+    'index.html': 'script.js?v=20261122-estimate',
+    'suppression-avis-google.html': 'script.js?v=20261122-fr-ca'
+};
+const formPages = Object.keys(formScripts);
 const frontend = fs.readFileSync(path.join(root, 'script.js'), 'utf8');
 assert.match(frontend, /const TURNSTILE_PAUSED = false;/, 'Production browser verification must be enabled');
 assert.match(source, /var TURNSTILE_PAUSED = false;/, 'Production backend verification must be enabled');
@@ -25,10 +28,10 @@ for (const file of formPages) {
     const profile = html.match(/<input\b[^>]*\bname="business_url"[^>]*>/)[0];
     assert.match(profile, /\btype="text"/);
     assert.doesNotMatch(profile, /\brequired\b|\b(?:maxlength|minlength|pattern)=/);
-    assert.deepEqual([...html.matchAll(/<script\b[^>]*\bsrc="(script\.js(?:\?[^"]*)?)"/g)].map(match => match[1]), [formScript], file + ': fresh form runtime required');
+    assert.deepEqual([...html.matchAll(/<script\b[^>]*\bsrc="(script\.js(?:\?[^"]*)?)"/g)].map(match => match[1]), [formScripts[file]], file + ': fresh form runtime required');
     assert.ok(html.includes('data-sitekey="0x4AAAAAAFy2ZmcJCPhgxNBL"'), file + ': existing widget required');
     assert.ok(!html.includes(sharedEndpoint), file + ': no old form destination');
-    if (file === 'index.html') assert.ok(html.includes('action="' + protectedEndpoint + '"'), 'Native action and JavaScript must agree');
+    assert.ok(html.includes('action="' + protectedEndpoint + '"'), file + ': native action and JavaScript must agree');
 }
 let cases = 0;
 
@@ -380,7 +383,7 @@ const server = http.createServer((req, res) => {
         assert.equal(pausedApp.calls.claims.length, 0);
         assert.equal(apiLoads, 0);
         assert.deepEqual(errors, []);
-        console.log('PASS: all eight paused forms save/notify through the mocked complete backend without loading Cloudflare or posting a token; required fields, attribution fields, mobile layout and lead tracking remain.');
+        console.log('PASS: both language variants save and notify through the mocked backend when verification is paused; required fields, layout and lead tracking remain.');
         verificationEnabled = true;
         await page.setViewport({width:390, height:844});
         await page.goto(base, { waitUntil: 'load' });
@@ -481,7 +484,7 @@ const server = http.createServer((req, res) => {
         assert.equal(await page.$$eval('script[src*="challenges.cloudflare.com"]', nodes => nodes.length), 0);
         assert.deepEqual(errors, []);
         assert.deepEqual(externalPosts, []);
-        console.log('PASS: all eight forms use the separate tested backend and fresh script; lazy loading, token gate, expiration, script failure/retry, fresh tokens after rejection/network/success, lead tracking, responsive widget, no loader on other pages. All provider responses mocked; zero real submissions.');
+        console.log('PASS: both forms use the dedicated backend and current script. Token gating, expiration, retries, conversion tracking and the responsive widget passed with mocked providers.');
     } finally {
         if (browser) await browser.close();
         server.closeAllConnections();

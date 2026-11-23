@@ -14,13 +14,16 @@ if (parsed.protocol !== 'https:' || parsed.pathname !== '/' || parsed.search || 
 }
 const origin = parsed.origin;
 const root = __dirname;
+const frenchHome = 'suppression-avis-google.html';
+const homeAlternates = { 'en-CA': `${origin}/`, 'fr-CA': `${origin}/${frenchHome}`, 'x-default': `${origin}/` };
 require('./build-editorial-page.cjs')();
 require('./build-legal-pages.cjs')(origin);
 const pages = [
-  'index.html', 'review-removal-canada.html', 'about.html', 'terms-of-service.html', 'privacy-policy.html', 'editorial-policy.html',
+  'index.html', frenchHome, 'review-removal-canada.html', 'about.html', 'terms-of-service.html', 'privacy-policy.html', 'editorial-policy.html',
   'blog/index.html', 'blog/google-review-moderation-2019-2025.html',
   'blog/canadian-tourism-google-reviews-2023.html', 'blog/review-removal-questions-answered.html', 'blog/review-report-evidence-checklist.html', 'blog/google-review-removal-rating-impact-study.html',
   ...require('./google-guides.cjs').map(guide => guide.file),
+  'google-review-case-tracker.html',
   'blog/google-review-removal-denominator-audit.html', 'blog/google-review-risk-score-denominator-study.html',
   'blog/google-review-removal-appeals-data.html', 'blog/google-review-removal-time-data.html',
   'blog/google-review-removal-local-ranking-study.html',
@@ -60,6 +63,16 @@ const organization = {
   description: 'Google review removal assistance for businesses across Canada.'
 };
 
+function addLanguageLink(html, relative) {
+  const isFrench = relative === frenchHome;
+  const switchLink = isFrench
+    ? '<a class="site-language" href="/" lang="en-CA" hreflang="en-CA" aria-label="View site in English"><span class="site-language-full">English</span><span class="site-language-short" aria-hidden="true">EN</span></a>'
+    : `<a class="site-language" href="/${frenchHome}" lang="fr-CA" hreflang="fr-CA" aria-label="Voir le site en français"><span class="site-language-full">Français</span><span class="site-language-short" aria-hidden="true">FR</span></a>`;
+  return html.replace(/<a class="site-language"[^>]*>[\s\S]*?<\/a>/, '')
+    .replace('<button class="menu-toggle"', `${switchLink}<button class="menu-toggle"`)
+    .replace(/(href="(?:\.\.\/|\/)?styles\.css)(?:\?v=[^"]+)?"/, '$1?v=20261122-fr-ca"');
+}
+
 for (const relative of pages) {
   const file = path.join(root, relative);
   if (!fs.existsSync(file)) { console.error(`Missing ${relative}. Run the build scripts first.`); process.exit(1); }
@@ -79,10 +92,27 @@ for (const relative of pages) {
   const description = html.match(/<meta name="description" content="([^"]*)">/)?.[1];
   if (!title || !description || !html.includes('</head>')) { console.error(`Missing metadata in ${relative}`); process.exit(1); }
   const canonical = `${origin}/${relative === 'index.html' ? '' : relative}`;
+  const isFrench = relative === frenchHome;
+  const alternateTags = relative === 'index.html' || isFrench
+    ? Object.entries(homeAlternates).map(([language, url]) => `\n  <link rel="alternate" hreflang="${language}" href="${escapeAttr(url)}">`).join('')
+    : '';
   const isGuide = require('./google-guides.cjs').some(guide => guide.file === relative);
   const isArticle = (relative.startsWith('blog/') && relative !== 'blog/index.html') || isGuide;
   const shareImage = `${origin}/${shareImages[relative] || 'assets/reviewremoval-social.png'}`;
   let schemaTag = '';
+  if (isFrench) {
+    schemaTag = `\n  <script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@graph': [
+      { '@type': 'WebPage', '@id': `${canonical}#webpage`, url: canonical, name: decodeEntities(title), description: decodeEntities(description), inLanguage: 'fr-CA', dateModified: '2026-11-22', isPartOf: { '@id': `${origin}/#website` }, mainEntity: { '@id': `${canonical}#service` } },
+      { '@type': 'Service', '@id': `${canonical}#service`, url: canonical, name: 'Service de suppression d’avis Google au Québec', serviceType: 'Aide au signalement et au retrait d’avis Google', description: decodeEntities(description), areaServed: { '@type': 'Country', name: 'Canada' }, provider: { '@type': 'Organization', '@id': `${origin}/#organization`, name: 'ReviewRemoval', url: `${origin}/` }, offers: { '@type': 'Offer', price: '50', priceCurrency: 'CAD', url: `${canonical}#pricing`, description: '50 $ CA au départ par avis. 125 $ CA de plus par avis retiré.' } }
+    ] }).replaceAll('<', '\\u003c')}</script>`;
+  }
+  if (relative === 'google-review-case-tracker.html') {
+    const schema = { '@context': 'https://schema.org', '@graph': [
+      { '@type':'WebPage', '@id':canonical+'#webpage', url:canonical, name:decodeEntities(title), description:decodeEntities(description), dateModified:'2026-11-22', inLanguage:'en-CA', mainEntity:{'@id':canonical+'#tool'} },
+      { '@type':'WebApplication', '@id':canonical+'#tool', name:'Google Review Case Tracker', url:canonical, applicationCategory:'BusinessApplication', operatingSystem:'Web browser', isAccessibleForFree:true, offers:{'@type':'Offer',price:'0',priceCurrency:'CAD'}, publisher:{'@id':origin+'/#organization'} }
+    ] };
+    schemaTag = `\n  <script type="application/ld+json">${JSON.stringify(schema)}</script>`;
+  }
   if (relative === 'index.html' || relative === 'review-removal-canada.html' || (relative.startsWith('remove-') && !isGuide)) {
     const isCanada = relative === 'review-removal-canada.html';
     const platform = relative === 'index.html' ? 'Google' : isCanada ? 'Canadian business' : decodeEntities(html.match(/<body data-platform="([^"]+)"/)?.[1] || '');
@@ -104,7 +134,7 @@ for (const relative of pages) {
     const schema = relative === 'index.html'
       ? { '@context': 'https://schema.org', '@graph': [
           organization,
-          { '@type': 'WebSite', '@id': `${origin}/#website`, url: `${origin}/`, name: 'ReviewRemoval', publisher: { '@id': `${origin}/#organization` }, inLanguage: 'en-CA' },
+          { '@type': 'WebSite', '@id': `${origin}/#website`, url: `${origin}/`, name: 'ReviewRemoval', publisher: { '@id': `${origin}/#organization` }, inLanguage: ['en-CA', 'fr-CA'] },
           service,
           { '@type': 'WebPage', '@id': `${origin}/#webpage`, url: `${origin}/`, name: decodeEntities(title),
             description: decodeEntities(description), inLanguage: 'en-CA', dateModified: '2026-11-01',
@@ -122,7 +152,7 @@ for (const relative of pages) {
             { '@type': 'ListItem', position: 2, name: platform, item: canonical }
           ]
         }] };
-    if(isCanada)schema['@graph'].push({'@type':'WebPage','@id':canonical+'#webpage',url:canonical,name:decodeEntities(title),dateModified:'2026-10-27',inLanguage:'en-CA',mainEntity:{'@id':canonical+'#service'}});
+    if(isCanada)schema['@graph'].push({'@type':'WebPage','@id':canonical+'#webpage',url:canonical,name:decodeEntities(title),dateModified:'2026-11-05',inLanguage:'en-CA',mainEntity:{'@id':canonical+'#service'}});
     schemaTag = `\n  <script type="application/ld+json">${JSON.stringify(schema).replaceAll('<', '\\u003c')}</script>`;
   }
   let articleTimeTags = "";
@@ -193,10 +223,10 @@ for (const relative of pages) {
     schemaTag += `\n  <script type="application/ld+json">${JSON.stringify(breadcrumbs).replaceAll('<', '\\u003c')}</script>`;
     if (relative === 'google-review-removal-checker.html') {
       schemaTag += `\n  <script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebApplication',
-        name: 'Google review removal evidence checker', url: canonical, applicationCategory: 'BusinessApplication', operatingSystem: 'Any',
-        isAccessibleForFree: true, browserRequirements: 'JavaScript for tailored worksheets; static checklists available without JavaScript',
+        name: 'Google review removal checker', url: canonical, applicationCategory: 'BusinessApplication', operatingSystem: 'Web browser',
+        isAccessibleForFree: true, browserRequirements: 'JavaScript for the interactive review check and worksheets',
         offers: { '@type': 'Offer', price: '0', priceCurrency: 'CAD' },
-        description: 'Seven concerns and four reporting stages create preparation worksheets. No removal probability or eligibility score.',
+        description: 'Check review wording for common Google policy concerns, recognize a Google review link and prepare a case worksheet.',
         publisher: { '@id': `${origin}/#organization` } }).replaceAll('<', '\\u003c')}</script>`;
     }
   }
@@ -206,14 +236,17 @@ for (const relative of pages) {
     if(relative==='editorial-policy.html')html=html.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/g,'');
     schemaTag=`\n  <script type="application/ld+json">${JSON.stringify(pageSchema).replaceAll('<','\\u003c')}</script>`;
   }
-  const imageAlt = shareImageAlts[relative] || 'ReviewRemoval: review concerns, handled for you';
-  const tags = `\n  <!-- production URL metadata start -->\n  <link rel="canonical" href="${escapeAttr(canonical)}">\n  <meta name="robots" content="index, follow, max-image-preview:large">\n  <meta property="og:type" content="${isArticle ? 'article' : 'website'}">\n  <meta property="og:site_name" content="ReviewRemoval">\n  <meta property="og:locale" content="en_CA">\n  <meta property="og:url" content="${escapeAttr(canonical)}">\n  <meta property="og:title" content="${title}">\n  <meta property="og:description" content="${description}">\n  <meta property="og:image" content="${escapeAttr(shareImage)}">\n  <meta property="og:image:width" content="1200">\n  <meta property="og:image:height" content="${['blog/google-review-risk-score-denominator-study.html','blog/google-review-removal-appeals-data.html','blog/google-review-removal-time-data.html'].includes(relative)?'780':['blog/google-review-removal-denominator-audit.html'].includes(relative)?'720':['blog/google-review-removal-local-ranking-study.html','blog/google-reviews-without-text-data-study.html'].includes(relative)?'630':shareImages[relative]?'672':'630'}">\n  <meta property="og:image:alt" content="${escapeAttr(imageAlt)}">\n  <meta name="twitter:card" content="summary_large_image">\n  <meta name="twitter:title" content="${title}">\n  <meta name="twitter:description" content="${description}">\n  <meta name="twitter:image" content="${escapeAttr(shareImage)}">\n  <meta name="twitter:image:alt" content="${escapeAttr(imageAlt)}">${articleTimeTags}${schemaTag}\n  <!-- production URL metadata end -->`;
+  const imageAlt = shareImageAlts[relative] || (isFrench ? 'ReviewRemoval, aide au retrait des avis Google' : 'ReviewRemoval: review concerns, handled for you');
+  const tags = `\n  <!-- production URL metadata start -->\n  <link rel="canonical" href="${escapeAttr(canonical)}">${alternateTags}\n  <meta name="robots" content="index, follow, max-image-preview:large">\n  <meta property="og:type" content="${isArticle ? 'article' : 'website'}">\n  <meta property="og:site_name" content="ReviewRemoval">\n  <meta property="og:locale" content="${isFrench ? 'fr_CA' : 'en_CA'}">\n  <meta property="og:url" content="${escapeAttr(canonical)}">\n  <meta property="og:title" content="${title}">\n  <meta property="og:description" content="${description}">\n  <meta property="og:image" content="${escapeAttr(shareImage)}">\n  <meta property="og:image:width" content="1200">\n  <meta property="og:image:height" content="${['blog/google-review-risk-score-denominator-study.html','blog/google-review-removal-appeals-data.html','blog/google-review-removal-time-data.html'].includes(relative)?'780':['blog/google-review-removal-denominator-audit.html'].includes(relative)?'720':['blog/google-review-removal-local-ranking-study.html','blog/google-reviews-without-text-data-study.html'].includes(relative)?'630':shareImages[relative]?'672':'630'}">\n  <meta property="og:image:alt" content="${escapeAttr(imageAlt)}">\n  <meta name="twitter:card" content="summary_large_image">\n  <meta name="twitter:title" content="${title}">\n  <meta name="twitter:description" content="${description}">\n  <meta name="twitter:image" content="${escapeAttr(shareImage)}">\n  <meta name="twitter:image:alt" content="${escapeAttr(imageAlt)}">${articleTimeTags}${schemaTag}\n  <!-- production URL metadata end -->`;
   html = applyMeasurement(html.replace('</head>', `${tags}\n</head>`), relative);
-  if (relative !== 'index.html' && relative !== 'google-review-removal-cost-canada.html' && !html.includes('class="assessment-shortcut"')) {
+  if (relative !== 'index.html' && !isFrench && relative !== 'google-review-removal-cost-canada.html' && !html.includes('class="assessment-shortcut"')) {
     html = html.replace(/\n?[ \t]*<\/body>/, `\n  ${assessmentShortcut}\n</body>`);
   }
-  fs.writeFileSync(file, applyPositioning(relative,html), 'utf8');
+  fs.writeFileSync(file, addLanguageLink(applyPositioning(relative,html),relative), 'utf8');
 }
+
+const notFound = path.join(root, '404.html');
+if (fs.existsSync(notFound)) fs.writeFileSync(notFound, addLanguageLink(fs.readFileSync(notFound, 'utf8'), '404.html'), 'utf8');
 
 const sitemapEntries = pages.map(relative => {
   const html = fs.readFileSync(path.join(root, relative), 'utf8');

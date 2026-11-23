@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en-CA">
+<head>
+  <!-- measurement bootstrap start -->
+  <link rel="stylesheet" href="measurement.css?v=20261122-cookie-prompt">
+  <script src="measurement-config.js" defer></script>
+  <script src="measurement.js?v=20261122-cookie-prompt" defer></script>
+  <!-- measurement bootstrap end -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#17353e">
+  <title>Google Review Case Tracker | ReviewRemoval</title>
+  <meta name="description" content="Track reported Google reviews, appeal dates and outcomes in a private browser log. Export a CSV of your cases when you need a record.">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css?v=20261122-fr-ca">
+  <link rel="stylesheet" href="google-review-case-tracker.css">
+  <script src="script.js?v=20261122-estimate" defer></script>
+  <script src="google-review-case-tracker.js" defer></script>
+
+  <!-- production URL metadata start -->
+  <link rel="canonical" href="https://reviewremoval.ca/google-review-case-tracker.html">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="ReviewRemoval">
+  <meta property="og:locale" content="en_CA">
+  <meta property="og:url" content="https://reviewremoval.ca/google-review-case-tracker.html">
+  <meta property="og:title" content="Google Review Case Tracker | ReviewRemoval">
+  <meta property="og:description" content="Track reported Google reviews, appeal dates and outcomes in a private browser log. Export a CSV of your cases when you need a record.">
+  <meta property="og:image" content="https://reviewremoval.ca/assets/reviewremoval-social.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="ReviewRemoval: review concerns, handled for you">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Google Review Case Tracker | ReviewRemoval">
+  <meta name="twitter:description" content="Track reported Google reviews, appeal dates and outcomes in a private browser log. Export a CSV of your cases when you need a record.">
+  <meta name="twitter:image" content="https://reviewremoval.ca/assets/reviewremoval-social.png">
+  <meta name="twitter:image:alt" content="ReviewRemoval: review concerns, handled for you">
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://reviewremoval.ca/google-review-case-tracker.html#webpage","url":"https://reviewremoval.ca/google-review-case-tracker.html","name":"Google Review Case Tracker | ReviewRemoval","description":"Track reported Google reviews, appeal dates and outcomes in a private browser log. Export a CSV of your cases when you need a record.","dateModified":"2026-11-22","inLanguage":"en-CA","mainEntity":{"@id":"https://reviewremoval.ca/google-review-case-tracker.html#tool"}},{"@type":"WebApplication","@id":"https://reviewremoval.ca/google-review-case-tracker.html#tool","name":"Google Review Case Tracker","url":"https://reviewremoval.ca/google-review-case-tracker.html","applicationCategory":"BusinessApplication","operatingSystem":"Web browser","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"CAD"},"publisher":{"@id":"https://reviewremoval.ca/#organization"}}]}</script>
+  <!-- production URL metadata end -->
+</head>
+<body class="case-tracker-page">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="/" aria-label="ReviewRemoval home"><span class="brand-mark" aria-hidden="true">R</span><span class="brand-name">Review<span>Removal</span><small>REPUTATION SERVICES</small></span></a>
+      <nav class="primary-nav" id="primary-nav" aria-label="Main navigation"><a href="/">Google reviews</a><a href="google-review-removal-checker.html">Evidence tool</a><a href="review-removal-canada.html">Canada</a><a href="/#pricing">Pricing</a><a href="blog/index.html">Blog</a><a href="about.html">About</a><a class="nav-contact" href="/#quote">Request an assessment <span aria-hidden="true">↓</span></a></nav>
+      <a class="site-language" href="/suppression-avis-google.html" lang="fr-CA" hreflang="fr-CA" aria-label="Voir le site en français"><span class="site-language-full">Français</span><span class="site-language-short" aria-hidden="true">FR</span></a><button class="menu-toggle" type="button" aria-label="Open menu" aria-controls="primary-nav" aria-expanded="false"><span></span><span></span><span></span></button>
+    </div>
+  </header>
+  <main id="main">
+    <header class="case-hero">
+      <div class="wrap">
+        <p class="eyebrow"><span></span> Free browser tool</p>
+        <h1>Google review case tracker</h1>
+        <p>Keep a record of when you reported each review, what Google decided and what to check next. Download the log when you need to share it with your team.</p>
+      </div>
+    </header>
+    <div class="wrap case-workspace" data-clarity-mask="true">
+      <section class="case-form-panel" aria-labelledby="case-form-title">
+        <h2 id="case-form-title">Record a case</h2>
+        <p>Use one numbered case per review. Enter the status you saw in Google.</p>
+        <form id="case-form" method="post">
+          <fieldset disabled>
+            <label>Original report date<input type="date" name="reported" required></label>
+            <label>Recorded status
+              <select name="stage" required>
+                <option value="pending">Report pending</option>
+                <option value="declined">No violation found</option>
+                <option value="appealed">Appeal submitted</option>
+                <option value="removed">Removed</option>
+                <option value="retained">Remains live after appeal</option>
+              </select>
+            </label>
+            <label>Status date <span>(optional)</span><input type="date" name="updated" aria-describedby="case-date-help"></label>
+            <p id="case-date-help">For a completed case, enter the date you learned the outcome to record the elapsed time.</p>
+            <div class="case-form-actions"><button class="button button-dark" type="submit">Add case</button><button class="case-secondary" type="button" id="case-cancel" hidden>Cancel edit</button></div>
+          </fieldset>
+        </form>
+        <p id="case-message" role="status"></p>
+        <noscript><p>Enable JavaScript to save and export cases. You can check a report directly with the Google link below.</p></noscript>
+      </section>
+      <section class="case-list-panel" aria-labelledby="case-list-title">
+        <div class="case-list-header"><div><h2 id="case-list-title">Case log</h2><p id="case-count">0 cases</p></div><button class="case-secondary" type="button" id="case-export" disabled>Download CSV</button></div>
+        <p id="case-empty">Add your first reported review to start the log.</p>
+        <ul id="case-list" class="case-records"></ul>
+      </section>
+    </div>
+    <section class="wrap case-help" aria-labelledby="case-help-title">
+      <h2 id="case-help-title">Check Google for the current decision</h2>
+      <p>Open the <a href="https://support.google.com/business/workflow/9945796">Reviews Management Tool</a> with the Google account that manages your Business Profile. Record the status you see. Google may offer a one-time appeal for a review it decides to keep. See <a href="https://support.google.com/business/answer/4596773?hl=en">Google’s reporting and appeal instructions</a>.</p>
+      <p>The elapsed time is measured in calendar days from your recorded dates. Your numbered cases, dates and statuses are saved in this browser. Download a CSV before clearing browser data.</p>
+      <p>Need help preparing evidence? Use the <a href="google-review-removal-checker.html">Google review evidence checker</a> or <a href="/#quote">request a free assessment</a>.</p>
+    </section>
+  </main>
+  <footer class="site-footer">
+    <div class="wrap footer-main">
+      <div><a class="footer-brand" href="/">Review<span>Removal</span></a><p>Google review removal assistance for Canadian businesses.</p></div>
+      <div class="footer-nav"><a href="/#pricing">Pricing</a><a href="blog/index.html">Guides and research</a><a href="/#quote">Get a quote</a><a href="terms-of-service.html">Terms</a><a href="privacy-policy.html">Privacy</a></div>
+      <div class="footer-note"><strong>Independent of Google</strong><p>Google decides whether a review stays on its platform.</p></div>
+    </div>
+    <div class="wrap footer-bottom"><span>© 2026 ReviewRemoval</span><a href="#main">Back to top <span aria-hidden="true">↑</span></a></div>
+  </footer>
+  <a class="assessment-shortcut" href="/#quote"><span>Free Assessment</span><span aria-hidden="true">→</span></a>
+</body>
+</html>

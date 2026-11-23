@@ -64,9 +64,19 @@ html:has(> body.home-page){scroll-padding-top:20px}
 .home-page .calculator{box-shadow:7px 7px 0 #e3e7df}
 .home-page .calculator-head{padding:12px 23px}
 .home-page .calculator-body{padding:23px 24px 20px}
-.home-page .calculator h3{font-size:27px;margin-bottom:8px}
+.home-page #calculator-title{font-size:27px;margin-bottom:8px}
 .home-page .calculator-body>p:first-of-type{color:#506269;font-size:14px}
-.home-page .calc-lines{margin-top:18px}
+.home-page .calculator .quantity-control{width:174px;height:50px;border-radius:5px;overflow:hidden}
+.home-page .calculator .quantity-control button{height:48px;width:50px;flex-basis:50px;background:#f4f6f3}
+.home-page .calculator .quantity-control button:hover:not(:disabled){background:#e6ede5}
+.home-page .calculator .quantity-control input{width:72px;height:48px}
+.home-page .calculator .quantity-control :focus-visible{outline-offset:-3px}
+.home-page .quantity-control button:disabled{color:#798484;cursor:default}
+.home-page .quantity-presets{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0 15px}
+.home-page .quantity-presets button{min-width:44px;min-height:44px;padding:6px 10px;border:1px solid #c8d4cf;border-radius:4px;background:#fff;color:#19323a;font-weight:700}
+.home-page .quantity-presets button:hover{background:#edf1ed}
+.home-page .quantity-presets button[aria-pressed="true"]{border-color:#17353e;background:#edf1ed;color:#17353e}
+.home-page .calc-lines{margin-top:0}
 .home-page .calc-lines>div{padding:11px 0;font-size:14px}
 .home-page .calc-lines small{color:#52646a;font-size:12px}
 .home-page .calc-total{padding:18px 0;font-size:14px}
@@ -247,7 +257,7 @@ html:has(> body.home-page){scroll-padding-top:20px}
   .home-page .pricing-detail{font-size:12px;margin-top:12px}
   .home-page .calculator{max-width:none;box-shadow:5px 5px 0 #e3e7df}
   .home-page .calculator-body{padding:21px 21px 18px}
-  .home-page .calculator h3{font-size:26px}
+  .home-page #calculator-title{font-size:26px}
   .home-page .quote-heading{grid-template-columns:1fr;gap:14px;margin-bottom:22px}
   .home-page .quote-heading h2{font-size:36px}
   .home-page .quote-heading>p{font-size:15px}

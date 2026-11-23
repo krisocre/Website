@@ -129,7 +129,7 @@ function build(originOverride){
    return start+links+`<a href="${prefix}terms-of-service.html">Terms</a><a href="${prefix}privacy-policy.html">Privacy</a>`+end;
   });
   html=html.replace(/<form\b[^>]*\bid="(?:assessment-form|removalForm|platformRemovalForm|reputationForm)"[^>]*>[\s\S]*?<\/form>/g,form=>{
-   forms++;const french=/\blang="fr-CA"/.test(html.slice(0,150))||file==='suppression-avis-google.html';
+   forms++;const french=/<html\b[^>]*\blang="fr-CA"/.test(html);
    const termsUrl=origin+'/terms-of-service.html'+(french?'#conditions-francaises':'');
    const privacyUrl=origin+'/privacy-policy.html'+(french?'#confidentialite-fr':'');
    const text=french?'En envoyant cette demande, vous acceptez les Conditions de service et prenez connaissance de la Politique de confidentialité. La suppression n’est pas garantie.':'By submitting, you agree to the Terms of Service and acknowledge the Privacy Policy. Removal is not guaranteed.';

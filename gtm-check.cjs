@@ -20,7 +20,7 @@ const server=http.createServer((req,res)=>{
 (async()=>{
  await new Promise(r=>server.listen(0,'127.0.0.1',r));const origin='http://127.0.0.1:'+server.address().port;
  const browser=await puppeteer.launch({headless:true,executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe'}),errors=[];
- async function open(query='',gpc=false){
+ async function open(query='',gpc=false,pathname='/'){
   const context=await browser.createBrowserContext(),page=await context.newPage(),loads=[];
   await page.setRequestInterception(true);page.on('pageerror',e=>errors.push(e.message));
   page.on('request',r=>{
@@ -29,13 +29,12 @@ const server=http.createServer((req,res)=>{
    return r.method()==='GET'&&r.url().startsWith(origin+'/')?r.continue():r.abort();
   });
   if(gpc)await page.evaluateOnNewDocument(()=>Object.defineProperty(navigator,'globalPrivacyControl',{get:()=>true}));
-  await page.goto(origin+'/'+query,{waitUntil:'load'});await page.waitForFunction(()=>!!window.ReviewRemovalMeasurement);
+  await page.goto(origin+pathname+query,{waitUntil:'load'});await page.waitForFunction(()=>!!window.ReviewRemovalMeasurement);
   return {context,page,loads};
  }
  async function choose(page,choice){if(await page.$eval('#measurement-preferences',el=>el.hidden))await page.click('.measurement-settings');await page.click('[data-choice="'+choice+'"]');}
  async function consent(page,analytics,advertising){
-  await page.click('.measurement-settings');
-  await page.click('#measurement-preferences [data-choice="customize"]');
+  await choose(page,'customize');
   for(const [purpose,want]of [['analytics',analytics],['advertising',advertising]])if(await page.$eval('[data-purpose="'+purpose+'"]',el=>el.checked)!==want)await page.click('[data-purpose="'+purpose+'"]');
   await page.click('[data-choice="save"]');
  }
@@ -65,6 +64,15 @@ const server=http.createServer((req,res)=>{
   assert.equal(t.loads.filter(url=>url.includes('/gtm.js?')).length,1);assert.equal(t.loads.filter(url=>url.includes('/gtag/js?')).length,1);assert.ok(!data.some(e=>e[0]==='config'&&e[1]==='G-9LFJWP87F0'),'GTM-owned GA4 is not initialized a second time by site code');await t.context.close();
   t=await open('?email=PRIVATE_EMAIL');await choose(t.page,'accept');assert.equal(t.loads.length,0);await t.context.close();
   t=await open('',true);await choose(t.page,'accept');await t.page.waitForSelector('#reviewremoval-tag-manager');assert.equal(t.loads.filter(url=>url.includes('/gtag/js?')).length,0);await t.context.close();
+  const frenchPath='/suppression-avis-google.html';
+  t=await open('',false,frenchPath);
+  assert.equal(await t.page.$eval('#measurement-preferences',panel=>panel.lang),'fr-CA');
+  await choose(t.page,'accept');await t.page.waitForSelector('#reviewremoval-google-tag');await submit(t.page);
+  assert.match(await t.page.$eval('#success-copy',node=>node.textContent),/prochaine étape par courriel/);
+  data=await layer(t.page);
+  assert.equal(data.filter(e=>e.event==='reviewremoval_generate_lead' && e.page_path===frenchPath).length,1);
+  assert.equal(data.filter(e=>e[1]==='conversion' && e[2].send_to==='AW-18449308865/EVurCIn11LQdEMG5qN1E').length,1);
+  await t.context.close();
   assert.deepEqual(errors,[]);console.log(`PASS: ${pages.length} page bootstraps; one GTM container, consent purposes/rejection/withdrawal/GPC, unsafe URLs, safe event bridge, unchanged confirmed-only Ads conversion and no duplicate GA4 initialization. Providers mocked.`);
  }finally{await browser.close();server.closeAllConnections();await new Promise(r=>server.close(r));}
 })().catch(e=>{console.error(e);server.close();process.exitCode=1;});

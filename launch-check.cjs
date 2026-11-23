@@ -6,9 +6,10 @@ const {spawnSync} = require('node:child_process');
 const workspace = __dirname;
 const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'reviewremoval-launch-'));
 const pages = [
-  'index.html','review-removal-canada.html','about.html','terms-of-service.html','privacy-policy.html','editorial-policy.html',
+  'index.html','suppression-avis-google.html','review-removal-canada.html','about.html','terms-of-service.html','privacy-policy.html','editorial-policy.html',
   'blog/index.html','blog/google-review-moderation-2019-2025.html','blog/canadian-tourism-google-reviews-2023.html','blog/review-removal-questions-answered.html','blog/review-report-evidence-checklist.html', 'blog/google-review-removal-rating-impact-study.html',
   ...require('./google-guides.cjs').map(guide => guide.file),
+  'google-review-case-tracker.html',
   'blog/google-review-removal-denominator-audit.html', 'blog/google-review-risk-score-denominator-study.html',
   'blog/google-review-removal-appeals-data.html', 'blog/google-review-removal-time-data.html',
   'blog/google-review-removal-local-ranking-study.html',
@@ -29,8 +30,16 @@ try {
   }
   for (const relative of pages) {
     const html = fs.readFileSync(path.join(tempRoot, relative), 'utf8');
-    const expectedShortcuts = ['index.html','google-review-removal-cost-canada.html'].includes(relative) ? 0 : 1;
+    const expectedShortcuts = ['index.html','suppression-avis-google.html','google-review-removal-cost-canada.html'].includes(relative) ? 0 : 1;
     if ((html.match(/class="assessment-shortcut" href="\/#quote"/g) || []).length !== expectedShortcuts) throw new Error(`${relative}: incorrect fixed assessment shortcut count`);
+    if ((html.match(/class="site-language"/g) || []).length !== 1) throw new Error(`${relative}: expected one visible language link`);
+    const alternateLinks = [...html.matchAll(/<link rel="alternate" hreflang="([^"]+)" href="([^"]+)">/g)];
+    if (relative === 'index.html' || relative === 'suppression-avis-google.html') {
+      if (alternateLinks.map(match => match.slice(1).join('=')).join(' ') !== 'en-CA=https://example.com/ fr-CA=https://example.com/suppression-avis-google.html x-default=https://example.com/') throw new Error(`${relative}: localized homepage alternates are incomplete`);
+      const french = relative === 'suppression-avis-google.html';
+      if (!html.includes(`<html lang="${french ? 'fr-CA' : 'en-CA'}">`) || !html.includes(`<link rel="canonical" href="https://example.com/${french ? relative : ''}">`)) throw new Error(`${relative}: invalid canonical or document language`);
+      if (!html.includes(`name="terms_language" value="${french ? 'fr-CA' : 'en-CA'}"`)) throw new Error(`${relative}: assessment terms use the wrong language`);
+    } else if (alternateLinks.length) throw new Error(`${relative}: unexpected hreflang on a page without a translation`);
     for(const file of ['measurement-config.js','measurement.js','measurement.css'])if((html.match(new RegExp('(?:src|href)="[^"\\s]*'+file.replace('.','\\.')+'(?:\\?v=[A-Za-z0-9-]+)?"','g'))||[]).length!==1)throw new Error(`${relative}: measurement bootstrap missing or duplicated: ${file}`);
     if(/googletagmanager\.com\/(?:gtag\/js|gtm\.js)/.test(html.split('</head>')[0]))throw new Error(`${relative}: direct tag bypasses consent`);
     if (['about.html','blog/index.html'].includes(relative) && (html.match(/<section class="wrap editorial-disclosure">/g)||[]).length !== 1) throw new Error(`${relative}: research disclosure duplicated by rebuild`);
