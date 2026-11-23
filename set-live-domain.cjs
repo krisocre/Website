@@ -102,8 +102,8 @@ for (const relative of pages) {
   let schemaTag = '';
   if (isFrench) {
     schemaTag = `\n  <script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@graph': [
-      { '@type': 'WebPage', '@id': `${canonical}#webpage`, url: canonical, name: decodeEntities(title), description: decodeEntities(description), inLanguage: 'fr-CA', dateModified: '2026-11-22', isPartOf: { '@id': `${origin}/#website` }, mainEntity: { '@id': `${canonical}#service` } },
-      { '@type': 'Service', '@id': `${canonical}#service`, url: canonical, name: 'Service de suppression d’avis Google au Québec', serviceType: 'Aide au signalement et au retrait d’avis Google', description: decodeEntities(description), areaServed: { '@type': 'Country', name: 'Canada' }, provider: { '@type': 'Organization', '@id': `${origin}/#organization`, name: 'ReviewRemoval', url: `${origin}/` }, offers: { '@type': 'Offer', price: '50', priceCurrency: 'CAD', url: `${canonical}#pricing`, description: '50 $ CA au départ par avis. 125 $ CA de plus par avis retiré.' } }
+      { '@type': 'WebPage', '@id': `${canonical}#webpage`, url: canonical, name: decodeEntities(title), description: decodeEntities(description), inLanguage: 'fr-CA', dateModified: '2026-11-23', isPartOf: { '@id': `${origin}/#website` }, mainEntity: { '@id': `${canonical}#service` } },
+      { '@type': 'Service', '@id': `${canonical}#service`, url: canonical, name: 'Service de suppression d’avis Google au Canada', serviceType: 'Aide au signalement et au retrait d’avis Google', description: decodeEntities(description), areaServed: { '@type': 'Country', name: 'Canada' }, provider: { '@type': 'Organization', '@id': `${origin}/#organization`, name: 'ReviewRemoval', url: `${origin}/` }, offers: { '@type': 'Offer', price: '50', priceCurrency: 'CAD', url: `${canonical}#pricing`, description: '50 $ CA au départ par avis. 125 $ CA de plus par avis retiré.' } }
     ] }).replaceAll('<', '\\u003c')}</script>`;
   }
   if (relative === 'google-review-case-tracker.html') {
