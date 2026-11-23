@@ -82,18 +82,26 @@ ${sources([[MISSING,'Google: about missing or delayed reviews'],[REPORT,'Google:
   <form id="policy-check-form" method="post" autocomplete="off">
     <fieldset disabled>
       <label for="policy-check-input">Paste the review text or Google review link</label>
-      <textarea id="policy-check-input" rows="4" maxlength="12000" spellcheck="false" placeholder="Paste the review or its link here" aria-describedby="policy-check-help policy-check-error"></textarea>
-      <p class="policy-check-help" id="policy-check-help">For a wording check, paste the review text. A link helps you find the review. Your entries stay in your browser.</p>
-      <button class="button button-accent" type="submit">Check review</button>
+      <textarea id="policy-check-input" rows="4" maxlength="5000" spellcheck="false" placeholder="Paste the review or its Google link here" aria-describedby="policy-check-help policy-check-error"></textarea>
+      <p class="policy-check-help" id="policy-check-help">Get a policy estimate after up to two follow-ups. The online check processes the public wording and selected answers. Leave out private details.</p>
+      <button class="button button-accent" type="submit">Check this review</button>
       <p class="policy-check-error" id="policy-check-error" role="status"></p>
     </fieldset>
   </form>
+  <p class="policy-check-status" id="policy-check-status" role="status"></p>
+  <section class="policy-follow-up" id="policy-follow-up" aria-labelledby="policy-follow-up-title" hidden>
+    <p class="policy-check-kicker" id="policy-follow-up-step"></p>
+    <h3 id="policy-follow-up-title" tabindex="-1"></h3>
+    <div id="policy-follow-up-body"></div>
+  </section>
   <section class="policy-check-result" id="policy-check-result" aria-labelledby="policy-result-title" tabindex="-1" hidden>
+    <p class="policy-check-kicker" id="policy-result-source"></p>
     <h3 id="policy-result-title">Your result</h3>
     <p id="policy-result-advice"></p>
+    <blockquote id="policy-result-excerpt" hidden></blockquote>
     <ul id="policy-result-findings" hidden></ul>
     <div class="policy-check-links"><a id="policy-open-review" target="_blank" rel="noopener noreferrer" hidden>Open the Google link ↗</a><a id="policy-google-guide" href="${REPORT}">Google’s reporting and appeals guide</a></div>
-    <p class="policy-check-help">This quick check looks for common clues. Google decides whether a review can be removed.</p>
+    <p class="policy-check-help">This estimate is based on what you shared. Google decides whether a review can be removed.</p>
     <div class="policy-check-actions"><a class="button button-accent" href="/#quote">Get a free assessment</a><a href="/#pricing">See pricing</a></div>
   </section>
 </div>
@@ -106,8 +114,8 @@ ${table('Static checklist: every concern available in the tool',['Concern','Fact
 <p>Already reported a review? Use the <a href="${L('google-review-case-tracker.html')}">Google review case tracker</a> to log the date and record the outcome.</p>
 <h2 id="record">What belongs in a useful case record?</h2><p>Keep the business listing, Canadian location, exact review, report date, stated decision and any appeal reference together. Record public visibility separately from the platform’s decision. When several reviews are involved, create a separate record for each so outcomes and fees can be checked individually.</p><p>The downloaded text file provides blank fields for those details. Fill it in using your own secure records. Do not put account passwords, payment details or unnecessary personal information into a reporting worksheet or initial quote request.</p>
 <h2 id="use">Use the right guide for your next step</h2><ul><li><a href="${L('remove-fake-google-reviews.html')}">Suspected fake review:</a> distinguish evidence from assumptions about the reviewer.</li><li><a href="${L('blog/report-google-review-appeal.html')}">Report or appeal:</a> record the current status and prepare an eligible follow-up.</li><li><a href="${L('blog/google-reviews-not-showing.html')}">Review not visible:</a> check the profile and observed status before claiming a removal.</li><li><a href="${L('google-review-removal-cost-canada.html')}">Managed service:</a> compare fees and partial-success totals before paying.</li></ul>
-<h2 id="method">How this tool works</h2><p>The quick check uses a limited set of wording clues, including threats, promotional solicitations and stated conflicts of interest. The checker cannot read the review from its link. Issues such as fake engagement can also depend on facts outside the review.</p><p>The worksheet covers seven concerns and four reporting stages. Its <a href="${L('google-evidence-planner.js')}" download>logic is downloadable</a>. The static tables preserve the checklist when JavaScript is unavailable.</p>
-${sources([[POLICY,'Google Maps: content policy'],[REPORT,'Google Business Profile: ordinary review reports and appeals'],[EXTORTION,'Google Business Profile: merchant extortion evidence']],'November 22, 2026')}`;
+<h2 id="method">How this tool works</h2><p>The online checker compares public review wording and your answers with common Google policy categories. It may ask up to two follow-ups. A share link lets you open the review to copy its wording. If it is a star rating without text, you can use the context question to identify evidence.</p><p>The online check sends the wording and selected answers for processing. Leave out personal details and documents. If the online check is unavailable, the guided check runs in your browser. The separate worksheet covers seven concerns and four reporting stages. Its <a href="${L('google-evidence-planner.js')}" download>logic is downloadable</a>.</p>
+${sources([[POLICY,'Google Maps: content policy'],[REPORT,'Google Business Profile: ordinary review reports and appeals'],[EXTORTION,'Google Business Profile: merchant extortion evidence']],'November 23, 2026')}`;
   throw new Error('Unknown guide '+file);
 }
 function writePages(){
@@ -128,9 +136,9 @@ function writePages(){
     const related=guides.filter(g=>g.file!==guide.file).slice(0,3).map(g=>`<a href="${L(g.file)}"><small>${esc(g.label)}</small><strong>${esc(g.heading)}</strong><span>Read the guide ↓</span></a>`).join('');
     const schema={'@context':'https://schema.org','@type':isBlog?'BlogPosting':'Article','@id':'https://reviewremoval.ca/'+guide.file+'#article','headline':guide.heading,'description':guide.summary,'datePublished':DATE,'dateModified':guide.updated||DATE,'author':{'@type':'Organization','name':'ReviewRemoval','url':'https://reviewremoval.ca/about.html'},'publisher':{'@id':'https://reviewremoval.ca/#organization'},'mainEntityOfPage':'https://reviewremoval.ca/'+guide.file,'inLanguage':'en-CA','image':'https://reviewremoval.ca/assets/reviewremoval-social.png'};
     // The domain script supplies canonical, social, tag and blog schema later.
-    const guidesStyle=guide.file==='google-review-removal-checker.html'?'google-guides.css?v=20261122-review-checker':'google-guides.css';
+    const guidesStyle=guide.file==='google-review-removal-checker.html'?'google-guides.css?v=20261123-guided-check':'google-guides.css';
     const updatedLabel=guide.updated?new Date(guide.updated).toLocaleDateString('en-CA',{dateStyle:'long',timeZone:'UTC'}):'';
-    const extra=guide.file==='google-review-removal-checker.html'?`<script src="${prefix}google-review-policy-check.js" defer></script>`:'';
+    const extra=guide.file==='google-review-removal-checker.html'?`<script src="${prefix}google-review-check-questions.js?v=20261123-guided-check" defer></script><script src="${prefix}google-review-policy-check.js?v=20261123-guided-check" defer></script>`:'';
     const html=`<!doctype html>\n<html lang="en-CA"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#17353e"><meta name="description" content="${esc(guide.summary+' For businesses across Canada.')}"><meta name="author" content="ReviewRemoval"><title>${esc(guide.title)}</title><link rel="icon" href="${prefix}favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="${prefix}styles.css"><link rel="stylesheet" href="${isBlog?'':'blog/'}blog.css"><link rel="stylesheet" href="${prefix}${guidesStyle}"><script src="${prefix}script.js?v=20261112-chatgpt-ads" defer></script>${guide.file==='google-review-removal-checker.html'?`<script src="${prefix}google-evidence-planner.js" defer></script>`:''}${extra}</head><body class="blog-page google-guide-page"><div id="top"></div>${header}<main id="main"><header class="article-hero"><div class="wrap"><nav class="article-breadcrumb" aria-label="Breadcrumb"><a href="${prefix}index.html">Google review removal</a><span>/</span><a href="${isBlog?'':'blog/'}index.html">Guides</a></nav><p class="content-kicker">${esc(guide.label)} / Canada</p><h1>${esc(guide.heading)}</h1><p class="article-deck">${esc(guide.summary)}</p><div class="article-meta"><span>By <a href="${prefix}about.html">ReviewRemoval</a></span><time datetime="${DATE}">October 13, 2026</time><span>Sources checked ${guide.checkedLabel||"October 13, 2026"}</span>${guide.updated?`<span>Updated <time data-updated datetime="${guide.updated}">${updatedLabel}</time></span>`:""}</div></div></header><div class="wrap article-layout"><article class="article-body"><details class="article-mobile-contents"><summary>On this page</summary><nav aria-label="Guide sections">${toc}</nav></details>${body}<section class="article-cta"><h2>Let us handle your Google review request.</h2><p>Send the review link and your location. Our team assesses the concern, prepares the reporting work and manages the available follow-through.</p><a class="button button-accent" href="${prefix}index.html#quote">Get my Google review quote <span aria-hidden="true">↓</span></a></section></article><aside class="article-sidebar" aria-label="Guide navigation"><strong>On this page</strong><nav>${toc}</nav><div class="sidebar-quote"><span>Managed Google review support</span><p>$50 CAD upfront. $125 for each review removed.</p><a href="${prefix}index.html#quote">Ask our team to handle it ↓</a></div></aside></div><section class="article-related"><div class="wrap"><h2>More Google review removal resources</h2><div class="article-related-grid">${related}</div></div></section></main>${localize(sourceFooter)}</body></html>\n`;
     fs.writeFileSync(path.join(ROOT,guide.file),html,'utf8');
   }

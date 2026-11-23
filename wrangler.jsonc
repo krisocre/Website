@@ -1,0 +1,12 @@
+{
+  "$schema": "https://developers.cloudflare.com/workers/wrangler/config-schema.json",
+  "name": "reviewremoval-review-check",
+  "main": "workers/review-check.mjs",
+  "compatibility_date": "2026-11-23",
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [{ "pattern": "reviewremoval.ca/api/review-check", "zone_name": "reviewremoval.ca" }],
+  "ai": { "binding": "AI" },
+  "observability": { "enabled": false },
+  "ratelimits": [{ "name": "REVIEW_CHECK_LIMIT", "namespace_id": "307902026", "simple": { "limit": 8, "period": 60 } }]
+}

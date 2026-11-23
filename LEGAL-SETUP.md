@@ -26,9 +26,10 @@ contract draft, not a legal opinion or a guarantee of enforceability.
   field. This works with the deployed twelve-column Apps Script handler; no backend
   redeployment is required for these extra lines. The backend supplies its own row
   timestamp. Client-supplied metadata is not independent proof of identity or reading.
-- `legal-versions/policies-2026-10-27.json` preserves the bilingual policy text for
-  this release and is linked in the submission record. Keep older snapshots after
-  later releases. Commit/tag the published version and keep order confirmations.
+- ReviewRemoval’s current submission record links to `legal-versions/policies-2026-11-23.json`,
+  which identifies the October 27 terms and November 23 privacy policy. The older
+  October 27 snapshot stays in the repository for historical submissions. It is
+  excluded from the public site build.
 
 ## Complete before taking paid orders
 

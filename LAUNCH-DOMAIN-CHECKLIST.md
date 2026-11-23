@@ -47,3 +47,16 @@ October 27 SEO follow-up: the domain pass also generates the editorial-standards
 page, normalizes homepage links and preserves source/publication dates. See
 `SEO-AUDIT-2026-10-27.md` for live findings, publication exclusions, the exact
 homepage redirect condition and separate webmaster-account tasks.
+
+## Online review checker
+
+The checker posts to `/api/review-check`. In a Cloudflare account with access to
+the `reviewremoval.ca` zone, deploy the configured Worker with `npx wrangler deploy`.
+The domain must be proxied by Cloudflare for the route to reach the Worker. The
+Workers AI binding uses the account’s allowance. Review wording and answers stay
+out of application logs and there is no storage binding. Keep the free plan to
+avoid usage charges while piloting the checker.
+
+The public page also supports a guided check when the endpoint is unavailable.
+After deploying, try a paid-review paraphrase and a link-only case. The result
+should identify when it used AI, and each check can ask at most two follow-ups.

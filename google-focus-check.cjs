@@ -19,6 +19,34 @@ const output=path.join(root,'.seo-private','previews');fs.mkdirSync(output,{recu
     for(const file of ['index.html',...guides.map(g=>g.file)]){
       await page.goto('file:///'+path.join(root,file).replaceAll('\\','/'),{waitUntil:'load'});
       if(file==='google-review-removal-checker.html'){
+        await page.evaluate(()=>{
+          window.__checkerRequests=[];
+          window.fetch=async(url,options)=>{
+            if(url!=='/api/review-check')throw new Error('Unexpected checker request');
+            const input=JSON.parse(options.body);window.__checkerRequests.push(input);
+            return {ok:true,json:async()=>({outcome:input.remaining?'unclear':'possible',policy:'fake',questions:['experience','duplicates','connection'],excerpt:''})};
+          };
+        });
+        await page.type('#policy-check-input','They described a service we do not offer.');
+        await page.click('#policy-check-form button');
+        await page.waitForSelector('#policy-follow-up:not([hidden])');
+        assert.equal(await page.$eval('#policy-follow-up-step',el=>el.textContent),'Follow-up 1 of 2');
+        await page.click('#policy-follow-up-body button');
+        assert.equal(await page.$eval('#policy-follow-up-step',el=>el.textContent),'Follow-up 2 of 2');
+        await page.click('#policy-follow-up-body button');
+        await page.waitForSelector('#policy-check-result:not([hidden])');
+        assert.equal(await page.$eval('#policy-result-source',el=>el.textContent),'AI policy estimate');
+        assert.equal(await page.$eval('#policy-follow-up',el=>el.hidden),true);
+        assert.deepEqual(await page.evaluate(()=>window.__checkerRequests.map(r=>r.remaining)),[2,0]);
+        await page.$eval('#policy-check-input',el=>{el.value='https://maps.app.goo.gl/Example123';el.dispatchEvent(new Event('input',{bubbles:true}));});
+        await page.click('#policy-check-form button');
+        await page.waitForSelector('#policy-follow-up-wording');
+        await page.click('#policy-follow-up-body button:last-child');
+        assert.equal(await page.$eval('#policy-follow-up-step',el=>el.textContent),'Follow-up 2 of 2');
+        await page.click('.policy-follow-up-options button:first-child');
+        assert.equal(await page.$eval('#policy-result-source',el=>el.textContent),'Guided policy estimate');
+        assert.match(await page.$eval('#policy-result-title',el=>el.textContent),/policy issue/);
+        assert.equal(await page.evaluate(()=>window.__checkerRequests.length),2,'A link alone does not reach AI');
         await page.select('#google-concern','negative');await page.select('#google-stage','declined');await page.click('#google-evidence-form button[type="submit"]');
         assert.match(await page.$eval('#google-evidence-result',el=>el.textContent),/customer concern/);
         await page.select('#google-concern','extortion');await page.click('#google-evidence-form button[type="submit"]');

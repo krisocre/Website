@@ -49,6 +49,13 @@ html:has(> body.home-page){scroll-padding-top:20px}
 .home-page .testimonial-rating-stars{display:block;width:108px;height:20px}
 .home-page .testimonial-rating-count{margin:0;color:#60706c;font:400 14px/1.5 'Segoe UI',Arial,sans-serif;white-space:nowrap}
 .home-page .testimonial-rating-count b{color:#445951;font-weight:700;font-variant-numeric:tabular-nums}
+.home-page .testimonial-next{display:none}
+@media(min-width:851px){
+  .home-page .testimonial-next{display:block;margin-top:22px;padding:16px 18px 6px;border:1px solid #e9e1d6;border-radius:7px;background:#faf7f1;text-align:left}
+  .home-page .testimonial-next p{margin:0;font-size:14px;color:var(--muted)}
+  .home-page .testimonial-next p:first-child{margin-bottom:4px;font-size:15px;color:var(--ink)}
+  .home-page .testimonial-next a{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding-bottom:0;border-bottom:0;color:var(--accent-dark)}
+}
 .home-page .pricing-section{padding:65px 0;background:var(--cream)}
 .home-page .pricing-grid{grid-template-columns:1fr .87fr;gap:88px;align-items:center}
 .home-page .pricing-intro h2{max-width:480px;margin-bottom:15px}

@@ -28,6 +28,15 @@ try {
     const result = spawnSync(process.execPath, [path.join(tempRoot, 'set-live-domain.cjs'), 'https://example.com'], {encoding: 'utf8'});
     if (result.status !== 0) throw new Error(result.stderr || result.stdout);
   }
+  const privacyRelease = '2026-11-23';
+  const oldPolicy = 'legal-versions/policies-2026-10-27.json';
+  const policyPath = `legal-versions/policies-${privacyRelease}.json`;
+  const publishedPrivacy = fs.readFileSync(path.join(tempRoot, 'privacy-policy.html'), 'utf8');
+  const snapshot = JSON.parse(fs.readFileSync(path.join(tempRoot, policyPath), 'utf8'));
+  const internalDetails = /Google (?:Sheets|Apps Script|Ads)|Cloudflare|Microsoft Clarity|\b(?:AW-\d+|GTM-[A-Z0-9]+)\b|https?:\/\/[^"<\s]+(?:myadcenter|partner-sites)/i;
+  if (internalDetails.test(publishedPrivacy) || internalDetails.test(JSON.stringify(snapshot.privacy))) throw new Error('The privacy policy exposes implementation details');
+  if (snapshot.termsVersion !== '2026-10-27' || snapshot.privacyVersion !== privacyRelease) throw new Error('The policy snapshot must identify both versions');
+  if (!fs.readFileSync(path.join(workspace, '_config.yml'), 'utf8').split(/\r?\n/).some(line => line.trim() === `- ${oldPolicy}`)) throw new Error('The historical policy snapshot is still configured for publication');
   for (const relative of pages) {
     const html = fs.readFileSync(path.join(tempRoot, relative), 'utf8');
     const expectedShortcuts = ['index.html','suppression-avis-google.html','google-review-removal-cost-canada.html'].includes(relative) ? 0 : 1;
@@ -39,6 +48,7 @@ try {
       const french = relative === 'suppression-avis-google.html';
       if (!html.includes(`<html lang="${french ? 'fr-CA' : 'en-CA'}">`) || !html.includes(`<link rel="canonical" href="https://example.com/${french ? relative : ''}">`)) throw new Error(`${relative}: invalid canonical or document language`);
       if (!html.includes(`name="terms_language" value="${french ? 'fr-CA' : 'en-CA'}"`)) throw new Error(`${relative}: assessment terms use the wrong language`);
+      if (!html.includes(`name="privacy_version" value="${privacyRelease}"`) || !html.includes(`name="terms_snapshot_url" value="https://example.com/${policyPath}"`)) throw new Error(`${relative}: the assessment uses an outdated policy record`);
     } else if (alternateLinks.length) throw new Error(`${relative}: unexpected hreflang on a page without a translation`);
     for(const file of ['measurement-config.js','measurement.js','measurement.css'])if((html.match(new RegExp('(?:src|href)="[^"\\s]*'+file.replace('.','\\.')+'(?:\\?v=[A-Za-z0-9-]+)?"','g'))||[]).length!==1)throw new Error(`${relative}: measurement bootstrap missing or duplicated: ${file}`);
     if(/googletagmanager\.com\/(?:gtag\/js|gtm\.js)/.test(html.split('</head>')[0]))throw new Error(`${relative}: direct tag bypasses consent`);

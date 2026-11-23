@@ -226,7 +226,7 @@ for (const relative of pages) {
         name: 'Google review removal checker', url: canonical, applicationCategory: 'BusinessApplication', operatingSystem: 'Web browser',
         isAccessibleForFree: true, browserRequirements: 'JavaScript for the interactive review check and worksheets',
         offers: { '@type': 'Offer', price: '0', priceCurrency: 'CAD' },
-        description: 'Check review wording for common Google policy concerns, recognize a Google review link and prepare a case worksheet.',
+        description: 'Get a Google review policy estimate and evidence checklist after up to two follow-up questions. A separate case worksheet is available.',
         publisher: { '@id': `${origin}/#organization` } }).replaceAll('<', '\\u003c')}</script>`;
     }
   }
@@ -252,7 +252,8 @@ const sitemapEntries = pages.map(relative => {
   const html = fs.readFileSync(path.join(root, relative), 'utf8');
   const schemas = [...html.matchAll(/<script type="application\/ld\+json">([^<]+)<\/script>/g)].map(match => JSON.parse(match[1]));
   const modified = schemas.find(schema => ['BlogPosting','Article','CollectionPage'].includes(schema['@type']))?.dateModified
-    || schemas.flatMap(schema => schema['@graph'] || []).find(schema => schema['@type'] === 'WebPage')?.dateModified;
+    || schemas.flatMap(schema => schema['@graph'] || []).find(schema => schema['@type'] === 'WebPage')?.dateModified
+    || (relative === 'privacy-policy.html' ? schemas.find(schema => schema['@type'] === 'WebPage')?.dateModified : undefined);
   const lastmod = /^\d{4}-\d{2}-\d{2}$/.test(modified || '') ? `<lastmod>${modified}</lastmod>` : '';
   const imageNames=relative==='blog/google-reviews-without-text-data-study.html'?['google-text-coverage-ratings','google-text-coverage-frames','google-text-coverage-places']:relative==='blog/google-review-removal-local-ranking-study.html'?['google-ranking-rating-bands','google-ranking-high-rating-categories','google-ranking-frames']:relative==='blog/google-review-removal-time-data.html'?['google-notice-category-medians','google-notice-receipt-mix','google-notice-median-tail-examples']:relative==='blog/google-review-removal-appeals-data.html'?['google-maps-appeals-direction','google-maps-appeals-receipt-share','google-maps-appeals-median-hours']:relative==='blog/google-review-removal-denominator-audit.html'?['google-removal-reasons-denominators','google-removal-metric-changes','google-removal-source-corrections']:relative==='blog/google-review-risk-score-denominator-study.html'?['google-risk-deleted-share','google-risk-identification-bounds','google-risk-same-subset']:[];
   const images=imageNames.map(name=>`<image:image><image:loc>${origin}/blog/assets/${name}.svg</image:loc></image:image>`).join('');
