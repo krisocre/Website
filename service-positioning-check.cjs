@@ -6,7 +6,7 @@ const root=__dirname;
 const read=file=>fs.readFileSync(path.join(root,file),'utf8');
 const schemas=html=>[...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map(m=>JSON.parse(m[1]));
 function nodes(value){if(!value||typeof value!=='object')return [];return [value,...Object.values(value).flatMap(v=>Array.isArray(v)?v.flatMap(nodes):nodes(v))];}
-const retired=/yelp|facebook|trustpilot|tripadvisor|glassdoor|booking[.-]com|remove-indeed/i;
+const retired=/yelp|facebook|trustpilot|tripadvisor|glassdoor|sitejabber|booking[.-]com|remove-indeed|\bplatforms\.html|review removal services by platform|review.removal services across major platforms/i;
 const rootPages=fs.readdirSync(root).filter(file=>file.endsWith('.html')&&file!=='404.html');
 for(const file of rootPages){
  const html=read(file),head=html.split('</head>')[0];

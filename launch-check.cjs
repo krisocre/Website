@@ -79,7 +79,7 @@ try {
   const sitemap = fs.readFileSync(path.join(tempRoot, 'sitemap.xml'), 'utf8');
   if ((sitemap.match(/<loc>/g) || []).length !== pages.length) throw new Error('Sitemap does not list every page');
   if(!sitemap.includes('<loc>https://example.com/blog/google-review-removal-rating-impact-study.html</loc><lastmod>2026-10-08</lastmod>')) throw new Error('Rating study sitemap date or URL is incorrect');
-  if(!sitemap.includes('<loc>https://example.com/blog/index.html</loc><lastmod>2026-11-19</lastmod>')) throw new Error('Blog index sitemap date is incorrect');
+  if(!sitemap.includes('<loc>https://example.com/blog/index.html</loc><lastmod>2026-11-24</lastmod>')) throw new Error('Blog index sitemap date is incorrect');
   const timingHtml = fs.readFileSync(path.join(tempRoot,'blog/google-review-removal-time-data.html'),'utf8');
   const timingSchemas = [...timingHtml.matchAll(/<script type="application\/ld\+json">([^<]+)<\/script>/g)].map(match=>JSON.parse(match[1]));
   const timingArticle = timingSchemas.find(schema=>schema['@type']==='BlogPosting');

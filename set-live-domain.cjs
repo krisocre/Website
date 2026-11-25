@@ -91,6 +91,8 @@ for (const relative of pages) {
   const title = html.match(/<title>([^<]+)<\/title>/)?.[1];
   const description = html.match(/<meta name="description" content="([^"]*)">/)?.[1];
   if (!title || !description || !html.includes('</head>')) { console.error(`Missing metadata in ${relative}`); process.exit(1); }
+  const heading = decodeEntities((html.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/i)?.[1] || title)
+    .replace(/<br\b[^>]*>/gi, ' ').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim());
   const canonical = `${origin}/${relative === 'index.html' ? '' : relative}`;
   const isFrench = relative === frenchHome;
   const alternateTags = relative === 'index.html' || isFrench
@@ -102,7 +104,7 @@ for (const relative of pages) {
   let schemaTag = '';
   if (isFrench) {
     schemaTag = `\n  <script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@graph': [
-      { '@type': 'WebPage', '@id': `${canonical}#webpage`, url: canonical, name: decodeEntities(title), description: decodeEntities(description), inLanguage: 'fr-CA', dateModified: '2026-11-23', isPartOf: { '@id': `${origin}/#website` }, mainEntity: { '@id': `${canonical}#service` } },
+      { '@type': 'WebPage', '@id': `${canonical}#webpage`, url: canonical, name: decodeEntities(title), description: decodeEntities(description), inLanguage: 'fr-CA', dateModified: '2026-11-24', isPartOf: { '@id': `${origin}/#website` }, mainEntity: { '@id': `${canonical}#service` } },
       { '@type': 'Service', '@id': `${canonical}#service`, url: canonical, name: 'Service de suppression d’avis Google au Canada', serviceType: 'Aide au signalement et au retrait d’avis Google', description: decodeEntities(description), areaServed: { '@type': 'Country', name: 'Canada' }, provider: { '@type': 'Organization', '@id': `${origin}/#organization`, name: 'ReviewRemoval', url: `${origin}/` }, offers: { '@type': 'Offer', price: '50', priceCurrency: 'CAD', url: `${canonical}#pricing`, description: '50 $ CA au départ par avis. 125 $ CA de plus par avis retiré.' } }
     ] }).replaceAll('<', '\\u003c')}</script>`;
   }
@@ -134,10 +136,10 @@ for (const relative of pages) {
     const schema = relative === 'index.html'
       ? { '@context': 'https://schema.org', '@graph': [
           organization,
-          { '@type': 'WebSite', '@id': `${origin}/#website`, url: `${origin}/`, name: 'ReviewRemoval', publisher: { '@id': `${origin}/#organization` }, inLanguage: ['en-CA', 'fr-CA'] },
+          { '@type': 'WebSite', '@id': `${origin}/#website`, url: `${origin}/`, name: 'ReviewRemoval', alternateName: 'ReviewRemoval.ca', publisher: { '@id': `${origin}/#organization` }, inLanguage: ['en-CA', 'fr-CA'] },
           service,
           { '@type': 'WebPage', '@id': `${origin}/#webpage`, url: `${origin}/`, name: decodeEntities(title),
-            description: decodeEntities(description), inLanguage: 'en-CA', dateModified: '2026-11-01',
+            description: decodeEntities(description), inLanguage: 'en-CA', dateModified: '2026-11-24',
             isPartOf: { '@id': `${origin}/#website` }, mainEntity: { '@id': `${origin}/#service` } }
         ] }
       : isCanada ? { '@context': 'https://schema.org', '@graph': [service, {
@@ -152,7 +154,7 @@ for (const relative of pages) {
             { '@type': 'ListItem', position: 2, name: platform, item: canonical }
           ]
         }] };
-    if(isCanada)schema['@graph'].push({'@type':'WebPage','@id':canonical+'#webpage',url:canonical,name:decodeEntities(title),dateModified:'2026-11-05',inLanguage:'en-CA',mainEntity:{'@id':canonical+'#service'}});
+    if(isCanada)schema['@graph'].push({'@type':'WebPage','@id':canonical+'#webpage',url:canonical,name:decodeEntities(title),dateModified:'2026-11-24',inLanguage:'en-CA',mainEntity:{'@id':canonical+'#service'}});
     schemaTag = `\n  <script type="application/ld+json">${JSON.stringify(schema).replaceAll('<', '\\u003c')}</script>`;
   }
   let articleTimeTags = "";
@@ -162,7 +164,7 @@ for (const relative of pages) {
     const citations = [...new Set([...html.matchAll(/<a href="(https:\/\/[^\"]+)"/g)].map(match => decodeEntities(match[1])))];
     const schema = {
       '@context': 'https://schema.org', '@type': relative.startsWith('blog/') ? 'BlogPosting' : 'Article', '@id': `${canonical}#article`,
-      mainEntityOfPage: canonical, headline: decodeEntities(title.replace(/ \| ReviewRemoval$/, '')),
+      mainEntityOfPage: canonical, headline: heading,
       description: decodeEntities(description), datePublished: published,
       dateModified: html.match(/<time data-updated datetime="([0-9-]+)"/)?.[1] || published,
       author: { '@type': 'Organization', name: 'ReviewRemoval', url: `${origin}/about.html` },
@@ -217,7 +219,7 @@ for (const relative of pages) {
       '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [
         { '@type': 'ListItem', position: 1, name: 'Home', item: `${origin}/` },
         { '@type': 'ListItem', position: 2, name: 'Research and guides', item: `${origin}/blog/index.html` },
-        { '@type': 'ListItem', position: 3, name: decodeEntities(title.replace(/ \| ReviewRemoval$/, '')), item: canonical }
+        { '@type': 'ListItem', position: 3, name: heading, item: canonical }
       ]
     };
     schemaTag += `\n  <script type="application/ld+json">${JSON.stringify(breadcrumbs).replaceAll('<', '\\u003c')}</script>`;

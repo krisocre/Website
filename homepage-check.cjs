@@ -31,7 +31,7 @@ const server=http.createServer((req,res)=>{
    page.on('pageerror',e=>errors.push(e.message));return page;
   }
   const page=await newPage();
-  for(const width of [1440,1024,768,390,320]){
+  for(const width of [1920,1440,1024,768,390,375,320]){
    await page.setViewport({width,height:width<=680?844:900});await page.goto(base,{waitUntil:'load'});
    await page.evaluate(()=>document.fonts.ready);
    const layout=await page.evaluate(()=>{
@@ -145,6 +145,29 @@ const server=http.createServer((req,res)=>{
    window.fetch=async()=>({ok:true,json:async()=>({result:'success',notification_sent:false})});f.requestSubmit();
   });
   await page.waitForSelector('#submission-success:not([hidden])');assert.match(await page.$eval('#success-copy',e=>e.textContent),/saved, but the notification email was not sent/);
+  await page.goto(base+'suppression-avis-google.html',{waitUntil:'load'});
+  const frenchHome = await page.$eval('html', element => ({
+    language: element.lang,
+    overflow: element.scrollWidth > window.innerWidth + 1,
+    englishLink: document.querySelector('.site-language').getAttribute('href')
+  }));
+  assert.deepEqual(frenchHome, {language:'fr-CA', overflow:false, englishLink:'/'});
+  await completeSecurityCheck(page);
+  await page.evaluate(() => {
+    const form = document.querySelector('#assessment-form');
+    for (const [name, value] of Object.entries({full_name:'Test',business_name:'Test Montréal',email_address:'test@example.com'})) {
+      form.elements[name].value = value;
+    }
+    window.fetch = async (_, options) => {
+      window.__frenchSubmission = options.body.toString();
+      return {ok:true,json:async()=>({result:'success',notification_sent:true})};
+    };
+    form.requestSubmit();
+  });
+  await page.waitForSelector('#submission-success:not([hidden])');
+  const frenchPayload = new URLSearchParams(await page.evaluate(() => window.__frenchSubmission));
+  assert.equal(frenchPayload.get('terms_language'),'fr-CA');
+  assert.equal(frenchPayload.get('review_count'),'1');
   await page.setJavaScriptEnabled(false);await page.goto(base,{waitUntil:'load'});
   assert.equal(await page.$$eval('.hero-testimonial figure',e=>e.length),1,'The testimonial remains in static HTML');
   assert.equal(await page.$eval('.testimonial-person strong',e=>e.textContent),'Luke Hapher');
@@ -154,6 +177,6 @@ const server=http.createServer((req,res)=>{
   assert.equal(await page.$$eval('title',n=>n.length),1);assert.equal(await page.$$eval('link[rel="canonical"]',n=>n.length),1);
   assert.deepEqual(errors,[]);assert.deepEqual(posts,[],'Never send a real POST');
   fs.writeFileSync(path.join(output,'layout-results.json'),JSON.stringify(results,null,2));
-  console.log('PASS: five homepage widths; one static testimonial; one platform banner; working quote forms with mocked Turnstile; legal payload and no-JS notice; zero real submissions.');
+  console.log('PASS: seven homepage widths; one static testimonial; one platform banner; working English and French quote forms with mocked Turnstile; legal payload and no-JS notice; zero real submissions.');
  }finally{if(browser)await browser.close();server.closeAllConnections();await new Promise(r=>server.close(r));}
 })().catch(e=>{console.error(e);process.exitCode=1;});

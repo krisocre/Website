@@ -1,18 +1,13 @@
 const path = require('node:path');
 const fs = require('node:fs');
 const puppeteer = require('C:/Users/alkhi/node_modules/puppeteer');
-const {turnstileApiFixture,isTurnstileApi,completeSecurityCheck}=require('./turnstile-test-fixture.cjs');
+const {turnstileApiFixture,isTurnstileApi}=require('./turnstile-test-fixture.cjs');
 
 const root = __dirname;
-const previewRoot=path.resolve(root,process.env.SITE_CHECK_PREVIEWS||'previews');
+const previewRoot=path.resolve(root,process.env.SITE_CHECK_PREVIEWS||'.seo-private/site-check');
 fs.mkdirSync(previewRoot,{recursive:true});
-const pages = [
-  'index.html', 'review-removal-canada.html', 'about.html', 'terms-of-service.html', 'privacy-policy.html', 'editorial-policy.html',
-  'blog/index.html', 'blog/google-review-moderation-2019-2025.html', 'blog/canadian-tourism-google-reviews-2023.html', 'blog/review-removal-questions-answered.html', 'blog/review-report-evidence-checklist.html', 'blog/google-review-removal-rating-impact-study.html',
-  ...require('./google-guides.cjs').map(guide => guide.file),
-  'blog/google-review-removal-denominator-audit.html', 'blog/google-review-risk-score-denominator-study.html',
-  'blog/google-review-removal-appeals-data.html', 'blog/google-review-removal-time-data.html'
-];
+const sitemap = fs.readFileSync(path.join(root, 'sitemap.xml'), 'utf8');
+const pages = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => new URL(match[1]).pathname.slice(1) || 'index.html');
 const errors = [];
 const titles = new Set();
 for (const name of pages) {
@@ -23,14 +18,12 @@ for (const name of pages) {
   titles.add(title);
 }
 const homeHtml = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
-if (!/<title>Google Review Removal[^<]*Canada[^<]*<\/title>/.test(homeHtml) || !homeHtml.includes('id="service-area"') || !homeHtml.includes('id="policy-title"')) errors.push('Homepage search landing content is incomplete');
+if (!/<title>Google Review Removal[^<]*Canada[^<]*<\/title>/.test(homeHtml) || !homeHtml.includes('id="service-area"') || !homeHtml.includes('<details id="policy">')) errors.push('Homepage search landing content or policy FAQ link target is missing');
 const googleRows = fs.readFileSync(path.join(root, 'blog/data/google-review-moderation-2019-2025.csv'), 'utf8').trim().split(/\r?\n/).slice(1);
-const trustRows = fs.readFileSync(path.join(root, 'blog/data/trustpilot-fake-reviews-by-star-2024.csv'), 'utf8').trim().split(/\r?\n/).slice(1);
 const canadaRows = fs.readFileSync(path.join(root, 'blog/data/canadian-sme-online-activities-2023.csv'), 'utf8').trim().split(/\r?\n/).slice(1);
 if (googleRows.length !== 7 || googleRows.map(row => Number(row.split(',')[1])).join(',') !== '75,55,95,115,170,240,292') errors.push('Google source table mismatch');
-if (trustRows.length !== 5 || trustRows.reduce((sum, row) => sum + Number(row.split(',')[1]), 0) !== 4483000) errors.push('Trustpilot source table mismatch');
 if (canadaRows.length !== 7 || !canadaRows.find(row => row.startsWith('Google Reviews,63.8,47.0,16.8,https://www.ised-isde.canada.ca/'))) errors.push('Canadian source table mismatch');
-for (const name of ['google-moderation-2019-2025.png', 'trustpilot-fake-reviews-by-star.png', 'canadian-sme-online-activities-2023.png', 'yelp-review-transitions.png', 'tripadvisor-fraud-series.png', 'tripadvisor-screening-2024.png','rating-removal-uncertainty.png','rating-removal-threshold-map.png','rating-recovery-range.png']) {
+for (const name of ['google-moderation-2019-2025.png', 'canadian-sme-online-activities-2023.png','rating-removal-uncertainty.png','rating-removal-threshold-map.png','rating-recovery-range.png']) {
   const image = fs.readFileSync(path.join(root, 'blog/assets', name));
   if (image.readUInt32BE(16) !== 1200 || image.readUInt32BE(20) !== 672) errors.push(`${name}: incorrect sharing image size`);
 }
@@ -44,8 +37,8 @@ for (const name of ['google-moderation-2019-2025.png', 'trustpilot-fake-reviews-
       page.on('request', request => {
         if (request.method() !== 'GET') request.abort();
         else if (isTurnstileApi(request.url())) request.respond({status:200,contentType:'text/javascript',body:turnstileApiFixture});
-        else if (request.url().startsWith('https://www.googletagmanager.com/gtag/js?')) request.abort();
-        else request.continue();
+        else if (/^(?:file|data):/.test(request.url())) request.continue();
+        else request.abort();
       });
       page.on('pageerror', err => errors.push(`${name}: ${err.message}`));
       await page.goto(`file:///${path.join(root, name).replaceAll('\\','/')}`, {waitUntil: 'load'});
@@ -103,7 +96,7 @@ for (const name of ['google-moderation-2019-2025.png', 'trustpilot-fake-reviews-
           names: [...document.querySelectorAll('.platform-list:not([aria-hidden]) li')].map(el => el.textContent.trim()),
           animation: getComputedStyle(document.querySelector('.platform-track')).animationName
         }));
-        if (marquee.names.length !== 8 || new Set(marquee.names).size !== 8 || marquee.animation !== 'review-platform-loop') errors.push(`${name}: eight-platform banner must be complete and scroll`);
+        if (marquee.names.length !== 7 || new Set(marquee.names).size !== 7 || marquee.animation !== 'review-platform-loop') errors.push(`${name}: seven press mentions must be complete and scroll`);
         await page.emulateMediaFeatures([{name: 'prefers-reduced-motion', value: 'reduce'}]);
         const reducedAnimation = await page.$eval('.platform-track', el => getComputedStyle(el).animationName);
         if (reducedAnimation !== 'none') errors.push(`${name}: banner ignores reduced motion`);
@@ -125,44 +118,11 @@ for (const name of ['google-moderation-2019-2025.png', 'trustpilot-fake-reviews-
         if (name === 'review-removal-canada.html' && width === 390) await page.screenshot({path: path.join(previewRoot, 'canada-mobile.png'), fullPage: true});
         if (name === 'blog/index.html' && width === 1440) await page.screenshot({path: path.join(previewRoot, 'blog-desktop.png'), fullPage: true});
         if (name === 'blog/google-review-moderation-2019-2025.html' && width === 1440) await page.screenshot({path: path.join(previewRoot, 'google-study-desktop.png'), fullPage: true});
-        if (name === 'blog/trustpilot-fake-reviews-by-star-rating.html' && width === 390) await page.screenshot({path: path.join(previewRoot, 'trustpilot-study-mobile.png'), fullPage: true});
-        if (name === 'blog/yelp-reviews-disappear-reappear-data.html' && width === 1440) await page.screenshot({path:path.join(previewRoot,'yelp-research-desktop.png'),fullPage:true});
-        if (name === 'blog/yelp-reviews-disappear-reappear-data.html' && width === 390) await page.screenshot({path:path.join(previewRoot,'yelp-research-mobile.png'),fullPage:true});
-        if (name === 'blog/tripadvisor-fake-review-statistics-removal-rates.html' && width === 1440) await page.screenshot({path:path.join(previewRoot,'tripadvisor-research-desktop.png'),fullPage:true});
-        if (name === 'blog/tripadvisor-fake-review-statistics-removal-rates.html' && width === 390) await page.screenshot({path:path.join(previewRoot,'tripadvisor-research-mobile.png'),fullPage:true});
         if (name === 'blog/canadian-tourism-google-reviews-2023.html' && width === 1440) await page.screenshot({path: path.join(previewRoot, 'canada-study-desktop.png'), fullPage: true});
-      }
-      if (name.startsWith('remove-') && !require('./google-guides.cjs').some(guide => guide.file === name)) {
-        const discontinued=!!require('./apply-service-positioning.cjs').discontinued[name];
-        const platform = await page.$eval('body', el => el.dataset.platform.toLowerCase());
-        const sectionIds = await page.$$eval('main > section', els => els.slice(0,3).map(el => el.id || el.className));
-        if (!discontinued && (sectionIds[1] !== 'pricing' || sectionIds[2] !== 'quote')) errors.push(`${name}: section order ${sectionIds}`);
-        if(discontinued){
-          if(!await page.$('main #legacy-request'))errors.push(`${name}: missing discontinued-service notice and previous-request route`);
-          await page.$eval('#legacy-request details',el=>{el.open=true;});
-        }
-        await page.evaluate(() => { const count=document.querySelector('#priceQuantity')||document.querySelector('#formQuantity');count.value = '3';count.dispatchEvent(new Event('input', {bubbles:true})); });
-        const quote = await page.evaluate(() => ({count: document.querySelector('#formQuantity').value, start: document.querySelector('[data-quote="start"]').textContent, success: document.querySelector('[data-quote="success"]').textContent, plan: document.querySelector('#selectedPlan').value}));
-        if (quote.count !== '3' || quote.start !== '$150' || quote.success !== '$375' || !quote.plan.toLowerCase().includes(platform)) errors.push(`${name}: quote mismatch ${JSON.stringify(quote)}`);
-        await completeSecurityCheck(page);
-        await page.evaluate(() => {
-          window.__submitted = null;
-          window.fetch = async (endpoint, options) => { window.__submitted = {endpoint, body: options.body.toString()}; return {ok: true, json: async () => ({result: 'success'})}; };
-          const form = document.querySelector('#assessment-form');
-          form.querySelector('[name=full_name]').value = 'Test Person';
-          form.querySelector('[name=business_name]').value = 'Test Business';
-          form.querySelector('[name=email_address]').value = 'test@example.com';
-          form.querySelector('[name=business_url]').value = 'https://example.com/review';
-          form.requestSubmit();
-        });
-        await page.waitForSelector('#submission-success:not([hidden])');
-        const submitted = await page.evaluate(() => window.__submitted);
-        const body = new URLSearchParams(submitted.body);
-        if (body.get('review_count') !== '3' || !body.get('selected_plan').toLowerCase().includes(platform) || body.get('contact_detail') !== 'test@example.com') errors.push(`${name}: payload mismatch`);
       }
       await page.close();
     }
   } finally { await browser.close(); }
   if (errors.length) { console.error(errors.join('\n')); process.exitCode = 1; }
-  else console.log(`PASS: ${pages.length} pages, links, anchors, images, desktop/mobile widths, service quotes and form payloads`);
+  else console.log(`PASS: ${pages.length} pages, links, anchors, images, desktop/mobile widths and the rating study calculator`);
 })();

@@ -43,14 +43,19 @@ for (const url of pages) {
   checkGoogleTag(html, relative);
   const title = html.match(/<title>([^<]+)<\/title>/)?.[1];
   const desc = html.match(/<meta name="description" content="([^"]+)"/)?.[1];
+  const ogTitle = html.match(/<meta property="og:title" content="([^"]+)"/)?.[1];
+  const ogDesc = html.match(/<meta property="og:description" content="([^"]+)"/)?.[1];
+  const twitterTitle = html.match(/<meta name="twitter:title" content="([^"]+)"/)?.[1];
+  const twitterDesc = html.match(/<meta name="twitter:description" content="([^"]+)"/)?.[1];
   const canonical = html.match(/<link rel="canonical" href="([^"]+)"/)?.[1];
   const ogUrl = html.match(/<meta property="og:url" content="([^"]+)"/)?.[1];
   const ogImage = html.match(/<meta property="og:image" content="([^"]+)"/)?.[1];
   const twitterImage = html.match(/<meta name="twitter:image" content="([^"]+)"/)?.[1];
   const schemaTags = [...html.matchAll(/<script type="application\/ld\+json">([^<]+)<\/script>/g)].map(match => match[1]);
 
-  if (!title || titles.has(title)) errors.push(`${relative}: missing or duplicate title`);
-  if (!desc || descriptions.has(desc) || desc.length < 80 || desc.length > 185) errors.push(`${relative}: missing, duplicate, or poorly sized description (${desc?.length || 0})`);
+  if (!title || titles.has(title) || (html.match(/<title>/g) || []).length !== 1) errors.push(`${relative}: missing or duplicate title`);
+  if (!desc || descriptions.has(desc) || (html.match(/<meta name="description"/g) || []).length !== 1 || desc.length < 80 || desc.length > 185) errors.push(`${relative}: missing, duplicate, or poorly sized description (${desc?.length || 0})`);
+  if (title !== ogTitle || title !== twitterTitle || desc !== ogDesc || desc !== twitterDesc) errors.push(`${relative}: search and social snippets disagree`);
   if ((html.match(/<h1\b/g) || []).length !== 1) errors.push(`${relative}: expected one H1`);
   if ((html.match(/rel="canonical"/g) || []).length !== 1 || canonical !== url || ogUrl !== url) errors.push(`${relative}: canonical and OG URL mismatch`);
   const socialLocale = /<html\b[^>]*\blang="fr-CA"/.test(html) ? 'fr_CA' : 'en_CA';
@@ -61,6 +66,26 @@ for (const url of pages) {
   const schemas = [];
   for (const tag of schemaTags) {
     try { schemas.push(JSON.parse(tag)); } catch { errors.push(`${relative}: invalid JSON-LD`); }
+  }
+  if (schemaTags.some(tag => /"@type"\s*:\s*"(?:AggregateRating|Review)"/.test(tag))) errors.push(`${relative}: unexpected rating or review markup`);
+  const entities = schemas.flatMap(schema => schema['@graph'] || [schema]);
+  for (const breadcrumb of entities.filter(entity => entity['@type'] === 'BreadcrumbList')) {
+    const items = breadcrumb.itemListElement || [];
+    if (items.length < 2 || items.at(-1)?.item !== url || items.some((item, i) =>
+      item.position !== i + 1 || !item.name || !pages.includes(item.item))) {
+      errors.push(`${relative}: breadcrumb does not follow canonical pages`);
+    }
+  }
+  if (relative === 'index.html') {
+    const site = entities.find(entity => entity['@type'] === 'WebSite');
+    const organization = entities.find(entity => entity['@type'] === 'Organization');
+    if (site?.name !== 'ReviewRemoval' || site?.url !== url || site?.alternateName !== 'ReviewRemoval.ca' ||
+        organization?.name !== site?.name || organization?.['@id'] !== `${origin}/#organization` ||
+        site?.publisher?.['@id'] !== organization?.['@id'] || organization?.logo !== `${origin}/assets/reviewremoval-logo.svg`) {
+      errors.push('index.html: WebSite and Organization must identify the same brand');
+    }
+    const favicon = fs.readFileSync(path.join(root, 'favicon.svg'), 'utf8');
+    if (!html.includes('rel="icon" href="favicon.svg"') || !/viewBox="0 0 (\d+) \1"/.test(favicon)) errors.push('index.html: expected a square SVG favicon');
   }
   if (relative.startsWith('blog/') && relative !== 'blog/index.html' &&
       (!schemas.some(schema => schema['@type'] === 'BlogPosting') || !schemas.some(schema => schema['@type'] === 'BreadcrumbList'))) {

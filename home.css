@@ -54,7 +54,7 @@ html:has(> body.home-page){scroll-padding-top:20px}
   .home-page .testimonial-next{display:block;margin-top:22px;padding:16px 18px 6px;border:1px solid #e9e1d6;border-radius:7px;background:#faf7f1;text-align:left}
   .home-page .testimonial-next p{margin:0;font-size:14px;color:var(--muted)}
   .home-page .testimonial-next p:first-child{margin-bottom:4px;font-size:15px;color:var(--ink)}
-  .home-page .testimonial-next a{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding-bottom:0;border-bottom:0;color:var(--accent-dark)}
+  .home-page .testimonial-next a{display:inline-block;min-height:44px;line-height:44px;padding-bottom:0;border-bottom:0;color:var(--accent-dark);text-decoration-skip-ink:none}
 }
 .home-page .pricing-section{padding:65px 0;background:var(--cream)}
 .home-page .pricing-grid{grid-template-columns:1fr .87fr;gap:88px;align-items:center}

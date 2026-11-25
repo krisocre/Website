@@ -3,6 +3,10 @@ exclude:
   - wrangler.jsonc
   - build-social-image.py
   - build-text-coverage-assets.py
+  - build-blog.cjs
+  - build-google-guides.cjs
+  - google-guides.cjs
+  - blog/*-post.cjs
   - text-coverage-check.cjs
   - GOOGLE-TEXT-COVERAGE-RESEARCH-NOTES.md
   - acknowledgement-sheet-fixture.cjs
@@ -10,6 +14,8 @@ exclude:
   - lead-source-check.cjs
   - gtm-check.cjs
   - apply-service-positioning.cjs
+  - apply-google-focus.cjs
+  - build-blog-images.cjs
   - service-positioning-check.cjs
   - SERVICE-POSITIONING-SEO-REPORT.md
   - LEGAL-SETUP.md
@@ -25,6 +31,9 @@ exclude:
   - LAUNCH-DOMAIN-CHECKLIST.md
   - SEO-GAP-AUDIT.md
   - SEO-AUDIT-2026-10-27.md
+  - SEO-AUDIT.md
+  - SEO-CTR-AUDIT.md
+  - POST-REMOVAL-SEO.md
   - audit-site.mjs
   - build-editorial-page.cjs
   - set-live-domain.cjs
