@@ -1,9 +1,16 @@
 (() => {
-  const section = document.currentScript.dataset.section;
+  const { section, sectionUrl } = document.currentScript.dataset;
 
   document.addEventListener('DOMContentLoaded', () => {
-    // Leave explicit fragments to the browser and the existing navigation.
-    if (window.location.hash) return;
+    const requestedFragment = window.location.hash;
+    if (sectionUrl) {
+      const destination = new URL(sectionUrl, window.location.href);
+      destination.search = window.location.search;
+      destination.hash = requestedFragment || section;
+      // Keep acquisition data on the original page load.
+      window.history.replaceState(window.history.state, '', destination);
+    }
+    if (requestedFragment) return;
 
     const target = document.querySelector(section);
     if (!target) return;

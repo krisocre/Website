@@ -1,9 +1,10 @@
 // Service metadata shared by the generator and the production URL build.
 const metadata={
- 'index.html':{title:'Google Review Removal Service Canada | ReviewRemoval.ca',description:'Professional Google review removal assistance for Canadian businesses. Help reporting fake, spam and policy-violating reviews. Get a free assessment.'},
- 'about.html':{title:'About ReviewRemoval | Google Review Removal Canada',description:'How ReviewRemoval helps Canadian businesses assess and report Google reviews. Find clear CAD fees, evidence guidance and an initial assessment.'},
+ 'index.html':{title:'Google Review Removal Service Canada | ReviewRemoval.ca',description:'Google review removal help for Canadian businesses. Get a free assessment. Approved work is CAD $50 per review upfront, plus $125 if removed.'},
+ 'about.html':{title:'About ReviewRemoval | Google Review Removal Canada',description:'Meet ReviewRemoval, a Google review removal service for Canadian businesses. See the work our team handles and start with a free assessment.'},
  'review-removal-canada.html':{title:'Google Review Removal Across Canada | Service Areas',description:'Google review removal assistance across Canada. Remote support for Toronto, Mississauga, Vancouver and other communities, with clear CAD fees.'},
- 'google-review-removal-cost-canada.html':{title:'Google Review Removal Cost Canada | ReviewRemoval',description:'Google review removal costs in Canada: CAD $50 upfront per review + $125 if removed. Compare free reporting, paid assistance and partial-success examples.'},
+ 'google-review-removal-cost-canada.html':{title:'ReviewRemoval Pricing | Google Review Removal Cost',description:'See ReviewRemoval pricing in Canada. CAD $50 upfront per approved review and $125 per successful removal. Compare example totals and get a free assessment.'},
+ 'google-review-removal-process.html':{title:'How Paid Google Review Removal Works | ReviewRemoval',description:'Hire ReviewRemoval to assess and report Google reviews in Canada. See what we handle, how you approve paid work and what updates to expect.'},
  'remove-fake-google-reviews.html':{title:'Remove Fake Google Reviews in Canada | ReviewRemoval',description:'How Canadian businesses can report fake Google reviews, document policy concerns and request professional help. Evidence guidance, without a removal guarantee.'}
 };
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

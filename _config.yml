@@ -1,6 +1,7 @@
 exclude:
   - workers
   - wrangler.jsonc
+  - build-social-image.py
   - build-text-coverage-assets.py
   - text-coverage-check.cjs
   - GOOGLE-TEXT-COVERAGE-RESEARCH-NOTES.md
