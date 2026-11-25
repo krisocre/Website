@@ -340,3 +340,43 @@ html:has(> body.home-page){scroll-padding-top:20px}
   .home-page .platform-banner.is-ready .platform-window{overflow-x:auto;mask-image:none}
   .home-page .platform-list[aria-hidden="true"]{display:none}
 }
+
+/* English homepage introduction. Keep the press links in the first screen. */
+.home-page .home-hero{background:#f9f5ee}
+.home-page .home-hero .platform-banner{background:#eaf0eb;border-bottom-color:#d4ded6}
+.home-page .home-hero .platform-list a{min-height:46px;padding-inline:16px;font-size:19px;gap:15px}
+.home-page .home-hero .platform-list a:focus-visible{outline-offset:-4px}
+.home-page .home-hero .hero-grid{grid-template-columns:minmax(0,1.12fr) minmax(0,1fr);gap:clamp(30px,5vw,76px);padding:46px 0 53px}
+.home-page .home-hero .hero-reassurance{max-width:440px;padding-top:14px;border-top:1px solid #dfd6ca}
+
+.home-page .home-hero .calculator{
+  border-radius:12px;
+  box-shadow:0 16px 32px #19323a18;
+}
+.home-page .home-hero .calculator-head{align-items:center;padding:10px 24px;border-radius:11px 11px 0 0}
+.home-page .home-hero .calculator-head span:last-child{padding:3px 7px;border:1px solid #698084;border-radius:4px;letter-spacing:.07em}
+.home-page .home-hero .calculator-body{padding:20px 24px}
+.home-page .home-hero #calculator-title{margin-bottom:4px}
+.home-page .home-hero #price-quantity-help{margin-bottom:14px}
+.home-page .home-hero .calculator-options{display:flex;flex-direction:column;align-items:flex-start;gap:10px;margin-bottom:13px}
+.home-page .home-hero .quantity-control{width:154px;height:46px}
+.home-page .home-hero .quantity-control button{width:44px;height:44px;flex-basis:44px}
+.home-page .home-hero .quantity-control input{width:64px;height:44px}
+.home-page .home-hero .quantity-presets{gap:6px;margin:0}
+.home-page .home-hero .calc-lines>div{padding:9px 0}
+.home-page .home-hero .calc-total{margin:11px 0;padding:11px 13px;border-radius:5px;background:#edf1ed}
+.home-page .home-hero .calculator .button{min-height:46px;padding:10px 14px}
+.home-page .home-hero .calculator-note{margin-top:9px}
+
+@media(max-width:850px){
+  .home-page .home-hero .platform-list a{font-size:17px}
+  .home-page .home-hero .calculator-head,
+  .home-page .home-hero .calculator-body{padding-inline:18px}
+}
+@media(max-width:680px){
+  .home-page .home-hero .hero-grid{grid-template-columns:minmax(0,1fr);gap:23px;padding:26px 0 36px}
+  .home-page .home-hero .eyebrow{margin-bottom:13px}
+  .home-page .home-hero h1{margin-bottom:15px}
+  .home-page .home-hero .hero-lead{margin-bottom:19px}
+  .home-page .home-hero .hero-reassurance{margin-top:14px;padding-top:12px}
+}

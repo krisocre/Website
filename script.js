@@ -139,8 +139,10 @@ const quantityPresets = [...document.querySelectorAll('[data-review-count]')];
 const platformName = document.body.dataset.platform || 'Google';
 const reviewNoun = document.body.dataset.reviewNoun || 'review';
 const reviewNounPlural = document.body.dataset.reviewNounPlural || 'reviews';
-const frenchDollars = frenchPage ? new Intl.NumberFormat('fr-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 }) : null;
-const dollars = value => frenchDollars ? frenchDollars.format(value) : `$${value.toLocaleString('en-CA', { useGrouping: true })}`;
+const quoteNumberFormat = frenchPage
+  ? new Intl.NumberFormat('fr-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 })
+  : new Intl.NumberFormat('en-CA');
+const dollars = value => frenchPage ? quoteNumberFormat.format(value) : `$${quoteNumberFormat.format(value)}`;
 const clamp = value => Math.max(1, Math.min(50, Math.round(Number(value) || 1)));
 let selectedCount;
 
@@ -334,14 +336,13 @@ function setupAssessmentVerification() {
       }, {rootMargin: '300px'});
       observer.observe(form);
     } else { load(); }
-    new ResizeObserver(() => {
+    const resizeWidget = () => {
       const nextSize = container.clientWidth < 300 ? 'compact' : 'flexible';
-      if (widgetId === null || nextSize === size || submitting) return;
-      token = '';
-      window.turnstile.remove(widgetId);
-      widgetId = null;
-      render();
-    }).observe(container);
+      if (widgetId === null || nextSize === size || submitting || form.hidden) return;
+      reset();
+    };
+    if (typeof ResizeObserver === 'function') new ResizeObserver(resizeWidget).observe(container);
+    else window.addEventListener('resize', resizeWidget);
   }
   return {
     getToken: () => token,

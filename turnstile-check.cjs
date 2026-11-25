@@ -12,8 +12,8 @@ const source = fs.readFileSync(path.join(root, 'google-apps-script.gs'), 'utf8')
 const protectedEndpoint = 'https://script.google.com/macros/s/AKfycbzK_hATDZaXApgEUITdZ1kgF6VirBLCpcK1q3tmiFoWhG2AZpy_B6uOy5CFjTejVo8T/exec';
 const sharedEndpoint = 'https://script.google.com/macros/s/AKfycby4mQu0BJFu8Jmbw_zZPzrBb9TF_YRw4j0Ayu3PFvwgicSN5vtzynX0ASet2utzxtlnMw/exec';
 const formScripts = {
-    'index.html': 'script.js?v=20261122-estimate',
-    'suppression-avis-google.html': 'script.js?v=20261122-fr-ca'
+    'index.html': 'script.js?v=20261125-quote-format',
+    'suppression-avis-google.html': 'script.js?v=20261125-quote-format'
 };
 const formPages = Object.keys(formScripts);
 const frontend = fs.readFileSync(path.join(root, 'script.js'), 'utf8');
@@ -482,6 +482,28 @@ const server = http.createServer((req, res) => {
         await page.screenshot({ path: path.join(output, 'form-320.png') });
         await page.goto(base + 'about.html', { waitUntil: 'load' });
         assert.equal(await page.$$eval('script[src*="challenges.cloudflare.com"]', nodes => nodes.length), 0);
+
+        await page.evaluateOnNewDocument(() => { delete window.ResizeObserver; });
+        await page.setViewport({ width:320, height:900 });
+        await page.goto(base, { waitUntil: 'load' });
+        assert.equal(await page.evaluate(() => typeof ResizeObserver), 'undefined');
+        await page.$eval('.calculator [data-qty-step="1"]', button => button.click());
+        assert.equal(await page.$eval('#formQuantity', input => input.value), '2');
+        await completeSecurityCheck(page);
+        await page.setViewport({ width:1440, height:900 });
+        await page.waitForFunction(() => document.querySelector('#assessment-verification').style.minHeight === '65px');
+        await completeSecurityCheck(page);
+        await page.evaluate(() => {
+            const form = document.querySelector('#assessment-form');
+            for (const [name, value] of Object.entries({full_name:'Local Test', business_name:'Test Business', email_address:'test@example.invalid'})) form.elements[name].value = value;
+            window.fetch = async (_, options) => {
+                window.__compatPayload = options.body.toString();
+                return {ok:true, json:async () => ({result:'success'})};
+            };
+            form.requestSubmit();
+        });
+        await page.waitForSelector('#submission-success:not([hidden])');
+        assert.ok(new URLSearchParams(await page.evaluate(() => window.__compatPayload)).get('cf-turnstile-response'));
         assert.deepEqual(errors, []);
         assert.deepEqual(externalPosts, []);
         console.log('PASS: both forms use the dedicated backend and current script. Token gating, expiration, retries, conversion tracking and the responsive widget passed with mocked providers.');

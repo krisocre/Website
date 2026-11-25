@@ -31,8 +31,8 @@ const server=http.createServer((req,res)=>{
    page.on('pageerror',e=>errors.push(e.message));return page;
   }
   const page=await newPage();
-  for(const width of [1920,1440,1024,768,390,375,320]){
-   await page.setViewport({width,height:width<=680?844:900});await page.goto(base,{waitUntil:'load'});
+  for(const [width,height] of [[1920,900],[1440,900],[1280,720],[1024,768],[768,900],[390,844],[375,667],[320,568]]){
+   await page.setViewport({width,height});await page.goto(base,{waitUntil:'load'});
    await page.evaluate(()=>document.fonts.ready);
    const layout=await page.evaluate(()=>{
     const cta=document.querySelector('.hero-actions .button').getBoundingClientRect(),form=document.querySelector('form').getBoundingClientRect(),summary=document.querySelector('.quote-summary').getBoundingClientRect();
@@ -46,11 +46,18 @@ const server=http.createServer((req,res)=>{
    assert.equal(await page.$eval('.testimonial-quote em',e=>e.textContent),'have on your side.');
    assert.equal(await page.$('.hero-testimonial [tabindex], .hero-testimonial button'),null,'A static testimonial has no carousel controls');
    assert.equal(await page.$eval('.testimonial-overall',e=>e.getAttribute('aria-label')),'Overall customer rating: 4.9 out of 5 from more than 5,000 ratings');
-   const portrait=await page.$eval('.testimonial-avatar',e=>{const img=e.querySelector('img');return {loaded:img.complete&&img.naturalWidth===480&&img.naturalHeight===600,circle:getComputedStyle(e).borderRadius,width:e.getBoundingClientRect().width,height:e.getBoundingClientRect().height};});
-   assert.equal(portrait.loaded,true,'Luke’s portrait is loaded');assert.equal(portrait.circle,'50%');assert.equal(portrait.width,portrait.height,'Portrait frame stays circular at every viewport');
+   const portrait=await page.$eval('.testimonial-avatar',e=>({circle:getComputedStyle(e).borderRadius,width:e.getBoundingClientRect().width,height:e.getBoundingClientRect().height}));
+   assert.equal(portrait.circle,'50%');assert.equal(portrait.width,portrait.height,'Portrait frame stays circular at every viewport');
    assert.equal(await page.evaluate(()=>performance.getEntriesByType('resource').filter(r=>/shop-owner.*\.(?:webp|jpg)/.test(r.name)).length),0,'Retired hero photograph is not downloaded');
-   const banner=await page.$eval('.platform-banner',e=>({height:e.getBoundingClientRect().height,links:e.querySelectorAll('.platform-list:not([aria-hidden]) a').length,rows:new Set([...e.querySelectorAll('.platform-list li')].map(n=>Math.round(n.getBoundingClientRect().top))).size,lists:e.querySelectorAll('.platform-list:not([aria-hidden])').length}));
+   const banner=await page.$eval('.platform-banner',e=>{
+    const rect=e.getBoundingClientRect();
+    return {height:rect.height,links:e.querySelectorAll('.platform-list:not([aria-hidden]) a').length,rows:new Set([...e.querySelectorAll('.platform-list li')].map(n=>Math.round(n.getBoundingClientRect().top))).size,lists:e.querySelectorAll('.platform-list:not([aria-hidden])').length,visible:scrollY===0&&rect.top>=0&&rect.bottom<=innerHeight&&e.contains(document.elementFromPoint(rect.width/2,rect.top+rect.height/2))};
+   });
    assert.equal(await page.$$eval('.platform-banner',e=>e.length),1);assert.equal(banner.lists,1);assert.equal(banner.links,7);assert.equal(banner.rows,1,'Banner remains one row');assert.ok(banner.height<=72,'No stacked banner');
+   assert.ok(banner.visible,`Press banner is visible without scrolling at ${width} × ${height}`);
+   await page.$eval('.testimonial-avatar img',img=>img.scrollIntoView({block:'center',behavior:'instant'}));
+   await page.waitForFunction(()=>{const img=document.querySelector('.testimonial-avatar img');return img.complete&&img.naturalWidth===480&&img.naturalHeight===600;});
+   await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
    if(width<=680)assert.ok(layout.formTop<layout.summaryTop,'Mobile form precedes summary');
    assert.equal(await page.$eval('.hero-actions .button',e=>e.getAttribute('href')),'#quote');
    assert.equal(await page.$$eval('.assessment-steps>li',e=>e.length),3);
@@ -177,6 +184,6 @@ const server=http.createServer((req,res)=>{
   assert.equal(await page.$$eval('title',n=>n.length),1);assert.equal(await page.$$eval('link[rel="canonical"]',n=>n.length),1);
   assert.deepEqual(errors,[]);assert.deepEqual(posts,[],'Never send a real POST');
   fs.writeFileSync(path.join(output,'layout-results.json'),JSON.stringify(results,null,2));
-  console.log('PASS: seven homepage widths; one static testimonial; one platform banner; working English and French quote forms with mocked Turnstile; legal payload and no-JS notice; zero real submissions.');
+  console.log('PASS: eight homepage sizes with the press banner visible without scrolling; one static testimonial; English and French quote forms with mocked Turnstile; legal payload and no-JS notice; zero real submissions.');
  }finally{if(browser)await browser.close();server.closeAllConnections();await new Promise(r=>server.close(r));}
 })().catch(e=>{console.error(e);process.exitCode=1;});
