@@ -14,8 +14,8 @@ const server=http.createServer((req,res)=>{
  try{
   browser=await puppeteer.launch({headless:true,executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe'});
   const fixtures={ga4MeasurementId:'G-TEST000001',googleAdsId:'AW-18449308865',googleAdsLeadConversionLabel:'TEST_ONLY'};
-  async function open({config=fixtures,query='',gpc=false,blockedStorage=false,language='en-CA'}={}){
-   const context=await browser.createBrowserContext(),page=await context.newPage();await page.setViewport({width:390,height:844});
+  async function open({config=fixtures,query='',gpc=false,blockedStorage=false,language='en-CA',sharedContext}={}){
+   const context=sharedContext||await browser.createBrowserContext(),page=await context.newPage();await page.setViewport({width:390,height:844});
    await page.setRequestInterception(true);page.on('pageerror',e=>errors.push(e.message));
    page.on('request',r=>{
     if(r.method()!=='GET'){externalPosts.push(r.url());r.abort();return;}
@@ -60,6 +60,17 @@ const server=http.createServer((req,res)=>{
   await fillAndSubmit(page);assert.equal((await events(page)).length,0,'No denied lead backfill');
   await page.click('.measurement-settings');await choose(page,'accept');
   assert.equal((await events(page)).filter(e=>e[1]==='generate_lead'||e[1]==='conversion').length,0);
+  await test.context.close();
+  // A decision made in another tab also controls the private source label.
+  test=await open({query:'?gad_source=1'});page=test.page;
+  const second=await open({sharedContext:test.context});
+  await choose(second.page,'reject');
+  await page.waitForFunction(()=>ReviewRemovalMeasurement.status().choiceRecorded && document.querySelector('#measurement-preferences').hidden);
+  assert.equal(await page.evaluate(()=>leadTrafficSource.get()),'unknown');
+  assert.equal(await page.$eval('.measurement-settings',button=>button.getAttribute('aria-expanded')),'false');
+  await second.page.evaluate(()=>localStorage.clear());
+  await page.waitForFunction(()=>!ReviewRemovalMeasurement.status().choiceRecorded && !document.querySelector('#measurement-preferences').hidden);
+  assert.equal(await page.evaluate(()=>ReviewRemovalMeasurement.status().advertisingConsent),false);
   await test.context.close();
   // Actual checked-in Ads destination: confirmed lead only, no real Google requests.
   test=await open({config:null});page=test.page;start=google.length;
@@ -148,7 +159,8 @@ const server=http.createServer((req,res)=>{
   }
   await page.click('.measurement-language');assert.equal(await page.$eval('#measurement-preferences',e=>e.lang),'en-CA');await test.context.close();
   // URL leakage guard, without changing the original address or the form integration.
-  for(const query of ['?_dbg=1','?gtm_debug=1770000000000','?gclid=LOCAL_TEST_AUTOTAG&_dbg=1#quote']){
+  for(const query of ['?_dbg=1','?gtm_debug=1770000000000','?gclid=LOCAL_TEST_AUTOTAG&_dbg=1#quote',
+      '?gclid=LOCAL_TEST_AUTOTAG&utm_source=google&utm_medium=cpc&utm_campaign=12345&utm_id=987']){
    test=await open({config:null,query});page=test.page;start=google.length;
    assert.equal((await page.evaluate(()=>window.ReviewRemovalMeasurement.status())).urlEligible,true);
    assert.equal((await commands(page)).filter(c=>c[0]==='config').length,0,'Debug flags never grant consent');
@@ -176,6 +188,8 @@ const server=http.createServer((req,res)=>{
    await test.context.close();
   }
   for(const query of ['?_dbg=PRIVATE_VALUE','?gtm_debug=PRIVATE_VALUE','?_dbg=1&email=PRIVATE_EMAIL','?_dbg=1&_dbg=PRIVATE_VALUE',
+      '?gclid=LOCAL_TEST_AUTOTAG&utm_source=google&utm_medium=cpc&utm_campaign=PRIVATE_NAME',
+      '?utm_source=google&utm_medium=cpc&utm_source=PRIVATE_NAME',
       campaignQuery+'&email=PRIVATE_EMAIL',campaignQuery+'&utm_campaign=PRIVATE_NAME',
       campaignQuery.replace('google_review_removal_canada','PRIVATE_NAME'),
       campaignQuery.replace('utm_medium=cpc','utm_medium=organic')]){

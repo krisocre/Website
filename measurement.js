@@ -45,16 +45,16 @@
     var url = new URL(window.location.href);
     if (pagePath === '/404.html' || pagePath === '/google-review-removal-checker.html') return false;
     var knownCampaign = hasChatgptCampaign(url.searchParams);
-    var googleReplayCampaign = forReplay && url.searchParams.get('utm_source')?.toLowerCase() === 'google' &&
+    var googlePaidCampaign = url.searchParams.get('utm_source')?.toLowerCase() === 'google' &&
       ['cpc','ppc','paid','paidsearch','paid_search'].includes(url.searchParams.get('utm_medium')?.toLowerCase());
     var allowed = ['gclid','dclid','gbraid','wbraid','gad_source','gad_campaignid'];
     for (var entry of url.searchParams) {
       if (knownCampaign && Object.prototype.hasOwnProperty.call(chatgptCampaign, entry[0])) continue;
-      // Replay may see standard Google Ads labels and numeric campaign IDs. Keep free text out.
-      if (googleReplayCampaign && url.searchParams.getAll(entry[0]).length === 1 &&
+      // Allow only fixed Google paid labels and numeric IDs. Events use the canonical URL.
+      if (googlePaidCampaign && url.searchParams.getAll(entry[0]).length === 1 &&
         (entry[0] === 'utm_source' || entry[0] === 'utm_medium' ||
           (['utm_campaign','utm_id'].includes(entry[0]) && /^[1-9]\d{0,19}$/.test(entry[1])) ||
-          (entry[0] === 'utm_campaign' && entry[1] === chatgptCampaign.utm_campaign))) continue;
+          (forReplay && entry[0] === 'utm_campaign' && entry[1] === chatgptCampaign.utm_campaign))) continue;
       // Tag Assistant adds these debug flags. They never grant consent or become event data.
       if (entry[0] === '_dbg' && entry[1] === '1') continue;
       if (entry[0] === 'gtm_debug' && /^\d{10,16}$/.test(entry[1])) continue;
@@ -76,15 +76,20 @@
   window.gtag('set', 'user_data', '');
   window.gtag('set', 'allow_google_signals', false);
   window.gtag('set', 'allow_ad_personalization_signals', false);
-  try {
-    var stored = JSON.parse(window.localStorage.getItem(key));
-    if (stored && stored.version === 1 && stored.expires > Date.now() && stored.expires <= Date.now() + ttl &&
-        typeof stored.analytics === 'boolean' && typeof stored.advertising === 'boolean') {
-      preferences = { analytics: stored.analytics, advertising: stored.advertising && !privacySignal,
-        replay: stored.replay === true && !privacySignal };
-      choiceRecorded = true;
-    }
-  } catch (_) { /* A blocked preference store must not break forms or imply consent. */ }
+  function restorePreferences() {
+    var stored;
+    try { stored = JSON.parse(window.localStorage.getItem(key)); }
+    catch (_) { /* Storage is optional. */ }
+    var now = Date.now();
+    choiceRecorded = Boolean(stored && stored.version === 1 && stored.expires > now && stored.expires <= now + ttl &&
+      typeof stored.analytics === 'boolean' && typeof stored.advertising === 'boolean');
+    preferences = {
+      analytics: choiceRecorded && stored.analytics,
+      advertising: choiceRecorded && stored.advertising && !privacySignal,
+      replay: choiceRecorded && stored.replay === true && !privacySignal
+    };
+  }
+  restorePreferences();
   function baseParameters() {
     return { page_location: pageLocation, page_referrer: '', page_title: 'ReviewRemoval', page_path: pagePath,
       page_type: pageType, service_platform: platform };
@@ -354,11 +359,13 @@
     closePanel();
   });
   window.addEventListener('storage', function (event) {
-    if (event.key !== key) return;
-    try { var value = JSON.parse(event.newValue); preferences = value && value.version === 1 && value.expires > Date.now() ?
-      { analytics: value.analytics === true, advertising: value.advertising === true && !privacySignal,
-        replay: value.replay === true && !privacySignal } : { analytics: false, advertising: false, replay: false }; }
-    catch (_) { preferences = { analytics: false, advertising: false, replay: false }; }
+    if (event.key !== key && event.key !== null) return;
+    restorePreferences();
     applyPreferences(); syncInputs();
+    if (choiceRecorded && panel.contains(document.activeElement)) closePanel();
+    else {
+      panel.hidden = choiceRecorded;
+      settings.setAttribute('aria-expanded', String(!panel.hidden));
+    }
   });
 })(window, document);

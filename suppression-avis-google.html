@@ -4,7 +4,7 @@
   <!-- measurement bootstrap start -->
   <link rel="stylesheet" href="measurement.css?v=20261122-cookie-prompt">
   <script src="measurement-config.js" defer></script>
-  <script src="measurement.js?v=20261122-fr-ca" defer></script>
+  <script src="measurement.js?v=20261127-homepage-fixes" defer></script>
   <!-- measurement bootstrap end -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -14,7 +14,7 @@
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="styles.css?v=20261122-fr-ca">
     <link rel="stylesheet" href="home.css?v=20261122-fr-ca">
-    <script src="script.js?v=20261125-quote-format" defer></script>
+    <script src="script.js?v=20261127-homepage-fixes" defer></script>
 <link rel="stylesheet" href="legal-notice.css">
 <script src="submission-terms.js" defer></script>
 
@@ -44,7 +44,7 @@
 </head>
 <body class="home-page" data-platform="Google">
     <a class="skip-link" href="#main">Aller au contenu</a>
-    <header class="site-header">
+    <header class="site-header" id="top">
         <div class="wrap header-inner">
             <a class="brand" href="#top" aria-label="Accueil ReviewRemoval"><span class="brand-mark" aria-hidden="true">R</span><span class="brand-name">Review<span>Removal</span><small>GESTION DE RÉPUTATION</small></span></a>
             <nav class="primary-nav" id="primary-nav" aria-label="Navigation principale">
@@ -58,7 +58,7 @@
         </div>
     </header>
     <main id="main">
-        <section class="hero" id="top" aria-labelledby="hero-title">
+        <section class="hero" aria-labelledby="hero-title">
             <div class="wrap hero-grid">
                 <div class="hero-copy">
                     <p class="eyebrow eyebrow-light"><span></span> Pour les entreprises du Québec et d’ailleurs au pays</p>
@@ -70,7 +70,7 @@
                     </div>
                     <p class="hero-reassurance"><svg viewBox="0 0 16 18" fill="none" aria-hidden="true"><path d="M4 7V5a4 4 0 0 1 8 0v2M2 7h12v10H2z" stroke="currentColor" stroke-width="1.4"/><path d="M8 11v2" stroke="currentColor" stroke-width="1.4"/></svg>Aucun mot de passe Google requis pour l’évaluation initiale.</p>
                 </div>
-                <div class="calculator" aria-labelledby="calculator-title">
+                <div class="calculator" role="group" aria-labelledby="calculator-title">
                     <div class="calculator-head"><span>VOTRE ESTIMATION</span><span>CAD</span></div>
                     <div class="calculator-body">
                         <h2 id="calculator-title">Combien d’avis?</h2>
@@ -152,10 +152,10 @@
                         <p id="verification-status" class="verification-status" role="status" aria-live="polite">La vérification de sécurité protège ce formulaire contre les envois automatisés.</p>
                         <button id="verification-retry" class="verification-retry" type="button" hidden>Relancer la vérification</button>
                     </div>
-                    <!-- submission legal notice start --><input type="hidden" name="terms_version" value="2026-10-27"><input type="hidden" name="terms_url" value="https://reviewremoval.ca/terms-of-service.html#conditions-francaises"><input type="hidden" name="terms_snapshot_url" value="https://reviewremoval.ca/legal-versions/policies-2026-11-23.json"><input type="hidden" name="privacy_version" value="2026-11-23"><input type="hidden" name="privacy_url" value="https://reviewremoval.ca/privacy-policy.html#confidentialite-fr"><input type="hidden" name="terms_language" value="fr-CA"><input type="hidden" name="terms_acknowledgement" value="En envoyant cette demande, vous acceptez les Conditions de service et prenez connaissance de la Politique de confidentialité. La suppression n’est pas garantie."><p class="submission-legal" id="submission-legal" data-version="2026-10-27">En envoyant cette demande, vous acceptez les <a href="terms-of-service.html#conditions-francaises" target="_blank" rel="noopener">Conditions de service</a> et prenez connaissance de la <a href="privacy-policy.html#confidentialite-fr" target="_blank" rel="noopener">Politique de confidentialité</a>. La suppression n’est pas garantie.</p><!-- submission legal notice end --><button class="button button-accent submit-button" type="submit" aria-describedby="assessment-help submission-legal">Envoyer ma demande <span aria-hidden="true">↓</span></button>
+                    <!-- submission legal notice start --><input type="hidden" name="terms_version" value="2026-10-27"><input type="hidden" name="terms_url" value="https://reviewremoval.ca/terms-of-service.html#conditions-francaises"><input type="hidden" name="terms_snapshot_url" value="https://reviewremoval.ca/legal-versions/policies-2026-11-23.json"><input type="hidden" name="privacy_version" value="2026-11-23"><input type="hidden" name="privacy_url" value="https://reviewremoval.ca/privacy-policy.html#confidentialite-fr"><input type="hidden" name="terms_language" value="fr-CA"><input type="hidden" name="terms_acknowledgement" value="En envoyant cette demande, vous acceptez les Conditions de service et prenez connaissance de la Politique de confidentialité. La suppression n’est pas garantie."><p class="submission-legal" id="submission-legal" data-version="2026-10-27">En envoyant cette demande, vous acceptez les <a href="terms-of-service.html#conditions-francaises" target="_blank" rel="noopener">Conditions de service</a> et prenez connaissance de la <a href="privacy-policy.html#confidentialite-fr" target="_blank" rel="noopener">Politique de confidentialité</a>. La suppression n’est pas garantie.</p><!-- submission legal notice end --><button class="button button-accent submit-button" type="submit" disabled aria-describedby="assessment-help submission-legal">Envoyer ma demande <span aria-hidden="true">↓</span></button>
                     <p class="form-help" id="assessment-help">Nous utilisons ces renseignements pour examiner votre demande et vous répondre. N’incluez aucun mot de passe ni dossier confidentiel de client.</p>
                     <noscript><p class="native-form-note">Activez JavaScript pour effectuer la vérification de sécurité et envoyer votre demande.</p></noscript>
-                    <p class="form-message" id="form-message" role="status" aria-live="polite"></p>
+                    <p class="form-message" id="form-message" role="status" aria-live="polite">Le formulaire se charge. Si le chargement se prolonge, copiez vos réponses avant de recharger la page.</p>
                 </form>
                 <div class="submission-success" id="submission-success" role="status" aria-live="polite" tabindex="-1" hidden>
                     <span class="success-mark" aria-hidden="true">✓</span><h3>Demande reçue</h3>

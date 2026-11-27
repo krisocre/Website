@@ -12,8 +12,8 @@ const source = fs.readFileSync(path.join(root, 'google-apps-script.gs'), 'utf8')
 const protectedEndpoint = 'https://script.google.com/macros/s/AKfycbzK_hATDZaXApgEUITdZ1kgF6VirBLCpcK1q3tmiFoWhG2AZpy_B6uOy5CFjTejVo8T/exec';
 const sharedEndpoint = 'https://script.google.com/macros/s/AKfycby4mQu0BJFu8Jmbw_zZPzrBb9TF_YRw4j0Ayu3PFvwgicSN5vtzynX0ASet2utzxtlnMw/exec';
 const formScripts = {
-    'index.html': 'script.js?v=20261125-quote-format',
-    'suppression-avis-google.html': 'script.js?v=20261125-quote-format'
+    'index.html': 'script.js?v=20261127-homepage-fixes',
+    'suppression-avis-google.html': 'script.js?v=20261127-homepage-fixes'
 };
 const formPages = Object.keys(formScripts);
 const frontend = fs.readFileSync(path.join(root, 'script.js'), 'utf8');
@@ -339,6 +339,8 @@ const server = http.createServer((req, res) => {
             errors = [],
             externalPosts = [];
         let blocked = false,
+            missingApi = false,
+            blockedController = false,
             apiLoads = 0;
         const pausedApp = backend({verificationEnabled:false}), pausedPosts = [];
         await page.setViewport({ width: 390, height: 844 });
@@ -349,11 +351,23 @@ const server = http.createServer((req, res) => {
                 const data = Object.fromEntries(new URLSearchParams(request.postData()));
                 pausedPosts.push(data);
                 const result = pausedApp.post(data);
-                request.respond({status:200, contentType:'application/json', headers:{'Access-Control-Allow-Origin':'*'}, body:JSON.stringify(result)});
-            } else if (request.method() !== 'GET') { externalPosts.push(request.url());
-                request.abort(); } else if (isTurnstileApi(request.url())) { apiLoads++;
-                blocked ? request.abort() : request.respond({ status: 200, contentType: 'text/javascript', body: turnstileApiFixture }); } else if (request.url().startsWith(base)) request.continue();
-            else request.abort();
+                return request.respond({status:200, contentType:'application/json', headers:{'Access-Control-Allow-Origin':'*'}, body:JSON.stringify(result)});
+            }
+            if (request.method() !== 'GET') {
+                externalPosts.push(request.url());
+                return request.abort();
+            }
+            if (isTurnstileApi(request.url())) {
+                apiLoads++;
+                if (blocked) return request.abort();
+                return request.respond({
+                    status: 200, contentType: 'text/javascript',
+                    headers: {'Cache-Control':'no-store'},
+                    body: missingApi ? '' : turnstileApiFixture
+                });
+            }
+            if (blockedController && new URL(request.url()).pathname === '/script.js') return request.abort();
+            return request.url().startsWith(base) ? request.continue() : request.abort();
         });
         for (const [index, file] of formPages.entries()) {
             await page.setViewport({width: index % 2 ? 1440 : 320, height:900});
@@ -435,9 +449,18 @@ const server = http.createServer((req, res) => {
         assert.equal(await page.$eval('[name="email_address"]',input=>input.checkValidity()),false);
         await page.$eval('[name="email_address"]',input=>{input.value='local+retry@example.invalid';input.dispatchEvent(new Event('input',{bubbles:true}));});
         await completeSecurityCheck(page);
+        const beforeOffline = await page.evaluate(() => window.__sent.length);
+        await page.evaluate(() => {
+            Object.defineProperty(navigator, 'onLine', {configurable:true, value:false});
+            document.querySelector('form').requestSubmit();
+            delete navigator.onLine;
+        });
+        assert.match(await page.$eval('#form-message', node => node.textContent), /offline/);
+        assert.equal(await page.evaluate(() => window.__sent.length), beforeOffline, 'An offline attempt never POSTs or consumes the token');
         await page.evaluate(() => { window.__mode = 'network';
             document.querySelector('form').requestSubmit(); });
         await page.waitForFunction(() => document.querySelector('#form-message').textContent.includes('could not confirm'));
+        assert.match(await page.$eval('#form-message', node => node.textContent), /could create a duplicate/);
         await completeSecurityCheck(page);
         await page.evaluate(() => { window.__mode = 'success';
             const f=document.querySelector('form');f.elements.full_name.value='$4,000 PROMO https://example.invalid';f.elements.email_address.value='bot@fldubai.com';
@@ -451,13 +474,41 @@ const server = http.createServer((req, res) => {
         assert.equal(new Set(tokens).size, 4, 'Every retry uses a fresh token');
         assert.deepEqual(await page.evaluate(() => window.__targets), Array(4).fill(protectedEndpoint), 'Security/input rejection, network error and success all use the separate backend');
         assert.ok(await page.evaluate(() => window.__turnstileFixture.resets >= 4));
+        blockedController = true;
+        for (const file of formPages) {
+            await page.goto(base + file, {waitUntil:'load'});
+            assert.equal(await page.$eval('.submit-button', button => button.disabled), true);
+            assert.match(await page.$eval('#form-message', node => node.innerText), /loading|se charge/);
+            await page.evaluate(() => {
+                const form = document.querySelector('#assessment-form');
+                form.elements.full_name.value = 'Local Test';
+                form.elements.business_name.value = 'Test Business';
+                form.elements.email_address.value = 'local@example.invalid';
+            });
+            await page.focus('[name="email_address"]');
+            await page.keyboard.press('Enter');
+            assert.equal(page.url(), base + file, 'Enter stays on the page while the form controller is unavailable');
+        }
+        blockedController = false;
         blocked = true;
         await page.goto(base, { waitUntil: 'load' });
-        await page.focus('[name="full_name"]');
-        await page.waitForSelector('#verification-retry:not([hidden])');
+        await page.$eval('#assessment-form', form => form.scrollIntoView({behavior:'instant'}));
+        await page.waitForSelector('#verification-retry:not([hidden])', {visible:true});
         blocked = false;
+        const beforeRetry = apiLoads;
+        await page.focus('#verification-retry');
+        assert.equal(apiLoads, beforeRetry, 'Focusing Retry does not silently start another download');
+        assert.equal(await page.$eval('#verification-retry', button => button.hidden), false);
+        missingApi = true;
+        await page.keyboard.press('Enter');
+        await page.waitForSelector('#verification-retry:not([hidden])', {visible:true});
+        assert.equal(apiLoads, beforeRetry + 1, 'An empty script response restores Retry');
+        missingApi = false;
+        await page.$eval('#verification-retry', button => button.scrollIntoView({block:'center',behavior:'instant'}));
         await page.click('#verification-retry');
+        await page.waitForFunction(() => Boolean(window.__turnstileFixture?.renders), {timeout:8000});
         await completeSecurityCheck(page);
+        assert.equal(apiLoads, beforeRetry + 2, 'A deliberate retry loads the provider once');
         for (const width of[320, 390, 768, 1440, 320]) {
             await page.setViewport({ width, height: 900 });
             await completeSecurityCheck(page);
@@ -469,10 +520,18 @@ const server = http.createServer((req, res) => {
         await page.evaluate(() => {
             const form = document.querySelector('form');
             for (const [name, value] of Object.entries({ full_name: 'Local Test', business_name: 'Test', email_address: 'test@example.invalid', business_url: 'https://example.invalid/' })) form.elements[name].value = value;
-            window.fetch = () => new Promise(resolve => { window.__finishRequest = () => resolve({ ok: true, json: async() => ({ result: 'error', code: 'verification_failed' }) }); });
+            window.__inFlightPosts = 0;
+            window.fetch = () => {
+                window.__inFlightPosts++;
+                return new Promise(resolve => {
+                    window.__finishRequest = () => resolve({ok:true, json:async()=>({result:'error', code:'verification_failed'})});
+                });
+            };
+            form.requestSubmit();
             form.requestSubmit();
         });
         await page.waitForFunction(() => Boolean(window.__finishRequest));
+        assert.equal(await page.evaluate(() => window.__inFlightPosts), 1, 'Repeated submission while waiting makes one request');
         await page.setViewport({ width: 320, height: 900 });
         await page.evaluate(() => window.__finishRequest());
         await page.waitForFunction(() => document.querySelector('#assessment-verification').style.minHeight === '140px' && document.documentElement.scrollWidth <= innerWidth + 1);

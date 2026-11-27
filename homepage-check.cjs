@@ -24,10 +24,33 @@ const server=http.createServer((req,res)=>{
  try{
   browser=await puppeteer.launch({headless:true,executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe'});
   const errors=[],posts=[];
-  async function newPage(width=390){
+  async function checkMobileMenu(page){
+   await page.focus('.menu-toggle');await page.keyboard.press('Enter');
+   assert.equal(await page.$eval('.primary-nav a',link=>link===document.activeElement),true,'Keyboard opening focuses the first menu link');
+   await page.keyboard.press('ArrowDown');
+   assert.equal(await page.$eval('.primary-nav a:nth-of-type(2)',link=>link===document.activeElement),true);
+   await page.keyboard.press('Escape');
+   assert.equal(await page.$eval('.menu-toggle',button=>button===document.activeElement&&button.getAttribute('aria-expanded')==='false'),true);
+   await page.keyboard.press('Enter');
+   await page.focus('.primary-nav [href="#quote"]');
+   await page.keyboard.press('Enter');
+   await page.waitForFunction(()=>location.hash==='#quote'&&document.activeElement.id==='quote-title');
+  }
+  async function newPage(width=390, blockController=false){
    const page=await browser.newPage();await page.setViewport({width,height:width<=680?844:900});
    await page.setRequestInterception(true);
-   page.on('request',r=>{if(r.method()!=='GET'){posts.push(r.url());r.abort();}else if(isTurnstileApi(r.url()))r.respond({status:200,contentType:'text/javascript',body:turnstileApiFixture});else if(r.url().startsWith(base)||r.url().startsWith('data:'))r.continue();else r.abort();});
+   page.on('request', request => {
+    const url = request.url();
+    if (request.method() !== 'GET') {
+     posts.push(url);
+     return request.abort();
+    }
+    if (blockController && new URL(url).pathname === '/script.js') return request.abort();
+    if (isTurnstileApi(url)) {
+     return request.respond({status:200,contentType:'text/javascript',body:turnstileApiFixture});
+    }
+    return url.startsWith(base) || url.startsWith('data:') ? request.continue() : request.abort();
+   });
    page.on('pageerror',e=>errors.push(e.message));return page;
   }
   const page=await newPage();
@@ -77,6 +100,15 @@ const server=http.createServer((req,res)=>{
    if(width===390)await page.screenshot({path:path.join(output,'assessment-390.png')});
    results.push(layout);
   }
+  await page.setViewport({width:390,height:844});
+  await page.goto(base,{waitUntil:'load'});
+  const rejectMeasurement=await page.$('#measurement-preferences:not([hidden]) [data-choice="reject"]');
+  if(rejectMeasurement) await rejectMeasurement.click();
+  await checkMobileMenu(page);
+  const backToTop=await page.$('.site-footer a[href="#top"]');
+  await backToTop.evaluate(link=>link.scrollIntoView({block:'center',behavior:'instant'}));
+  await backToTop.click();
+  await page.waitForFunction(()=>location.hash==='#top'&&scrollY===0);
   // The banner has no visible control; hover/focus and reduced motion keep links usable.
   await page.setViewport({width:768,height:900});
   await page.goto(base,{waitUntil:'load'});
@@ -159,6 +191,7 @@ const server=http.createServer((req,res)=>{
     englishLink: document.querySelector('.site-language').getAttribute('href')
   }));
   assert.deepEqual(frenchHome, {language:'fr-CA', overflow:false, englishLink:'/'});
+  await checkMobileMenu(page);
   await completeSecurityCheck(page);
   await page.evaluate(() => {
     const form = document.querySelector('#assessment-form');
@@ -175,11 +208,22 @@ const server=http.createServer((req,res)=>{
   const frenchPayload = new URLSearchParams(await page.evaluate(() => window.__frenchSubmission));
   assert.equal(frenchPayload.get('terms_language'),'fr-CA');
   assert.equal(frenchPayload.get('review_count'),'1');
+  const slowPage=await newPage(390,true);
+  await slowPage.goto(base,{waitUntil:'load'});
+  assert.equal(await slowPage.$eval('.submit-button',button=>button.disabled),true);
+  await slowPage.$eval('#formQuantity',field=>{field.value='12';});
+  await slowPage.addScriptTag({path:path.join(root,'script.js')});
+  assert.equal(await slowPage.$eval('.submit-button',button=>button.disabled),false);
+  assert.equal(await slowPage.$eval('#formQuantity',field=>field.value),'12');
+  assert.equal(await slowPage.$eval('#priceQuantity',field=>field.value),'12');
+  assert.equal(await slowPage.$eval('.calculator [data-quote="total"]',node=>node.textContent),'$2,100');
+  await slowPage.close();
   await page.setJavaScriptEnabled(false);await page.goto(base,{waitUntil:'load'});
   assert.equal(await page.$$eval('.hero-testimonial figure',e=>e.length),1,'The testimonial remains in static HTML');
   assert.equal(await page.$eval('.testimonial-person strong',e=>e.textContent),'Luke Hapher');
   assert.equal(await page.$$eval('.platform-list',e=>e.length),1,'One list without JavaScript');
   assert.equal(await page.$$eval('.platform-list a',e=>e.length),7,'All press links remain accessible without JavaScript');
+  assert.equal(await page.$eval('.submit-button',button=>button.disabled),true);
   assert.equal(await page.$eval('form',f=>f.method),'post');assert.equal(await page.$eval('form',f=>f.noValidate),false);assert.match(await page.$eval('noscript',n=>n.textContent),/enable JavaScript to send your request/);
   assert.equal(await page.$$eval('title',n=>n.length),1);assert.equal(await page.$$eval('link[rel="canonical"]',n=>n.length),1);
   assert.deepEqual(errors,[]);assert.deepEqual(posts,[],'Never send a real POST');

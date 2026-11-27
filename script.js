@@ -105,18 +105,54 @@ const pageText = (english, french) => frenchPage ? french : english;
 const openMenu = pageText('Open menu', 'Ouvrir le menu');
 const closeMenu = pageText('Close menu', 'Fermer le menu');
 
-menuButton?.addEventListener('click', () => {
-  const open = menuButton.getAttribute('aria-expanded') !== 'true';
-  menuButton.setAttribute('aria-expanded', String(open));
-  menuButton.setAttribute('aria-label', open ? closeMenu : openMenu);
-  navigation.classList.toggle('is-open', open);
-});
+if (menuButton && navigation) {
+  const links = Array.from(navigation.querySelectorAll('a[href]'));
+  const mobile = window.matchMedia('(max-width: 960px)');
 
-navigation?.querySelectorAll('a').forEach(link => link.addEventListener('click', () => {
-  navigation.classList.remove('is-open');
-  menuButton.setAttribute('aria-expanded', 'false');
-  menuButton.setAttribute('aria-label', openMenu);
-}));
+  function setMenu(open) {
+    menuButton.setAttribute('aria-expanded', String(open));
+    menuButton.setAttribute('aria-label', open ? closeMenu : openMenu);
+    navigation.classList.toggle('is-open', open);
+  }
+
+  menuButton.addEventListener('click', event => {
+    const open = !navigation.classList.contains('is-open');
+    setMenu(open);
+    if (open && event.detail === 0) links[0]?.focus();
+  });
+
+  document.addEventListener('keydown', event => {
+    if (!navigation.classList.contains('is-open')) return;
+    if (event.key === 'Escape') {
+      setMenu(false);
+      menuButton.focus();
+      return;
+    }
+    const index = links.indexOf(document.activeElement);
+    if (index < 0 || (event.key !== 'ArrowDown' && event.key !== 'ArrowUp')) return;
+    event.preventDefault();
+    const offset = event.key === 'ArrowDown' ? 1 : -1;
+    links[(index + offset + links.length) % links.length].focus();
+  });
+
+  mobile.addEventListener?.('change', event => {
+    if (!event.matches) setMenu(false);
+  });
+
+  links.forEach(link => link.addEventListener('click', event => {
+    if (!navigation.classList.contains('is-open')) return;
+    setMenu(false);
+    const href = link.getAttribute('href');
+    if (event.detail !== 0 || !href.startsWith('#')) return;
+    const target = document.getElementById(href.slice(1));
+    const heading = target?.querySelector('h2') || target;
+    if (heading) {
+      heading.tabIndex = -1;
+      // Native fragment navigation scrolls first and can reset the active element.
+      window.requestAnimationFrame(() => heading.focus({preventScroll:true}));
+    }
+  }));
+}
 
 const platformBanner = document.querySelector('.home-page .platform-banner');
 const platformList = platformBanner?.querySelector('.platform-list');
@@ -212,7 +248,7 @@ const successPanel = document.querySelector('#submission-success');
 const endpoint = 'https://script.google.com/macros/s/AKfycbzK_hATDZaXApgEUITdZ1kgF6VirBLCpcK1q3tmiFoWhG2AZpy_B6uOy5CFjTejVo8T/exec';
 let submitting = false;
 // Validate current values in the submit handler, including autofill corrections.
-// Native input validity still supplies accessible messages; no-JS HTML is unchanged.
+// Use native validity messages after checking the current field values.
 if (form) form.noValidate = true;
 
 const leadFields = ['full_name', 'business_name', 'email_address', 'phone_number', 'business_url', 'review_count', 'review_links', 'reason'];
@@ -262,7 +298,7 @@ function setupAssessmentVerification() {
     showStatus(pageText('The security check could not finish. Please retry the check.', 'La vérification de sécurité n’a pas abouti. Veuillez réessayer.'), true);
   }
   function render() {
-    if (widgetId !== null || !window.turnstile) return;
+    if (widgetId !== null || form.hidden || !container.clientWidth || typeof window.turnstile?.render !== 'function') return;
     size = container.clientWidth < 300 ? 'compact' : 'flexible';
     container.style.minHeight = size === 'compact' ? '140px' : '65px';
     try {
@@ -287,21 +323,29 @@ function setupAssessmentVerification() {
     } catch (_) { failed(); }
   }
   function load() {
-    if (!container || !status || !retry) return;
-    if (window.turnstile) { render(); return; }
+    if (!container || !status || !retry || !retry.hidden || form.hidden) return;
+    if (typeof window.turnstile?.render === 'function') { render(); return; }
     if (loader) return;
     showStatus(checking);
-    loader = document.createElement('script');
-    loader.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
-    loader.async = true;
-    loader.defer = true;
-    loader.onload = () => { clearTimeout(loadTimer); render(); };
-    loader.onerror = () => {
+    const script = document.createElement('script');
+    loader = script;
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+    script.async = true;
+    script.defer = true;
+    function loadFailed() {
+      if (loader !== script) return;
       clearTimeout(loadTimer);
-      loader.remove();
+      script.remove();
       loader = null;
       failed();
+    }
+    script.onload = () => {
+      if (loader !== script) return;
+      clearTimeout(loadTimer);
+      if (typeof window.turnstile?.render !== 'function') { loadFailed(); return; }
+      render();
     };
+    script.onerror = loadFailed;
     loadTimer = window.setTimeout(failed, 15000);
     document.head.append(loader);
   }
@@ -322,7 +366,8 @@ function setupAssessmentVerification() {
   if (container && status && retry) {
     retry.addEventListener('click', () => {
       if (submitting) return;
-      if (loader && !window.turnstile) {
+      retry.hidden = true;
+      if (loader && typeof window.turnstile?.render !== 'function') {
         clearTimeout(loadTimer);
         loader.remove();
         loader = null;
@@ -341,8 +386,10 @@ function setupAssessmentVerification() {
       if (widgetId === null || nextSize === size || submitting || form.hidden) return;
       reset();
     };
-    if (typeof ResizeObserver === 'function') new ResizeObserver(resizeWidget).observe(container);
-    else window.addEventListener('resize', resizeWidget);
+    if (typeof ResizeObserver === 'function') {
+      // Turnstile changes the observed element's height when its size changes.
+      new ResizeObserver(() => window.requestAnimationFrame(resizeWidget)).observe(container);
+    } else window.addEventListener('resize', resizeWidget);
   }
   return {
     getToken: () => token,
@@ -372,6 +419,11 @@ form?.addEventListener('submit', async event => {
   }
   updateQuote(document.querySelector('#formQuantity').value);
 
+  if (navigator.onLine === false) {
+    message.className = 'form-message is-error';
+    message.textContent = pageText('You are offline. Your answers are still here. Reconnect to send your request.', 'Vous êtes hors ligne. Vos réponses sont conservées. Reconnectez-vous pour envoyer votre demande.');
+    return;
+  }
   const verificationToken = assessmentVerification?.getToken() || '';
   if (!TURNSTILE_PAUSED && !verificationToken) { assessmentVerification.prompt(); return; }
   const payload = new FormData(form);
@@ -434,7 +486,7 @@ form?.addEventListener('submit', async event => {
       ? pageText('The security check was not accepted. Your details are still here; complete the new check and try again.', 'La vérification de sécurité a échoué. Vos renseignements sont toujours dans le formulaire. Terminez la nouvelle vérification, puis réessayez.')
       : error.message === 'invalid_input'
       ? pageText('Please check your details and try again. Your answers are still here.', 'Vérifiez vos renseignements, puis réessayez. Vos réponses sont toujours dans le formulaire.')
-      : pageText('We could not confirm your request. Your details are still here; please wait a few minutes before trying again.', 'Nous n’avons pas pu confirmer votre demande. Vos renseignements sont toujours dans le formulaire. Attendez quelques minutes avant de réessayer.');
+      : pageText('We could not confirm receipt. Your request may already have reached us. Your answers are still here, and sending again could create a duplicate.', 'Nous n’avons pas pu confirmer la réception. Votre demande nous est peut-être déjà parvenue. Vos réponses sont conservées et un nouvel envoi pourrait créer un doublon.');
     if (error.message === 'invalid_input' && error.field) {
       const invalid = form.elements.namedItem(error.field);
       const errors = leadInputErrors(Object.fromEntries(new FormData(form)), true);
@@ -453,4 +505,10 @@ form?.addEventListener('submit', async event => {
   }
 });
 
-updateQuote(1);
+const enteredQuantity = quantityInputs.find(input =>
+  input.value !== input.defaultValue && Number.isFinite(input.valueAsNumber));
+updateQuote(enteredQuantity?.valueAsNumber ?? 1);
+if (form) {
+  message.textContent = '';
+  submitButton.disabled = false;
+}
