@@ -18,6 +18,8 @@ const frenchHome = 'suppression-avis-google.html';
 const homeAlternates = { 'en-CA': `${origin}/`, 'fr-CA': `${origin}/${frenchHome}`, 'x-default': `${origin}/` };
 require('./build-editorial-page.cjs')();
 require('./build-legal-pages.cjs')(origin);
+const industryArticles = new Map(require('./blog/industry-review-removal-post.cjs')
+  .map(article => [`blog/${article.slug}.html`, article]));
 const pages = [
   'index.html', frenchHome, 'review-removal-canada.html', 'about.html', 'terms-of-service.html', 'privacy-policy.html', 'editorial-policy.html',
   'blog/index.html', 'blog/google-review-moderation-2019-2025.html',
@@ -28,7 +30,8 @@ const pages = [
   'blog/google-review-removal-appeals-data.html', 'blog/google-review-removal-time-data.html',
   'blog/google-review-removal-local-ranking-study.html',
   'blog/google-reviews-without-text-data-study.html',
-  'blog/google-review-removal-physiotherapy-clinics.html'
+  'blog/google-review-removal-physiotherapy-clinics.html',
+  ...industryArticles.keys()
 ];
 const escapeAttr = value => value.replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;');
 const marker = /\n[ \t]*<!-- production URL metadata start -->[\s\S]*?<!-- production URL metadata end -->/g;
@@ -103,7 +106,9 @@ for (const relative of pages) {
     : '';
   const isGuide = require('./google-guides.cjs').some(guide => guide.file === relative);
   const isArticle = (relative.startsWith('blog/') && relative !== 'blog/index.html') || isGuide;
-  const shareImage = `${origin}/${shareImages[relative] || 'assets/reviewremoval-social.png'}`;
+  const industryArticle = industryArticles.get(relative);
+  const shareImagePath = industryArticle ? `blog/assets/${industryArticle.cover}` : shareImages[relative] || 'assets/reviewremoval-social.png';
+  const shareImage = `${origin}/${shareImagePath}`;
   let schemaTag = '';
   if (isFrench) {
     schemaTag = `\n  <script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@graph': [
@@ -241,7 +246,7 @@ for (const relative of pages) {
     if(relative==='editorial-policy.html')html=html.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/g,'');
     schemaTag=`\n  <script type="application/ld+json">${JSON.stringify(pageSchema).replaceAll('<','\\u003c')}</script>`;
   }
-  const imageAlt = shareImageAlts[relative] || (isFrench ? 'ReviewRemoval, aide au retrait des avis Google' : 'ReviewRemoval: review concerns, handled for you');
+  const imageAlt = industryArticle?.coverAlt || shareImageAlts[relative] || (isFrench ? 'ReviewRemoval, aide au retrait des avis Google' : 'ReviewRemoval: review concerns, handled for you');
   const tags = `\n  <!-- production URL metadata start -->\n  <link rel="canonical" href="${escapeAttr(canonical)}">${alternateTags}\n  <meta name="robots" content="index, follow, max-image-preview:large">\n  <meta property="og:type" content="${isArticle ? 'article' : 'website'}">\n  <meta property="og:site_name" content="ReviewRemoval">\n  <meta property="og:locale" content="${isFrench ? 'fr_CA' : 'en_CA'}">\n  <meta property="og:url" content="${escapeAttr(canonical)}">\n  <meta property="og:title" content="${title}">\n  <meta property="og:description" content="${description}">\n  <meta property="og:image" content="${escapeAttr(shareImage)}">\n  <meta property="og:image:width" content="1200">\n  <meta property="og:image:height" content="${['blog/google-review-risk-score-denominator-study.html','blog/google-review-removal-appeals-data.html','blog/google-review-removal-time-data.html'].includes(relative)?'780':['blog/google-review-removal-denominator-audit.html'].includes(relative)?'720':['blog/google-review-removal-local-ranking-study.html','blog/google-reviews-without-text-data-study.html','blog/google-review-removal-physiotherapy-clinics.html'].includes(relative)?'630':shareImages[relative]?'672':'630'}">\n  <meta property="og:image:alt" content="${escapeAttr(imageAlt)}">\n  <meta name="twitter:card" content="summary_large_image">\n  <meta name="twitter:title" content="${title}">\n  <meta name="twitter:description" content="${description}">\n  <meta name="twitter:image" content="${escapeAttr(shareImage)}">\n  <meta name="twitter:image:alt" content="${escapeAttr(imageAlt)}">${articleTimeTags}${schemaTag}\n  <!-- production URL metadata end -->`;
   html = applyMeasurement(html.replace('</head>', `${tags}\n</head>`), relative);
   if (relative !== 'index.html' && !isFrench && relative !== 'google-review-removal-cost-canada.html' && !html.includes('class="assessment-shortcut"')) {
@@ -263,6 +268,8 @@ const sitemapEntries = pages.map(relative => {
   const imageNames=relative==='blog/google-reviews-without-text-data-study.html'?['google-text-coverage-ratings','google-text-coverage-frames','google-text-coverage-places']:relative==='blog/google-review-removal-local-ranking-study.html'?['google-ranking-rating-bands','google-ranking-high-rating-categories','google-ranking-frames']:relative==='blog/google-review-removal-time-data.html'?['google-notice-category-medians','google-notice-receipt-mix','google-notice-median-tail-examples']:relative==='blog/google-review-removal-appeals-data.html'?['google-maps-appeals-direction','google-maps-appeals-receipt-share','google-maps-appeals-median-hours']:relative==='blog/google-review-removal-denominator-audit.html'?['google-removal-reasons-denominators','google-removal-metric-changes','google-removal-source-corrections']:relative==='blog/google-review-risk-score-denominator-study.html'?['google-risk-deleted-share','google-risk-identification-bounds','google-risk-same-subset']:[];
   const imageFiles=imageNames.map(name=>name+'.svg');
   if(relative==='blog/google-review-removal-physiotherapy-clinics.html') imageFiles.push('physio-google-rating-comparison.webp','physio-patient-reviewing-options.webp');
+  const industryArticle = industryArticles.get(relative);
+  if (industryArticle) imageFiles.push(industryArticle.cover);
   const images=imageFiles.map(file=>`<image:image><image:loc>${origin}/blog/assets/${file}</image:loc></image:image>`).join('');
   return `  <url><loc>${escapeAttr(`${origin}/${relative === 'index.html' ? '' : relative}`)}</loc>${lastmod}${images}</url>`;
 });

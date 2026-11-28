@@ -5,6 +5,7 @@ const {spawnSync} = require('node:child_process');
 
 const workspace = __dirname;
 const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'reviewremoval-launch-'));
+const industryPosts = 'blog/industry-review-removal-post.cjs';
 const pages = [
   'index.html','suppression-avis-google.html','review-removal-canada.html','about.html','terms-of-service.html','privacy-policy.html','editorial-policy.html',
   'blog/index.html','blog/google-review-moderation-2019-2025.html','blog/canadian-tourism-google-reviews-2023.html','blog/review-removal-questions-answered.html','blog/review-report-evidence-checklist.html', 'blog/google-review-removal-rating-impact-study.html',
@@ -14,7 +15,8 @@ const pages = [
   'blog/google-review-removal-appeals-data.html', 'blog/google-review-removal-time-data.html',
   'blog/google-review-removal-local-ranking-study.html',
   'blog/google-reviews-without-text-data-study.html',
-  'blog/google-review-removal-physiotherapy-clinics.html'
+  'blog/google-review-removal-physiotherapy-clinics.html',
+  ...require('./' + industryPosts).map(article => `blog/${article.slug}.html`)
 ];
 
 try {
@@ -25,6 +27,7 @@ try {
     fs.mkdirSync(path.dirname(path.join(tempRoot, relative)), {recursive: true});
     fs.copyFileSync(path.join(workspace, relative), path.join(tempRoot, relative));
   }
+  fs.copyFileSync(path.join(workspace, industryPosts), path.join(tempRoot, industryPosts));
   for (let pass = 0; pass < 2; pass++) {
     const result = spawnSync(process.execPath, [path.join(tempRoot, 'set-live-domain.cjs'), 'https://example.com'], {encoding: 'utf8'});
     if (result.status !== 0) throw new Error(result.stderr || result.stdout);
