@@ -4,6 +4,7 @@ const os = require('node:os');
 const {spawnSync} = require('node:child_process');
 
 const workspace = __dirname;
+const { visuals, reviewCover } = require('./blog/review-guide-visuals-post.cjs');
 const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'reviewremoval-launch-'));
 const industryPosts = 'blog/industry-review-removal-post.cjs';
 const pages = [
@@ -28,6 +29,12 @@ try {
     fs.copyFileSync(path.join(workspace, relative), path.join(tempRoot, relative));
   }
   fs.copyFileSync(path.join(workspace, industryPosts), path.join(tempRoot, industryPosts));
+  const specialistPosts = 'blog/specialist-review-removal-post.cjs';
+  fs.copyFileSync(path.join(workspace, specialistPosts), path.join(tempRoot, specialistPosts));
+  const visualSource = 'blog/industry-review-visuals-post.cjs';
+  fs.copyFileSync(path.join(workspace, visualSource), path.join(tempRoot, visualSource));
+  const guideVisualSource = 'blog/review-guide-visuals-post.cjs';
+  fs.copyFileSync(path.join(workspace, guideVisualSource), path.join(tempRoot, guideVisualSource));
   for (let pass = 0; pass < 2; pass++) {
     const result = spawnSync(process.execPath, [path.join(tempRoot, 'set-live-domain.cjs'), 'https://example.com'], {encoding: 'utf8'});
     if (result.status !== 0) throw new Error(result.stderr || result.stdout);
@@ -66,7 +73,7 @@ try {
   if ((html.match(/rel="canonical"/g) || []).length !== 1) throw new Error('Canonical tag was duplicated');
   const json = html.match(/<script type="application\/ld\+json">([^<]+)<\/script>/)?.[1];
   const schema = JSON.parse(json);
-  if (schema['@type'] !== 'BlogPosting' || schema.citation.length < 7 || !schema.image.endsWith('.png')) throw new Error('Article schema is incomplete');
+  if (schema['@type'] !== 'BlogPosting' || schema.citation.length < 7 || !schema.image.endsWith('/' + reviewCover('google-review-moderation-2019-2025').file)) throw new Error('Article schema is incomplete');
   const articleSchemas = [...html.matchAll(/<script type="application\/ld\+json">([^<]+)<\/script>/g)].map(match => JSON.parse(match[1]));
   if (articleSchemas[1]?.['@type'] !== 'BreadcrumbList' || articleSchemas[1]?.itemListElement?.length !== 3) throw new Error('Article breadcrumb schema is incomplete');
   const home = fs.readFileSync(path.join(tempRoot, 'index.html'), 'utf8');
@@ -81,9 +88,24 @@ try {
   const canadaArticleSchema = JSON.parse(canadaArticle.match(/<script type="application\/ld\+json">([^<]+)<\/script>/)?.[1]);
   if (canadaArticleSchema.datePublished !== '2026-09-26' || !canadaArticleSchema.citation?.some(url => url.includes('ised-isde.canada.ca'))) throw new Error('Canadian research schema is incomplete');
   const sitemap = fs.readFileSync(path.join(tempRoot, 'sitemap.xml'), 'utf8');
+  for (const slug of Object.keys(visuals)) {
+    const entry = sitemap.split('\n').find(line => line.includes('/blog/' + slug + '.html</loc>'));
+    const image = 'https://example.com/blog/assets/' + reviewCover(slug).file;
+    const page = fs.readFileSync(path.join(tempRoot, 'blog', slug + '.html'), 'utf8');
+    if (!entry?.includes(image) || !page.includes(`property="og:image" content="${image}"`)) {
+      throw new Error('Guide cover is missing from discovery metadata: ' + slug);
+    }
+  }
   if ((sitemap.match(/<loc>/g) || []).length !== pages.length) throw new Error('Sitemap does not list every page');
   if(!sitemap.includes('<loc>https://example.com/blog/google-review-removal-rating-impact-study.html</loc><lastmod>2026-10-08</lastmod>')) throw new Error('Rating study sitemap date or URL is incorrect');
-  if(!sitemap.includes('<loc>https://example.com/blog/index.html</loc><lastmod>2026-11-27</lastmod>')) throw new Error('Blog index sitemap date is incorrect');
+  if(!sitemap.includes('<loc>https://example.com/blog/index.html</loc><lastmod>2026-11-28</lastmod>')) throw new Error('Blog index sitemap date is incorrect');
+  for (const article of require('./' + industryPosts)) {
+    const entry = sitemap.split('\n').find(line => line.includes('/blog/' + article.slug + '.html</loc>'));
+    const visuals = [article.cover, article.photo, article.chartFile].filter(Boolean);
+    if (!entry || visuals.some(file => !entry.includes('/blog/assets/' + file))) {
+      throw new Error('Missing industry visual in sitemap: ' + article.slug);
+    }
+  }
   const physioUrl = 'https://example.com/blog/google-review-removal-physiotherapy-clinics.html';
   const physioEntry = sitemap.split('\n').find(line => line.includes(`<loc>${physioUrl}</loc>`));
   if (!physioEntry?.includes('/blog/assets/physio-google-rating-comparison.webp') ||

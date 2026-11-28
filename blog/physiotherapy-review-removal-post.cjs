@@ -1,3 +1,5 @@
+const { evidencePanel } = require('./industry-review-visuals-post.cjs');
+
 module.exports = {
   slug: 'google-review-removal-physiotherapy-clinics',
   title: 'Google Review Removal for Physiotherapy Clinics',
@@ -10,6 +12,10 @@ module.exports = {
   dateLabel: 'November 27, 2026',
   checkedLabel: 'November 2026',
   minutes: 5,
+  heroVisual: `<figure class="review-visual-lead">
+    <img src="assets/physio-google-rating-comparison.webp" width="1200" height="630" decoding="async" alt="Fictional physiotherapy clinics with 30 ratings each. Clinic A scores 3.6 out of 5 and Clinic B scores 5.0. In the example the patient calls Clinic B first.">
+    <figcaption>Fictional comparison with review count, distance and availability held similar. Patients also weigh appointment times, coverage, and whether a clinic offers the service they need.</figcaption>
+  </figure>`,
   serviceHref: '/#quote',
   serviceLabel: 'Request a free clinic assessment',
   serviceSummary: 'Send the public Google review or profile link and a short description of the concern. We’ll tell you what might qualify and what paid work would cover.',
@@ -23,16 +29,11 @@ module.exports = {
   body: `
     <p class="lede">A patient gets your clinic’s name from a friend, then searches for it before booking. If a misleading review raises doubts about billing or the front desk, the patient can open another clinic’s listing in seconds. ReviewRemoval assesses suspected fake, abusive or off-topic Google reviews for Canadian physiotherapy practices and handles the reporting work you approve.</p>
     <p><a class="button button-dark" href="/#quote">Get a free clinic assessment <span aria-hidden="true">↓</span></a></p>
-    <figure class="chart-frame">
-      <img src="assets/physio-patient-reviewing-options.webp" width="1200" height="800" loading="lazy" decoding="async" alt="Illustration of a prospective patient on a bench comparing physiotherapy clinics on a phone">
-      <figcaption>A patient checking reviews can be one step away from calling the front desk.</figcaption>
-    </figure>
-
     <h2 id="shortlist">What a patient sees before booking</h2>
     <p>Imagine two nearby clinics with evening appointments and 30 reviews each. One shows 3.6 stars. The other shows 5.0. In this example, the patient calls the higher-rated clinic first. A clinic can lose that inquiry before anyone visits its website or speaks to reception.</p>
-    <figure class="chart-frame">
-      <img src="assets/physio-google-rating-comparison.webp" width="1200" height="630" loading="lazy" decoding="async" alt="Fictional physiotherapy clinics with 30 ratings each. Clinic A scores 3.6 out of 5 and Clinic B scores 5.0. In the example the patient calls Clinic B first.">
-      <figcaption>Fictional comparison with review count, distance and availability held similar. Patients also weigh appointment times, coverage, and whether a clinic offers the service they need.</figcaption>
+    <figure class="industry-context-photo">
+      <img src="assets/physio-patient-reviewing-options.webp" width="1200" height="800" loading="lazy" decoding="async" alt="Illustration of a prospective patient on a bench comparing physiotherapy clinics on a phone">
+      <figcaption>A patient checking reviews can be one step away from calling the front desk.</figcaption>
     </figure>
     <p>Google reviews can help people find a clinic even where referrals are the main source of new business. In a 2025 survey of 550 first-time patients at one women’s physiotherapy clinic in Poland, 12% named Google Maps reviews as their source of information about the clinic and 49% named a friend’s recommendation. The result describes that clinic’s patients. Use your own intake records to learn how people find yours. <a href="https://bibliotekanauki.pl/articles/64161667.pdf">Read Zuzanna Minga’s physiotherapy clinic study</a>.</p>
     <p>Star averages and search position each affect the route to a booking. Google’s local results also depend on relevance, distance and prominence. Check that your listing shows current hours, a working booking link and clear service and billing details. An accurate profile helps someone decide whether to book once they’ve found you. <a href="https://support.google.com/business/answer/7091?hl=en">See Google’s local ranking guidance</a>.</p>
@@ -56,6 +57,7 @@ module.exports = {
     </ul>
     <p>A real complaint about a cancellation fee, wait time or communication can tell you what to fix for the next patient. If you reply publicly, keep it general and invite the person to contact the practice privately. Keep treatment details and records out of public replies. <a href="https://collegept.org/standard/communication-standard/">College of Physiotherapists of Ontario communication standard</a>.</p>
 
+    ${evidencePanel('Keep the public review link and the date it appeared.', 'Identify a verifiable detail about the service or location.', 'Keep patient names, appointment records and clinical details within the practice.')}
     <h2 id="manage">Hand the reporting work to ReviewRemoval</h2>
     <p>Start by sending the public Business Profile or review link and a short note about the policy concern. We’ll assess the case for free, identify useful evidence and tell you which reviews we can take on. Keep patient names, appointment records and clinical details inside your practice.</p>
     <p>Once you approve a written scope, we prepare the report and manage the agreed follow-up, including an appeal where applicable. The fee is <strong>CAD $50 upfront per approved review</strong> plus <strong>CAD $125 for each successful removal</strong>. Google decides whether each review comes down. <a href="../google-review-removal-cost-canada.html">See Canadian pricing and examples</a>.</p>

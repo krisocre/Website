@@ -1,3 +1,4 @@
+const { reviewVisuals } = require('./industry-review-visuals-post.cjs');
 const policy = 'https://support.google.com/contributionpolicy/answer/7400114?hl=en';
 const appeals = 'https://support.google.com/business/answer/4596773?hl=en';
 const fees = '<strong>CAD $50 upfront per approved review</strong> plus <strong>CAD $125 for each successful removal</strong>, before applicable taxes';
@@ -28,6 +29,7 @@ module.exports = [
       <p>An agent, a brokerage and one of its branches can appear in the same search. Google’s rules distinguish a public-facing practitioner from the organization and give different guidance when several practitioners share a location. Before you report anything, open the review and save a link to the listing that hosts it. Earlier office names and similar agent names can make the wrong profile look plausible. <a href="https://support.google.com/business/answer/3038177?hl=en">Google Business Profile guidelines for individual practitioners</a>.</p>
       <p>Consider a fictional example. A review on a Hamilton agent’s listing mentions a different agent and an appointment at a Kingston office. Copy the lines that identify the office and find a public page confirming which brokerage operates it. If the reviewer only mentions a street name shared by both cities, the details may be too thin to establish a mismatch.</p>
 
+      {{industryPhoto}}
       <h2 id="evidence">Make a short evidence file</h2>
       <ol>
         <li><strong>Pin down the review.</strong> Save its direct link, the date, a screenshot and the name of the profile where it appears.</li>
@@ -40,6 +42,7 @@ module.exports = [
       <p>The Real Estate Council of Ontario encourages consumers to interview several agents and check references. Make it easy for a referred seller to match your public profile to your brokerage website. Use current contact details and give prospects a clear way to request a conversation. <a href="https://www.reco.on.ca/consumers/information-for-buyers/how-do-i-choose-a-real-estate-agent/">RECO’s consumer guide to choosing an agent</a>.</p>
       <p>Ask first-time callers who referred them and whether they also looked you up. Track booked consultations alongside those answers. A lead can start with a personal recommendation and still depend on what the client sees online. If you want to estimate how much one ineligible rating could change the displayed score, start with the total review count and current average. <a href="google-review-removal-rating-impact-study.html">See the rating impact model</a>.</p>
 
+      {{reviewEvidence}}
       <h2 id="assessment">Let ReviewRemoval check the evidence</h2>
       <p>Bring the public review link, the affected profile and a short explanation of the mismatch. The initial assessment is free. If you approve the scope, we prepare the report and handle agreed follow-up, including an eligible appeal. Paid work costs ${fees}. <a href="../google-review-removal-cost-canada.html">See ReviewRemoval’s pricing and examples</a>.</p>
     `
@@ -69,6 +72,7 @@ module.exports = [
       <p>When several trades are on site, a homeowner may remember only the name on the sign out front. Start by asking who contracted for the specific work the review describes. Suppose a review says the countertop installers never returned to finish. The general contractor might have hired those installers, or the homeowner might have hired a separate company after the renovation. Those two facts lead to different conversations.</p>
       <p>If your company managed that trade, address the complaint in the context of your own project. If the review clearly names a different firm that handled a separate job, the text and public business details can help show why the post may be off-topic. <a href="${policy}">Google’s Maps content policies</a>.</p>
 
+      {{industryPhoto}}
       <h2 id="records">Check the scope, change orders and handoff notes</h2>
       <p>The Canadian Home Builders’ Association explains how written contracts set out the work and payment milestones, and how change orders record alterations. Those records can help your team establish what it was responsible for and identify who should handle a complaint. <a href="https://www.chba.ca/contracts-get-it-in-writing/">CHBA guidance on renovation contracts</a>.</p>
       <ul>
@@ -82,6 +86,7 @@ module.exports = [
       <p>When a review is prominent, count requests from homeowners in your service area who want the work you actually do. Compare similar weeks and record changes in ads, crew availability and season separately. Fewer serious estimate requests matter more than a change in total calls.</p>
       <p>For a hypothetical budget check, one successful removal costs CAD $175 before applicable taxes. If a suitable project would contribute CAD $3,500 after direct job costs, the fee equals 5% of that contribution. Use your own margins to compare costs. Changes in bookings can have several causes.</p>
 
+      {{reviewEvidence}}
       <h2 id="assessment">Give us the facts and hand off the reporting</h2>
       <p>ReviewRemoval checks the concern for free. For approved paid work, we organize the evidence, prepare the report and follow up as agreed. Our fee is ${fees}. <a href="../google-review-removal-cost-canada.html">See the fee breakdown</a> · <a href="report-google-review-appeal.html">Check what to do after an initial report</a>.</p>
     `
@@ -110,6 +115,7 @@ module.exports = [
       <h2 id="booking">Make exam information easy to find</h2>
       <p>A prospective patient needs to know which location offers exams, where to book and how to confirm fees or coverage. Review those details on Google and on the booking page for each branch. If a review describes another business with a similar name, save the text that identifies it. If your practice also sells eyewear, genuine feedback about that experience may belong on your profile.</p>
 
+      {{industryPhoto}}
       <h2 id="privacy">Give the front desk a simple triage plan</h2>
       <ol>
         <li><strong>Check which service the post describes.</strong> Does it name a different optical shop, clinic or location? Save the link and any public detail that identifies the business.</li>
@@ -122,23 +128,28 @@ module.exports = [
       <p>Track those three numbers separately for each location. If requests stay steady but fewer people book, check wait times and how quickly calls are returned. If requests fall after inaccurate information appears, review what the profile says alongside any changes to hours, ads or appointment availability.</p>
       <p>There’s also a practical reason to read the review itself. In a hypothetical clinic with exactly 212 stars across 50 ratings, removing one one-star rating brings the raw average from 4.24 to about 4.31. That difference is modest. The misleading claim that disappears with the post can be the larger factor for a patient deciding whether to call. <a href="google-review-removal-rating-impact-study.html">See how count and starting score affect the average</a>.</p>
 
+      {{reviewEvidence}}
       <h2 id="assessment">Ask ReviewRemoval to check the public post</h2>
       <p>Start with a public review link and a short, non-identifying description. We’ll assess the concern for free. If you approve the scope, we prepare the report and handle agreed follow-up through the appropriate process. Paid work costs ${fees}. <a href="../google-review-removal-cost-canada.html">See pricing in Canadian dollars</a> · <a href="${appeals}">Google’s reporting and appeal process</a>.</p>
     `
   }
-].map(({intro, body, ...article}) => ({
-  ...article,
-  published: '2026-11-27',
-  dateLabel: 'November 27, 2026',
-  checkedLabel: 'November 2026',
-  minutes: 5,
-  serviceHref: '/#quote',
-  body: `
-    <p class="lede">${intro}</p>
-    <p><a class="button button-dark" href="/#quote">${article.serviceLabel} <span aria-hidden="true">↓</span></a></p>
-    <figure class="chart-frame">
-      <img src="assets/${article.cover}" width="1200" height="630" alt="${article.coverAlt}" loading="lazy" decoding="async">
-    </figure>
-    ${body}
-  `
-}));
+].map(({intro, body, ...article}) => {
+  const { cover, coverAlt, photo, lead, contextPhoto, evidence } = reviewVisuals(article);
+  return {
+    ...article,
+    cover,
+    coverAlt,
+    photo,
+    heroVisual: lead,
+    published: '2026-11-27',
+    dateLabel: 'November 27, 2026',
+    checkedLabel: 'November 2026',
+    minutes: 5,
+    serviceHref: '/#quote',
+    body: `
+      <p class="lede">${intro}</p>
+      <p><a class="button button-dark" href="/#quote">${article.serviceLabel} <span aria-hidden="true">↓</span></a></p>
+      ${body.trimStart().replace('{{industryPhoto}}', () => contextPhoto).replace('{{reviewEvidence}}', () => evidence)}
+    `
+  };
+}).concat(require('./specialist-review-removal-post.cjs'));
