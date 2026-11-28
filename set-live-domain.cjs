@@ -27,7 +27,8 @@ const pages = [
   'blog/google-review-removal-denominator-audit.html', 'blog/google-review-risk-score-denominator-study.html',
   'blog/google-review-removal-appeals-data.html', 'blog/google-review-removal-time-data.html',
   'blog/google-review-removal-local-ranking-study.html',
-  'blog/google-reviews-without-text-data-study.html'
+  'blog/google-reviews-without-text-data-study.html',
+  'blog/google-review-removal-physiotherapy-clinics.html'
 ];
 const escapeAttr = value => value.replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;');
 const marker = /\n[ \t]*<!-- production URL metadata start -->[\s\S]*?<!-- production URL metadata end -->/g;
@@ -35,6 +36,7 @@ const googleTagMarker = /\n  <!-- Google tag \(gtag\.js\) -->[\s\S]*?<!-- \/Goog
 const {applyToHtml: applyMeasurement} = require('./install-measurement.cjs');
 const assessmentShortcut = '<a class="assessment-shortcut" href="/#quote"><span>Free Assessment</span><span aria-hidden="true">→</span></a>';
 const shareImages = {
+  'blog/google-review-removal-physiotherapy-clinics.html':'blog/assets/physio-google-rating-comparison.webp',
   'blog/google-reviews-without-text-data-study.html':'blog/assets/google-text-coverage-cover.png',
   'blog/google-review-removal-local-ranking-study.html':'blog/assets/google-ranking-study-cover.png',
   'blog/google-review-removal-time-data.html':'blog/assets/google-notice-category-medians.png',
@@ -46,6 +48,7 @@ const shareImages = {
   'blog/canadian-tourism-google-reviews-2023.html': 'blog/assets/canadian-sme-online-activities-2023.png'
 };
 const shareImageAlts = {
+  'blog/google-review-removal-physiotherapy-clinics.html':'Fictional physiotherapy clinics with 3.6 and 5.0 stars from 30 ratings each',
   'blog/google-reviews-without-text-data-study.html':'43.2% of 516,281 cleaned historical Alaska 10-core records had no nonblank stored text; not Canadian prevalence or removal odds',
   'blog/google-review-removal-local-ranking-study.html':'538 of 852 high-rating listings were not seen in sampled top-20 results; six US metros, not a removal-outcome or Canadian prevalence estimate',
   'blog/google-review-removal-time-data.html':'Selected Google Maps legal-notice medians for January–June 2026; EU-focused processing data, not Canadian review-removal deadlines',
@@ -239,7 +242,7 @@ for (const relative of pages) {
     schemaTag=`\n  <script type="application/ld+json">${JSON.stringify(pageSchema).replaceAll('<','\\u003c')}</script>`;
   }
   const imageAlt = shareImageAlts[relative] || (isFrench ? 'ReviewRemoval, aide au retrait des avis Google' : 'ReviewRemoval: review concerns, handled for you');
-  const tags = `\n  <!-- production URL metadata start -->\n  <link rel="canonical" href="${escapeAttr(canonical)}">${alternateTags}\n  <meta name="robots" content="index, follow, max-image-preview:large">\n  <meta property="og:type" content="${isArticle ? 'article' : 'website'}">\n  <meta property="og:site_name" content="ReviewRemoval">\n  <meta property="og:locale" content="${isFrench ? 'fr_CA' : 'en_CA'}">\n  <meta property="og:url" content="${escapeAttr(canonical)}">\n  <meta property="og:title" content="${title}">\n  <meta property="og:description" content="${description}">\n  <meta property="og:image" content="${escapeAttr(shareImage)}">\n  <meta property="og:image:width" content="1200">\n  <meta property="og:image:height" content="${['blog/google-review-risk-score-denominator-study.html','blog/google-review-removal-appeals-data.html','blog/google-review-removal-time-data.html'].includes(relative)?'780':['blog/google-review-removal-denominator-audit.html'].includes(relative)?'720':['blog/google-review-removal-local-ranking-study.html','blog/google-reviews-without-text-data-study.html'].includes(relative)?'630':shareImages[relative]?'672':'630'}">\n  <meta property="og:image:alt" content="${escapeAttr(imageAlt)}">\n  <meta name="twitter:card" content="summary_large_image">\n  <meta name="twitter:title" content="${title}">\n  <meta name="twitter:description" content="${description}">\n  <meta name="twitter:image" content="${escapeAttr(shareImage)}">\n  <meta name="twitter:image:alt" content="${escapeAttr(imageAlt)}">${articleTimeTags}${schemaTag}\n  <!-- production URL metadata end -->`;
+  const tags = `\n  <!-- production URL metadata start -->\n  <link rel="canonical" href="${escapeAttr(canonical)}">${alternateTags}\n  <meta name="robots" content="index, follow, max-image-preview:large">\n  <meta property="og:type" content="${isArticle ? 'article' : 'website'}">\n  <meta property="og:site_name" content="ReviewRemoval">\n  <meta property="og:locale" content="${isFrench ? 'fr_CA' : 'en_CA'}">\n  <meta property="og:url" content="${escapeAttr(canonical)}">\n  <meta property="og:title" content="${title}">\n  <meta property="og:description" content="${description}">\n  <meta property="og:image" content="${escapeAttr(shareImage)}">\n  <meta property="og:image:width" content="1200">\n  <meta property="og:image:height" content="${['blog/google-review-risk-score-denominator-study.html','blog/google-review-removal-appeals-data.html','blog/google-review-removal-time-data.html'].includes(relative)?'780':['blog/google-review-removal-denominator-audit.html'].includes(relative)?'720':['blog/google-review-removal-local-ranking-study.html','blog/google-reviews-without-text-data-study.html','blog/google-review-removal-physiotherapy-clinics.html'].includes(relative)?'630':shareImages[relative]?'672':'630'}">\n  <meta property="og:image:alt" content="${escapeAttr(imageAlt)}">\n  <meta name="twitter:card" content="summary_large_image">\n  <meta name="twitter:title" content="${title}">\n  <meta name="twitter:description" content="${description}">\n  <meta name="twitter:image" content="${escapeAttr(shareImage)}">\n  <meta name="twitter:image:alt" content="${escapeAttr(imageAlt)}">${articleTimeTags}${schemaTag}\n  <!-- production URL metadata end -->`;
   html = applyMeasurement(html.replace('</head>', `${tags}\n</head>`), relative);
   if (relative !== 'index.html' && !isFrench && relative !== 'google-review-removal-cost-canada.html' && !html.includes('class="assessment-shortcut"')) {
     html = html.replace(/\n?[ \t]*<\/body>/, `\n  ${assessmentShortcut}\n</body>`);
@@ -258,7 +261,9 @@ const sitemapEntries = pages.map(relative => {
     || (relative === 'privacy-policy.html' ? schemas.find(schema => schema['@type'] === 'WebPage')?.dateModified : undefined);
   const lastmod = /^\d{4}-\d{2}-\d{2}$/.test(modified || '') ? `<lastmod>${modified}</lastmod>` : '';
   const imageNames=relative==='blog/google-reviews-without-text-data-study.html'?['google-text-coverage-ratings','google-text-coverage-frames','google-text-coverage-places']:relative==='blog/google-review-removal-local-ranking-study.html'?['google-ranking-rating-bands','google-ranking-high-rating-categories','google-ranking-frames']:relative==='blog/google-review-removal-time-data.html'?['google-notice-category-medians','google-notice-receipt-mix','google-notice-median-tail-examples']:relative==='blog/google-review-removal-appeals-data.html'?['google-maps-appeals-direction','google-maps-appeals-receipt-share','google-maps-appeals-median-hours']:relative==='blog/google-review-removal-denominator-audit.html'?['google-removal-reasons-denominators','google-removal-metric-changes','google-removal-source-corrections']:relative==='blog/google-review-risk-score-denominator-study.html'?['google-risk-deleted-share','google-risk-identification-bounds','google-risk-same-subset']:[];
-  const images=imageNames.map(name=>`<image:image><image:loc>${origin}/blog/assets/${name}.svg</image:loc></image:image>`).join('');
+  const imageFiles=imageNames.map(name=>name+'.svg');
+  if(relative==='blog/google-review-removal-physiotherapy-clinics.html') imageFiles.push('physio-google-rating-comparison.webp','physio-patient-reviewing-options.webp');
+  const images=imageFiles.map(file=>`<image:image><image:loc>${origin}/blog/assets/${file}</image:loc></image:image>`).join('');
   return `  <url><loc>${escapeAttr(`${origin}/${relative === 'index.html' ? '' : relative}`)}</loc>${lastmod}${images}</url>`;
 });
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n${sitemapEntries.join('\n')}\n</urlset>\n`;

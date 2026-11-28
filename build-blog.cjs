@@ -150,6 +150,7 @@ articles.splice(1,0,require('./blog/google-maps-appeals-post.cjs'));
 articles.splice(1,0,require('./blog/google-notice-timing-post.cjs'));
 articles.splice(1,0,require('./blog/google-ranking-post.cjs'));
 articles.splice(1,0,require('./blog/google-text-coverage-post.cjs'));
+articles.unshift(require('./blog/physiotherapy-review-removal-post.cjs'));
 
 const escapeHtml = value => String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 function head(title, description, extra = "") { return `<!doctype html>\n<html lang="en-CA">\n<head>\n  <meta charset="utf-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1">\n  <meta name="theme-color" content="#17353e">\n  <meta name="description" content="${escapeHtml(description)}">\n  <meta name="author" content="ReviewRemoval">\n  <title>${escapeHtml(title)} | ReviewRemoval</title>\n  <link rel="icon" href="../favicon.svg" type="image/svg+xml">\n  <link rel="alternate" type="application/rss+xml" title="ReviewRemoval Research and Guides" href="../feed.xml">\n  <link rel="stylesheet" href="../styles.css">\n  <link rel="stylesheet" href="blog.css">\n  <script src="../script.js?v=20261112-chatgpt-ads" defer></script>${extra}\n</head>`; }

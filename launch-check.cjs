@@ -13,7 +13,8 @@ const pages = [
   'blog/google-review-removal-denominator-audit.html', 'blog/google-review-risk-score-denominator-study.html',
   'blog/google-review-removal-appeals-data.html', 'blog/google-review-removal-time-data.html',
   'blog/google-review-removal-local-ranking-study.html',
-  'blog/google-reviews-without-text-data-study.html'
+  'blog/google-reviews-without-text-data-study.html',
+  'blog/google-review-removal-physiotherapy-clinics.html'
 ];
 
 try {
@@ -79,7 +80,11 @@ try {
   const sitemap = fs.readFileSync(path.join(tempRoot, 'sitemap.xml'), 'utf8');
   if ((sitemap.match(/<loc>/g) || []).length !== pages.length) throw new Error('Sitemap does not list every page');
   if(!sitemap.includes('<loc>https://example.com/blog/google-review-removal-rating-impact-study.html</loc><lastmod>2026-10-08</lastmod>')) throw new Error('Rating study sitemap date or URL is incorrect');
-  if(!sitemap.includes('<loc>https://example.com/blog/index.html</loc><lastmod>2026-11-24</lastmod>')) throw new Error('Blog index sitemap date is incorrect');
+  if(!sitemap.includes('<loc>https://example.com/blog/index.html</loc><lastmod>2026-11-27</lastmod>')) throw new Error('Blog index sitemap date is incorrect');
+  const physioUrl = 'https://example.com/blog/google-review-removal-physiotherapy-clinics.html';
+  const physioEntry = sitemap.split('\n').find(line => line.includes(`<loc>${physioUrl}</loc>`));
+  if (!physioEntry?.includes('/blog/assets/physio-google-rating-comparison.webp') ||
+      !physioEntry?.includes('/blog/assets/physio-patient-reviewing-options.webp')) throw new Error('Physiotherapy article image discovery is incomplete');
   const timingHtml = fs.readFileSync(path.join(tempRoot,'blog/google-review-removal-time-data.html'),'utf8');
   const timingSchemas = [...timingHtml.matchAll(/<script type="application\/ld\+json">([^<]+)<\/script>/g)].map(match=>JSON.parse(match[1]));
   const timingArticle = timingSchemas.find(schema=>schema['@type']==='BlogPosting');
